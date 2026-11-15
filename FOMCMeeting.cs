@@ -33,5 +33,16 @@ namespace CurveGuard
             MeetingDates = file.Rows.Select(row => row.MeetingEndDate.ToDateTime(TimeOnly.MinValue)).ToList();
             return MeetingDates;
         }
+
+        internal async Task<List<DateTime>> LoadPolicyDecisionDatesAsync(DateTime valuationDate)
+        {
+            var dates = await LoadMeetingsAsync();
+            // The Fed announced this revision on Nov 12, 2026. Earlier replays use the original schedule.
+            if (valuationDate.Date < new DateTime(2026, 11, 12))
+                return dates;
+
+            return dates.Where(date => date != new DateTime(2027, 10, 27) && date != new DateTime(2027, 12, 8))
+                .Append(new DateTime(2027, 11, 17)).Order().ToList();
+        }
     }
 }

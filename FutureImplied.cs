@@ -4,14 +4,12 @@ using YahooQuotesApi;
 public class FutureImpliedRate
 {
     private readonly char[] MonthCodes = { 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z' };
-    public Dictionary<(int Year, int Month), decimal> futuresImpliedRates = new Dictionary<(int Year, int Month), decimal>();
+    private Dictionary<(int Year, int Month), decimal> futuresImpliedRates = new Dictionary<(int Year, int Month), decimal>();
     private readonly DateTime effectiveDate;
-    public FutureImpliedRate(DateTime effectiveDate)
-    {
-        this.effectiveDate = effectiveDate;
-    }
+    public FutureImpliedRate()
+    {}
 
-    public async Task GetFuturesImpliedRates()
+    public async Task<Dictionary<(int Year, int Month), decimal>> GetFuturesImpliedRates(DateTime effectiveDate)
     {
         List<(DateTime Date, string Ticker)> tickers = new List<(DateTime Date, string Ticker)>();
         
@@ -61,5 +59,6 @@ public class FutureImpliedRate
 
         if (futuresImpliedRates.Count == 0)
             throw new InvalidOperationException($"No Yahoo Finance ZQ daily closes available for {valuationDate:yyyy-MM-dd} or the prior seven days.");
+        return futuresImpliedRates;
     }
 }

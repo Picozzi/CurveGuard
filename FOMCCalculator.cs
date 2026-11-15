@@ -9,25 +9,21 @@ namespace CurveGuard
             this.effectiveDate = effectiveDate;
         }
 
-        public async Task GetFOMCResults()
+        public async Task<List<MeetingProbability>> LoadFrontEndAsync(DateTime handoff, EFFRCalculator.EFFRFixing fixing, Dictionary<(int Year, int Month), decimal> futuresImpliedRates)
         {
-            EFFRCalculator effrCalc = new EFFRCalculator();
-            var effrFixing = await effrCalc.GetEffrFixingAsync(effectiveDate);
-
             //Scheduled FOMC Decision Dates
-            FOMCMeeting meeting = new FOMCMeeting();
-            List<DateTime> fomcDates = await meeting.LoadMeetingsAsync();
+            List<DateTime> fomcDates = await new FOMCMeeting().LoadPolicyDecisionDatesAsync(effectiveDate);
 
-            // 3. Fetch historical 30-Day Fed Funds (ZQ) futures closes from Yahoo Finance
-            FutureImpliedRate futureImpliedRate = new FutureImpliedRate(effectiveDate);
-            await futureImpliedRate.GetFuturesImpliedRates();
-            var futuresImpliedRates = futureImpliedRate.futuresImpliedRates;
+            if (fomcDates.Count == 0 || effectiveDate.Year < fomcDates.Min().Year || handoff.Year > fomcDates.Max().Year)
+                throw new InvalidOperationException("The bundled FOMC schedule does not cover the entire one-year front end.");
+    
+            var meetings = CalculateFedWatch(effectiveDate, (decimal)fixing.TargetLower, (decimal)fixing.TargetUpper, fomcDates, futuresImpliedRates, handoff);
+            
+            if (meetings.Count != fomcDates.Count(date => date.Date >= effectiveDate.Date && date < handoff))
+                throw new InvalidOperationException("Missing ZQ inputs for one or more decisions in the FOMC front end.");
 
-            var results = CalculateFedWatch(effectiveDate, (decimal)effrFixing.TargetLower,
-                (decimal)effrFixing.TargetUpper, fomcDates, futuresImpliedRates);
-
-            Console.WriteLine($"ZQ-implied FOMC probabilities (As of {effectiveDate:yyyy-MM-dd} | EFFR: {effrFixing.Rate:F2}%)\n");
-            foreach (var result in results)
+            Console.WriteLine($"ZQ-implied FOMC probabilities (As of {effectiveDate:yyyy-MM-dd}\n");
+            foreach (var result in meetings)
             {
                 var ranges = result.TargetRanges.Select(range =>
                     $"Range [{range.Lower:F2}%-{range.Upper:F2}%]: {range.Probability:P1}");
@@ -35,12 +31,17 @@ namespace CurveGuard
                 Console.WriteLine($"Meeting: {result.MeetingDate:yyyy-MM-dd} | Implied EFFR: {result.PostMeetingRate:F3}% | " +
                     $"Meeting move: {moveBps:+0.0;-0.0;0.0} bp | {string.Join(" | ", ranges)}");
             }
+            return meetings;
         }
 
-        private static List<MeetingProbability> CalculateFedWatch(DateTime asOfDate, decimal targetLower, decimal targetUpper,
-            List<DateTime> fomcDates, Dictionary<(int Year, int Month), decimal> futuresRates)
+        private static List<MeetingProbability> CalculateFedWatch(DateTime asOfDate, decimal targetLower, decimal targetUpper, List<DateTime> fomcDates, Dictionary<(int Year, int Month), decimal> futuresRates, DateTime? through = null)
         {
-            var upcomingMeetings = fomcDates.Where(date => date.Date > asOfDate.Date).OrderBy(date => date).ToList();
+            DateOnly asOfDateOnly = DateOnly.FromDateTime(asOfDate);
+
+            var upcomingMeetings = fomcDates.Where(date => through is { } end
+                ? date.Date >= asOfDate.Date && date < end
+                : date.Date > asOfDate.Date).OrderBy(date => date).ToList();
+            
             if (upcomingMeetings.Count == 0)
                 return [];
 
@@ -49,7 +50,7 @@ namespace CurveGuard
             var meetingsByMonth = fomcDates.ToLookup(MonthOf);
             var valuationMonth = MonthOf(asOfDate);
             // The bundled calendar covers complete calendar years.
-            var calendarYear = upcomingMeetings[^1].Year;
+            var calendarYear = fomcDates.Max().Year;
             var meetingRates = InferMeetingRates(valuationMonth, calendarYear, meetingsByMonth, ratesByMonth);
             var output = new List<MeetingProbability>();
             var distribution = new Dictionary<int, decimal> { [0] = 1m };

@@ -47,12 +47,11 @@ namespace CurveGuard
         
         public Task<EFFRFixing> GetLatestEffrAsync() => FetchEffrAsync(new Uri($"{EffrEndpoint}/last/1.json"));
 
-        public Task<EFFRFixing> GetEffrFixingAsync(DateTime effectiveDate)
+        public Task<EFFRFixing> GetEffrFixingAsync(DateOnly effectiveDate)
         {
-            var expectedDate = DateOnly.FromDateTime(effectiveDate);
-            var date = expectedDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var date = effectiveDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
             var url = new Uri($"{EffrEndpoint}/search.json?startDate={date}&endDate={date}");
-            return FetchEffrAsync(url, expectedDate);
+            return FetchEffrAsync(url, effectiveDate);
         }
 
         private async Task<EFFRFixing> FetchEffrAsync(Uri url, DateOnly? effectiveDate = null)

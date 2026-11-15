@@ -41,10 +41,9 @@ namespace CurveGuard
             _dataRetrieval = new DataRetrieval(httpClient, OisJsonOptions);
         }
 
-        public async Task<SOFRFixing> GetSOFRFixingAsync(DateTime effectiveDate)
+        public async Task<SOFRFixing> GetSOFRFixingAsync(DateOnly effectiveDate)
         {
-            var expectedDate = DateOnly.FromDateTime(effectiveDate);
-            var date = expectedDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var date = effectiveDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
             var url = new Uri($"{SearchEndpoint}?startDate={date}&endDate={date}");
             var payload = await _dataRetrieval.GetJsonAsync<SofrResponse>(url);
             if (payload.Rates is not { } rates)
@@ -53,7 +52,7 @@ namespace CurveGuard
                 throw new KeyNotFoundException($"No New York Fed SOFR fixing for {date}");
 
             if (rates is not [{ Type: "SOFR", EffectiveDate: { } dateOfFixing, PercentRate: { } rate }] ||
-                dateOfFixing != expectedDate)
+                dateOfFixing != effectiveDate)
             {
                 throw new JsonException($"New York Fed response did not contain the SOFR fixing for {date}");
             }

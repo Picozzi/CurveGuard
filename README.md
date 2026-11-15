@@ -11,6 +11,16 @@ dotnet build
 mkdir -p reports
 ```
 
+## Bootstrap a dated USD SOFR curve
+
+```sh
+dotnet run --no-build -- --sofr-curve 2026-11-13 > reports/sofr-curve-2026-11-13.json
+```
+
+Use a US Government Bond business day with a CheckMySwap snapshot and dated ZQ history. The curve starts at the prior business day's published New York Fed SOFR fixing, modeled as an overnight deposit. Expected EFFR changes from ZQ shift the flat SOFR forward on the business day after each policy decision. The initial SOFR–EFFR spread uses fixings for the same date. With a 1Y quote, the model applies one level adjustment to the steps after the first decision so that a flat extension to the spot-starting 1Y maturity matches its par quote.
+
+At exactly one year from valuation, QuantLib switches from log-linear discount factors to a cubic spline on log discount factors. The segments share the discount factor and forward at the join. The spline fits the 1Y and longer OIS quotes, whose pillars can extend beyond contractual maturity because of payment lag. The report shows the raw and adjusted FOMC steps, the join, provider quote methods, and market-strike PV and quote residuals. [CheckMySwap methodology](https://checkmyswap.com/methodology)
+
 ## Build a SOFR curve with a synthetic FOMC front end
 
 ```sh
