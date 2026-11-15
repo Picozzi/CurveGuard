@@ -11,6 +11,19 @@ dotnet build
 mkdir -p reports
 ```
 
+## Build a SOFR curve with a synthetic FOMC front end
+
+```sh
+dotnet run -- --fomc-calendar 2026-11-13
+dotnet run -- --fomc examples/fomc-illustrative.json
+```
+
+The example uses eight official policy decision dates, the archived NY Fed fixing and CheckMySwap swaps, and **illustrative probabilities**. It uses the November 12, 2026 calendar revision, including the November 2027 decision and omitting the October 2027 strategy meeting. [2026 FOMC calendar](https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm) · [2027 calendar revision](https://www.federalreserve.gov/newsevents/pressreleases/monetary20261112a.htm)
+
+To use market probabilities, copy the JSON file. Set `valuation_date` to the probability snapshot’s observation date and `probability_source` to its origin. Enter the current target range and the next eight policy decision dates. `--fomc-calendar` reads the currently published schedule. Save its output with each new probability snapshot so a later calendar revision cannot move the dates in a replay. Copy each meeting’s full set of target ranges and probabilities from the public FedWatch table or historical downloads. Enter `20` for a 20% probability. Set `front_end_date` after the last decision date. CME offers a paid API for automated probability retrieval. [FedWatch guide](https://www.cmegroup.com/tools-information/quikstrike/cme-fedwatch-tool-user-guide.html) · [FedWatch API](https://www.cmegroup.com/market-data/market-data-api/fedwatch-api.html)
+
+The command fetches the previous US Government Bond business day’s SOFR fixing, assumed available by the valuation day’s close, and the valuation day’s indicative OIS snapshot. For each decision, it computes the probability weighted target midpoint. The modeled forward SOFR adds the assumed constant spread between the starting fixing and the current target midpoint. Rates step on the decision dates. QuantLib fits continuous discount factors at the segment boundaries and reprices the OIS quotes that mature after the handoff. The report lists any overlap it excludes, including the 1Y OIS in this example.
+
 ## Fetch an overnight SOFR fixing
 
 ```sh

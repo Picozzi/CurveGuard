@@ -9,6 +9,15 @@ internal static class Program
     private const string Help = """
         Build and validate a USD SOFR OIS curve.
 
+        --fomc PATH
+            Build a synthetic SOFR front end from a saved FOMC probability snapshot and live market data sources.
+
+        --fomc-calendar YYYY-MM-DD
+            List the next eight policy decision dates in the currently published Fed calendar.
+
+        --fomc-meetings PATH
+            Read all meeting start and end dates from a local JSON file.
+
         --sofr [YYYY-MM-DD] --url URL
             Fetch a SOFR fixing. Supply the effective date to validate the response date.
 
@@ -31,27 +40,25 @@ internal static class Program
     };
 
     public static async Task<int> Main(string[] args)
-    {
-        if (args is ["--help"] or ["-h"])
-        {
-            Console.WriteLine(Help);
-            return 0;
-        }
-        
+    {  
         DateTime valuationDate = new DateTime(2026, 11, 12);
+
+        FOMCCalculator cc = new FOMCCalculator();
+        await cc.GetFOMCResults();
 
         OvernightSOFR sofr = new OvernightSOFR();
         OISSOFR ois = new OISSOFR();
 
         try
         {
+            await cc.GetFOMCResults();
             var sofrRate = await sofr.GetSOFRFixingAsync(valuationDate);
             var oisSnapshot = await ois.GetOisSwapRatesAsync(valuationDate);
             Console.WriteLine(JsonSerializer.Serialize(new { Sofr = sofrRate, Ois = oisSnapshot }, JsonOptions));
             return 0;
         }
         catch (Exception error) when (error is HttpRequestException or JsonException or KeyNotFoundException
-            or OperationCanceledException)
+            or OperationCanceledException or FormatException)
         {
             Console.Error.WriteLine($"CurveGuard: {error.Message}");
             return 1;
@@ -163,6 +170,28 @@ internal static class Program
     }
 
     
+
+    // private static async Task<int> BuildFomcCurve(string path)
+    // {
+    //     try
+    //     {
+    //         var scenario = await FomcScenario.LoadAsync(path);
+    //         var fixingDate = FomcSofrCurve.PreviousFixingDate(scenario.ValuationDate);
+    //         var fixingTask = new OvernightSOFR().GetSOFRFixingAsync(fixingDate.ToDateTime(TimeOnly.MinValue));
+    //         var swapsTask = new OISSOFR().GetOisSwapRatesAsync(scenario.ValuationDate.ToDateTime(TimeOnly.MinValue));
+    //         await Task.WhenAll(fixingTask, swapsTask);
+    //         var result = FomcSofrCurve.Build(scenario, await fixingTask, await swapsTask);
+    //         Console.WriteLine(JsonSerializer.Serialize(result, JsonOptions));
+    //         return 0;
+    //     }
+    //     catch (Exception error) when (error is IOException or UnauthorizedAccessException or FormatException
+    //         or JsonException or HttpRequestException or KeyNotFoundException or OperationCanceledException
+    //         or ArgumentException or InvalidOperationException or ApplicationException)
+    //     {
+    //         Console.Error.WriteLine($"CurveGuard: {error.Message}");
+    //         return 1;
+    //     }
+    // }
 
     private static int UsageError(string message)
     {

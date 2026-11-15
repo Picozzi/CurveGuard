@@ -1,0 +1,41 @@
+{
+  "valuation_date": "2026-11-13",
+  "front_end_date": "2027-12-01",
+  "current_target_lower_percent": 3.75,
+  "current_target_upper_percent": 4.00,
+  "probability_source": "Illustrative probabilities for the code example",
+  "meetings": [
+    {"decision_date": "2026-12-09", "outcomes": [
+      {"target_lower_percent": 3.50, "target_upper_percent": 3.75, "probability_percent": 20},
+      {"target_lower_percent": 3.75, "target_upper_percent": 4.00, "probability_percent": 80}
+    ]},
+    {"decision_date": "2027-01-27", "outcomes": [
+      {"target_lower_percent": 3.50, "target_upper_percent": 3.75, "probability_percent": 35},
+      {"target_lower_percent": 3.75, "target_upper_percent": 4.00, "probability_percent": 65}
+    ]},
+    {"decision_date": "2027-03-17", "outcomes": [
+      {"target_lower_percent": 3.50, "target_upper_percent": 3.75, "probability_percent": 60},
+      {"target_lower_percent": 3.75, "target_upper_percent": 4.00, "probability_percent": 40}
+    ]},
+    {"decision_date": "2027-04-28", "outcomes": [
+      {"target_lower_percent": 3.50, "target_upper_percent": 3.75, "probability_percent": 70},
+      {"target_lower_percent": 3.75, "target_upper_percent": 4.00, "probability_percent": 30}
+    ]},
+    {"decision_date": "2027-06-09", "outcomes": [
+      {"target_lower_percent": 3.25, "target_upper_percent": 3.50, "probability_percent": 40},
+      {"target_lower_percent": 3.50, "target_upper_percent": 3.75, "probability_percent": 60}
+    ]},
+    {"decision_date": "2027-07-28", "outcomes": [
+      {"target_lower_percent": 3.25, "target_upper_percent": 3.50, "probability_percent": 55},
+      {"target_lower_percent": 3.50, "target_upper_percent": 3.75, "probability_percent": 45}
+    ]},
+    {"decision_date": "2027-09-15", "outcomes": [
+      {"target_lower_percent": 3.25, "target_upper_percent": 3.50, "probability_percent": 65},
+      {"target_lower_percent": 3.50, "target_upper_percent": 3.75, "probability_percent": 35}
+    ]},
+    {"decision_date": "2027-11-17", "outcomes": [
+      {"target_lower_percent": 3.25, "target_upper_percent": 3.50, "probability_percent": 80},
+      {"target_lower_percent": 3.50, "target_upper_percent": 3.75, "probability_percent": 20}
+    ]}
+  ]
+}
