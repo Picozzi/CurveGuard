@@ -19,7 +19,6 @@ namespace CurveGuard
         }
         
         private DataRetrieval _dataRetrieval;
-
         private static readonly Uri url = new("https://markets.newyorkfed.org/api/sofr");
         private record SofrResponse([property: JsonPropertyName("refRates")] SofrApiRate?[]? Rates);
         private record SofrApiRate(DateOnly? EffectiveDate, string? Type, decimal? PercentRate);
@@ -32,10 +31,16 @@ namespace CurveGuard
             };
 
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("CurveGuard/1.0");
-            _dataRetrieval = new DataRetrieval(httpClient);
+
+            JsonSerializerOptions OisJsonOptions = new(JsonSerializerDefaults.Web)
+            {
+                NumberHandling = JsonNumberHandling.Strict,
+            };
+
+            _dataRetrieval = new DataRetrieval(httpClient, OisJsonOptions);
         }
 
-        public async Task<SOFRFixing> GetSofrFixingAsync(DateTime effectiveDate)
+        public async Task<SOFRFixing> GetSOFRFixingAsync(DateTime effectiveDate)
         {
             var payload = await _dataRetrieval.GetJsonAsync<SofrResponse>(url);
             if (payload.Rates is not { } rates)

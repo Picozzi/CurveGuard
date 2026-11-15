@@ -58,12 +58,7 @@ internal static class Program
                 return UsageError("finish the command with --url followed by a full HTTP or HTTPS URL");
             }
 
-            using var httpClient = new HttpClient
-            {
-                Timeout = TimeSpan.FromSeconds(15),
-                MaxResponseContentBufferSize = 256 * 1024,
-            };
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("CurveGuard/1.0");
+            using var httpClient = new 
             var retrieval = new DataRetrieval(httpClient);
             var command = args[..^2];
             return command[0] == "--sofr"
