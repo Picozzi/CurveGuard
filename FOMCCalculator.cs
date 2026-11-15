@@ -22,13 +22,13 @@ namespace CurveGuard
             if (meetings.Count != fomcDates.Count(date => date.Date >= effectiveDate.Date && date < handoff))
                 throw new InvalidOperationException("Missing ZQ inputs for one or more decisions in the FOMC front end.");
 
-            Console.WriteLine($"ZQ-implied FOMC probabilities (As of {effectiveDate:yyyy-MM-dd}\n");
+            Console.Error.WriteLine($"ZQ-implied FOMC probabilities (as of {effectiveDate:yyyy-MM-dd})\n");
             foreach (var result in meetings)
             {
                 var ranges = result.TargetRanges.Select(range =>
                     $"Range [{range.Lower:F2}%-{range.Upper:F2}%]: {range.Probability:P1}");
                 var moveBps = (result.PostMeetingRate - result.PreMeetingRate) * 100m;
-                Console.WriteLine($"Meeting: {result.MeetingDate:yyyy-MM-dd} | Implied EFFR: {result.PostMeetingRate:F3}% | " +
+                Console.Error.WriteLine($"Meeting: {result.MeetingDate:yyyy-MM-dd} | Implied EFFR: {result.PostMeetingRate:F3}% | " +
                     $"Meeting move: {moveBps:+0.0;-0.0;0.0} bp | {string.Join(" | ", ranges)}");
             }
             return meetings;
