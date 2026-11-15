@@ -7,5 +7,11 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="QuantLib" Version="1.44.0" />
+    <PackageReference Include="YahooQuotesApi" Version="7.1.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="MeetingCSVs/fomc-meetings-2026-2027.json"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

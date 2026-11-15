@@ -9,6 +9,9 @@ internal static class Program
     private const string Help = """
         Build and validate a USD SOFR OIS curve.
 
+        --effr YYYY-MM-DD
+            Fetch the EFFR fixing and target range for the effective date.
+
         --fomc PATH
             Build a synthetic SOFR front end from a saved FOMC probability snapshot and live market data sources.
 
@@ -40,29 +43,38 @@ internal static class Program
     };
 
     public static async Task<int> Main(string[] args)
-    {  
+    {
         DateTime valuationDate = new DateTime(2026, 11, 12);
-
-        FOMCCalculator cc = new FOMCCalculator();
+        FOMCCalculator cc = new FOMCCalculator(valuationDate);
         await cc.GetFOMCResults();
 
-        OvernightSOFR sofr = new OvernightSOFR();
-        OISSOFR ois = new OISSOFR();
+        return 0;
+        // try
+        // {
+        //     if (args.Length > 0 && args[0] == "--effr")
+        //     {
+        //         if (args.Length != 2 || !DateTime.TryParseExact(args[1], "yyyy-MM-dd", CultureInfo.InvariantCulture,
+        //                 DateTimeStyles.None, out var effectiveDate))
+        //             return UsageError("--effr requires a date in YYYY-MM-DD format");
 
-        try
-        {
-            await cc.GetFOMCResults();
-            var sofrRate = await sofr.GetSOFRFixingAsync(valuationDate);
-            var oisSnapshot = await ois.GetOisSwapRatesAsync(valuationDate);
-            Console.WriteLine(JsonSerializer.Serialize(new { Sofr = sofrRate, Ois = oisSnapshot }, JsonOptions));
-            return 0;
-        }
-        catch (Exception error) when (error is HttpRequestException or JsonException or KeyNotFoundException
-            or OperationCanceledException or FormatException)
-        {
-            Console.Error.WriteLine($"CurveGuard: {error.Message}");
-            return 1;
-        }
+        //         var fixing = await new EFFRCalculator().GetEffrFixingAsync(effectiveDate);
+        //         Console.WriteLine(JsonSerializer.Serialize(fixing, JsonOptions));
+        //         return 0;
+        //     }
+
+        //     OvernightSOFR sofr = new OvernightSOFR();
+        //     OISSOFR ois = new OISSOFR();
+        //     var sofrRate = await sofr.GetSOFRFixingAsync(valuationDate);
+        //     var oisSnapshot = await ois.GetOisSwapRatesAsync(valuationDate);
+        //     Console.WriteLine(JsonSerializer.Serialize(new { Sofr = sofrRate, Ois = oisSnapshot }, JsonOptions));
+        //     return 0;
+        // }
+        // catch (Exception error) when (error is HttpRequestException or JsonException or KeyNotFoundException
+        //     or OperationCanceledException or FormatException)
+        // {
+        //     Console.Error.WriteLine($"CurveGuard: {error.Message}");
+        //     return 1;
+        // }
 
 
 

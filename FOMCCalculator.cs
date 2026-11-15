@@ -4,75 +4,31 @@ namespace CurveGuard
 {
     public class FOMCCalculator
     {
-        public class FOMCMeeting
+        private readonly DateTime effectiveDate;
+        public FOMCCalculator(DateTime effectiveDate)
         {
-            //FedRateCalc. "FOMC meeting dates 2026-2027" (dataset), data as of November 6, 2026. CC BY 4.0. https://fedratecalc.com/data/fomc-meetings-2026-2027/
-           
-            private readonly DataRetrieval _dataRetrieval;
-            private const string FOMCMeetingPath = "MeetingCSVs/fomc-meetings-2026-2027.json";
-            public List<DateTime> MeetingDates { get; set; } = new();
-            public sealed record MeetingRow(DateOnly MeetingStartDate, DateOnly MeetingEndDate);
-            private sealed record MeetingFile(MeetingRow[] Rows);
-
-            public FOMCMeeting()
-            {
-                JsonSerializerOptions jsonOptions = new()
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-                    RespectRequiredConstructorParameters = true,
-                };
-
-                _dataRetrieval = new DataRetrieval(jsonOptions);
-            }
-
-            public async Task<List<DateTime>> LoadMeetingsAsync()
-            {
-                var file = await _dataRetrieval.GetJsonAsync<MeetingFile>(FOMCMeetingPath);
-                if (file.Rows is null || file.Rows.Any(row => row is null || row.MeetingEndDate < row.MeetingStartDate))
-                    throw new JsonException("The FOMC meeting file must contain rows with valid start and end dates.");
-
-                MeetingDates = file.Rows.Select(row => row.MeetingEndDate.ToDateTime(TimeOnly.MinValue)).ToList();
-                return MeetingDates;
-            }
+            this.effectiveDate = effectiveDate;
         }
-
-        private static readonly HttpClient Http = new HttpClient
-        {
-            Timeout = Timeout.InfiniteTimeSpan
-        };
-        
-        private static readonly char[] MonthCodes = { 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z' };
-
-
-        public FOMCCalculator()
-        {}
 
         public async Task GetFOMCResults()
         {
             EFFRCalculator effrCalc = new EFFRCalculator();
-            var effrFixing = await effrCalc.GetLatestEffrAsync();
+            var effrFixing = await effrCalc.GetEffrFixingAsync(effectiveDate);
 
             //Scheduled FOMC Decision Dates
             FOMCMeeting meeting = new FOMCMeeting();
             List<DateTime> fomcDates = await meeting.LoadMeetingsAsync();
 
             // 3. Fetch 30-Day Fed Funds (ZQ) futures settlements from Yahoo Finance
-            var futuresImpliedRates = new Dictionary<(int Year, int Month), double>();
-            for (int i = 0; i < 14; i++)
-            {
-                var dt = asOfDate.AddMonths(i);
-                string ticker = $"ZQ{MonthCodes[dt.Month - 1]}{dt.Year % 100:D2}.CBT";
-                double? closePrice = await GetYahooClosePriceAsync(ticker);
-                if (closePrice.HasValue)
-                {
-                    futuresImpliedRates[(dt.Year, dt.Month)] = 100.0 - closePrice.Value;
-                }
-            }
+            FutureImpliedRate futureImpliedRate = new FutureImpliedRate(effectiveDate);
+            await futureImpliedRate.GetFuturesImpliedRates();
+            var futuresImpliedRates = futureImpliedRate.futuresImpliedRates;
 
             // 4. Calculate CME FedWatch Probabilities
-            var results = CalculateFedWatch(asOfDate, effr, targetLower, targetUpper, fomcDates, futuresImpliedRates);
+            var results = CalculateFedWatch(effectiveDate, effrFixing.Rate, effrFixing.TargetLower, effrFixing.TargetUpper,
+                fomcDates, futuresImpliedRates);
 
-            Console.WriteLine($"CME FedWatch Implied Probabilities (As of {asOfDate:yyyy-MM-dd} | EFFR: {effr:F2}%)\n");
+            Console.WriteLine($"CME FedWatch Implied Probabilities (As of {effectiveDate:yyyy-MM-dd} | EFFR: {effrFixing.Rate:F2}%)\n");
             foreach (var r in results)
             {
                 Console.WriteLine($"Meeting: {r.MeetingDate:yyyy-MM-dd} | Implied Rate: {r.PostMeetingRate:F3}% | " +
@@ -80,32 +36,8 @@ namespace CurveGuard
                                 $"Range [{r.ShiftedLower:F2}%-{r.ShiftedUpper:F2}%]: {r.ProbShifted:P1}");
             }
         }
-
-
-
-        private static async Task<double?> GetYahooClosePriceAsync(string ticker)
-        {
-            string url = $"https://yahoo.com{ticker}?range=5d&interval=1d";
-            try
-            {
-                string json = await Http.GetStringAsync(url);
-                using var doc = JsonDocument.Parse(json);
-                var closes = doc.RootElement
-                    .GetProperty("chart").GetProperty("result")[0]
-                    .GetProperty("indicators").GetProperty("quote")[0]
-                    .GetProperty("close");
-
-                for (int i = closes.GetArrayLength() - 1; i >= 0; i--)
-                {
-                    if (closes[i].ValueKind == JsonValueKind.Number)
-                        return closes[i].GetDouble();
-                }
-            }
-            catch { /* Contract illiquid or unlisted */ }
-            return null;
-        }
-
-        private static List<MeetingProbability> CalculateFedWatch(DateTime asOfDate, double currentEffr, double targetLower, double targetUpper, List<DateTime> fomcDates, Dictionary<(int Year, int Month), double> futuresRates)
+        
+        private static List<MeetingProbability> CalculateFedWatch(DateTime asOfDate, double currentEffr, double targetLower, double targetUpper, List<DateTime> fomcDates, Dictionary<(int Year, int Month), decimal> futuresRates)
         {
             var output = new List<MeetingProbability>();
             var upcomingMeetings = fomcDates.Where(d => d > asOfDate).OrderBy(d => d).ToList();
@@ -117,7 +49,7 @@ namespace CurveGuard
             foreach (var meeting in upcomingMeetings)
             {
                 var key = (meeting.Year, meeting.Month);
-                if (!futuresRates.TryGetValue(key, out double impliedMonthAvg)) break;
+                if (!futuresRates.TryGetValue(key, out decimal impliedMonthAvg)) break;
 
                 int daysInMonth = DateTime.DaysInMonth(meeting.Year, meeting.Month);
                 int daysBefore = meeting.Day; // Rate change takes effect the day after the FOMC statement
@@ -128,7 +60,7 @@ namespace CurveGuard
                     break; // Multi-meeting months require anchoring off an adjacent non-meeting month
 
                 // CME FedWatch Formula: Solve for post-meeting EFFR
-                double postRate = (impliedMonthAvg * daysInMonth - prevRate * daysBefore) / daysAfter;
+                double postRate = ((double)impliedMonthAvg * daysInMonth - prevRate * daysBefore) / daysAfter;
 
                 // Calculate probability of a 25 bps move relative to the current bracket midpoint
                 double midPoint = (currLower + currUpper) / 2.0;
