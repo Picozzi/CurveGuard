@@ -25,8 +25,7 @@ namespace CurveGuard
             var futuresImpliedRates = futureImpliedRate.futuresImpliedRates;
 
             // 4. Calculate CME FedWatch Probabilities
-            var results = CalculateFedWatch(effectiveDate, effrFixing.Rate, effrFixing.TargetLower, effrFixing.TargetUpper,
-                fomcDates, futuresImpliedRates);
+            var results = CalculateFedWatch(effectiveDate, effrFixing.Rate, effrFixing.TargetLower, effrFixing.TargetUpper, fomcDates, futuresImpliedRates);
 
             Console.WriteLine($"CME FedWatch Implied Probabilities (As of {effectiveDate:yyyy-MM-dd} | EFFR: {effrFixing.Rate:F2}%)\n");
             foreach (var r in results)
@@ -36,7 +35,7 @@ namespace CurveGuard
                                 $"Range [{r.ShiftedLower:F2}%-{r.ShiftedUpper:F2}%]: {r.ProbShifted:P1}");
             }
         }
-        
+
         private static List<MeetingProbability> CalculateFedWatch(DateTime asOfDate, double currentEffr, double targetLower, double targetUpper, List<DateTime> fomcDates, Dictionary<(int Year, int Month), decimal> futuresRates)
         {
             var output = new List<MeetingProbability>();
