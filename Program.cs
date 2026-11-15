@@ -37,6 +37,18 @@ internal static class Program
             Console.WriteLine(Help);
             return 0;
         }
+        
+        DateTime valuationDate = new DateTime(2026, 11, 14);
+
+
+
+
+
+
+
+
+
+
 
         if (args.Length > 0 && args[0] is "--sofr" or "--ois" or "--market-date")
         {
@@ -59,7 +71,6 @@ internal static class Program
                 : await FetchOis(command, retrieval, url);
         }
 
-        DateTime valuationDate = new DateTime(2026, 11, 14);
 
         
 

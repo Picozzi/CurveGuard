@@ -4,12 +4,8 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CurveGuard;
-
-public sealed record SofrFixing(DateOnly EffectiveDate, decimal RatePercent)
+namespace CurveGuard
 {
-    public decimal RateDecimal => RatePercent / 100m;
-}
 
 public sealed record OisSwapQuote(string Tenor, decimal RatePercent, string Source, string Method,
     int? AcceptedRecords, int? CloseRecords)
@@ -22,12 +18,11 @@ public sealed record OisSwapSnapshot(DateOnly ObservationDate, string Source, st
 
 public sealed class DataRetrieval(HttpClient httpClient)
 {
-    private static readonly JsonSerializerOptions OisJsonOptions = new(JsonSerializerDefaults.Web)
-    {
-        NumberHandling = JsonNumberHandling.Strict,
-    };
+    // // private static readonly JsonSerializerOptions OisJsonOptions = new(JsonSerializerDefaults.Web)
+    // // {
+    // //     NumberHandling = JsonNumberHandling.Strict,
+    // // };
 
-    /// <summary>Fetches JSON from a caller supplied URL and deserializes it to the requested type.</summary>
     public async Task<T> GetJsonAsync<T>(Uri url, CancellationToken cancellationToken = default)
     {
         var content = await DownloadAsync(url, cancellationToken);
@@ -37,23 +32,7 @@ public sealed class DataRetrieval(HttpClient httpClient)
 
     /// <summary>Fetches a SOFR fixing from a New York Fed compatible URL and optionally checks its date.</summary>
     /// <returns>The published fixing, or null if the API has no observation for the request.</returns>
-    public async Task<SofrFixing?> GetSofrFixingAsync(Uri url, DateOnly? effectiveDate = null,
-        CancellationToken cancellationToken = default)
-    {
-        var payload = await GetJsonAsync<SofrResponse>(url, cancellationToken);
-        if (payload.Rates is not { } rates)
-            throw new JsonException("New York Fed SOFR response is missing refRates");
-        if (rates.Length == 0)
-            return null;
-
-        if (rates is not [{ Type: "SOFR", EffectiveDate: { } dateOfFixing, PercentRate: { } rate }] ||
-            (effectiveDate is { } expectedDate && dateOfFixing != expectedDate))
-        {
-            throw new JsonException("New York Fed response did not contain the expected SOFR fixing");
-        }
-
-        return new SofrFixing(dateOfFixing, rate);
-    }
+    
 
     /// <summary>Fetches a CheckMySwap compatible USD OIS snapshot and checks its observation date.</summary>
     public async Task<OisSwapSnapshot> GetOisSwapRatesAsync(Uri url, DateOnly observationDate,
@@ -106,9 +85,9 @@ public sealed class DataRetrieval(HttpClient httpClient)
         return await response.Content.ReadAsByteArrayAsync(cancellationToken);
     }
 
-    private sealed record SofrResponse([property: JsonPropertyName("refRates")] SofrApiRate?[]? Rates);
-    private sealed record SofrApiRate(DateOnly? EffectiveDate, string? Type, decimal? PercentRate);
     private sealed record OisResponse(string? Currency, DateOnly? Date, OisApiQuote?[]? Curve, string? FetchedAt);
     private sealed record OisApiQuote(string? Tenor, decimal? Rate, DateOnly? Date, string? Source,
         string? Method, int? Trades, int? CloseTrades);
+}
+
 }
