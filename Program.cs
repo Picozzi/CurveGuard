@@ -38,33 +38,51 @@ internal static class Program
             return 0;
         }
         
-        DateTime valuationDate = new DateTime(2026, 11, 14);
+        DateTime valuationDate = new DateTime(2026, 11, 12);
 
+        OvernightSOFR sofr = new OvernightSOFR();
+        OISSOFR ois = new OISSOFR();
 
-
-
-
-
-
-
-
-
-
-        if (args.Length > 0 && args[0] is "--sofr" or "--ois" or "--market-date")
+        try
         {
-            if (args.Length < 3 || args[^2] != "--url" ||
-                !Uri.TryCreate(args[^1], UriKind.Absolute, out var url) || url.Scheme is not ("http" or "https"))
-            {
-                return UsageError("finish the command with --url followed by a full HTTP or HTTPS URL");
-            }
-
-            using var httpClient = new 
-            var retrieval = new DataRetrieval(httpClient);
-            var command = args[..^2];
-            return command[0] == "--sofr"
-                ? await FetchSofr(command, retrieval, url)
-                : await FetchOis(command, retrieval, url);
+            var sofrRate = await sofr.GetSOFRFixingAsync(valuationDate);
+            var oisSnapshot = await ois.GetOisSwapRatesAsync(valuationDate);
+            Console.WriteLine(JsonSerializer.Serialize(new { Sofr = sofrRate, Ois = oisSnapshot }, JsonOptions));
+            return 0;
         }
+        catch (Exception error) when (error is HttpRequestException or JsonException or KeyNotFoundException
+            or OperationCanceledException)
+        {
+            Console.Error.WriteLine($"CurveGuard: {error.Message}");
+            return 1;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        // if (args.Length > 0 && args[0] is "--sofr" or "--ois" or "--market-date")
+        // {
+        //     if (args.Length < 3 || args[^2] != "--url" ||
+        //         !Uri.TryCreate(args[^1], UriKind.Absolute, out var url) || url.Scheme is not ("http" or "https"))
+        //     {
+        //         return UsageError("finish the command with --url followed by a full HTTP or HTTPS URL");
+        //     }
+
+        //     using var httpClient = new 
+        //     var retrieval = new DataRetrieval(httpClient);
+        //     var command = args[..^2];
+        //     return command[0] == "--sofr"
+        //         ? await FetchSofr(command, retrieval, url)
+        //         : await FetchOis(command, retrieval, url);
+        // }
 
 
         
@@ -142,71 +160,9 @@ internal static class Program
         // Console.WriteLine(JsonSerializer.Serialize(report, JsonOptions));
         // return report.Decision == "PASS" ? 0 : 1;
 
-        return UsageError("provide --sofr, --ois, or --market-date with --url URL");
     }
 
-    private static async Task<int> FetchSofr(string[] args, DataRetrieval retrieval, Uri url)
-    {
-        DateOnly? effectiveDate = null;
-        if (args.Length > 1)
-        {
-            if (args.Length != 2 || !DateOnly.TryParseExact(args[1], "yyyy-MM-dd", CultureInfo.InvariantCulture,
-                DateTimeStyles.None, out var date))
-            {
-                return UsageError("--sofr takes an optional effective date in YYYY-MM-DD format");
-            }
-            effectiveDate = date;
-        }
-
-        try
-        {
-            var fixing = await retrieval.GetSofrFixingAsync(url, effectiveDate);
-            if (fixing is null)
-            {
-                Console.Error.WriteLine(effectiveDate is { } missingDate
-                    ? $"No New York Fed SOFR fixing for {MarketData.DateText(missingDate)}."
-                    : "The New York Fed returned no overnight SOFR fixing.");
-                return 1;
-            }
-
-            Console.WriteLine(JsonSerializer.Serialize(fixing, JsonOptions));
-            return 0;
-        }
-        catch (Exception error) when (error is HttpRequestException or OperationCanceledException or JsonException or IOException)
-        {
-            Console.Error.WriteLine($"Could not retrieve New York Fed SOFR: {error.Message}");
-            return 1;
-        }
-    }
-
-    private static async Task<int> FetchOis(string[] args, DataRetrieval retrieval, Uri url)
-    {
-        if (args.Length != 2 || !DateOnly.TryParseExact(args[1], "yyyy-MM-dd", CultureInfo.InvariantCulture,
-            DateTimeStyles.None, out var date))
-        {
-            return UsageError($"{args[0]} requires a date in YYYY-MM-DD format");
-        }
-
-        if (args[0] == "--market-date")
-        {
-            var report = await Guard.ReplayMarket(date, retrieval, url);
-            Console.WriteLine(JsonSerializer.Serialize(report, JsonOptions));
-            return report.Decision == "PASS" ? 0 : 1;
-        }
-
-        try
-        {
-            var snapshot = await retrieval.GetOisSwapRatesAsync(url, date);
-            Console.WriteLine(JsonSerializer.Serialize(snapshot, JsonOptions));
-            return 0;
-        }
-        catch (Exception error) when (error is HttpRequestException or OperationCanceledException or JsonException
-            or IOException or FormatException)
-        {
-            Console.Error.WriteLine($"Could not retrieve CheckMySwap OIS rates: {error.Message}");
-            return 1;
-        }
-    }
+    
 
     private static int UsageError(string message)
     {
