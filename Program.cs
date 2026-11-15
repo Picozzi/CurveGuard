@@ -13,35 +13,11 @@ internal static class Program
 
     public static async Task<int> Main(string[] args)
     {
-        if (args is ["--chart-from", var reportPath])
-        {
-            try
-            {
-                using var stream = File.OpenRead(reportPath);
-                using var report = await JsonDocument.ParseAsync(stream);
-                Console.WriteLine(CurveChart.Save(report.RootElement));
-                return 0;
-            }
-            catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException
-                or FormatException or KeyNotFoundException or InvalidOperationException or ArgumentException)
-            {
-                Console.Error.WriteLine($"CurveGuard: {error.Message}");
-                return 1;
-            }
-        }
-
-        if (args is ["--sofr-curve", var date] && DateTime.TryParseExact(date, "yyyy-MM-dd",
-                CultureInfo.InvariantCulture, DateTimeStyles.None, out var valuationDate))
-            return await BuildSofrCurveAsync(valuationDate, writeJson: true);
-
-        if (args.Length == 0)
-            return await BuildSofrCurveAsync(new DateTime(2026, 11, 2), writeJson: false);
-
-        Console.Error.WriteLine("Usage: dotnet run -- [--sofr-curve YYYY-MM-DD | --chart-from REPORT.json]");
-        return 2;
+        DateTime valuationDate = new DateTime(2026, 11, 2);
+        return await BuildSofrCurveAsync(valuationDate);
     }
 
-    private static async Task<int> BuildSofrCurveAsync(DateTime valuationDate, bool writeJson)
+    private static async Task<int> BuildSofrCurveAsync(DateTime valuationDate)
     {
         try
         {
@@ -71,16 +47,6 @@ internal static class Program
             var curve = SOFRCurve.Build(valuationDateOnly, fixingTask.Result, swapsTask.Result, effrTask.Result, decisions);
             var report = JsonSerializer.SerializeToElement(curve, JsonOptions);
             var chart = CurveChart.Save(report);
-            if (writeJson)
-            {
-                Console.WriteLine(JsonSerializer.Serialize(report, JsonOptions));
-                Console.Error.WriteLine($"Chart saved to {chart}");
-            }
-            else
-            {
-                Console.WriteLine(chart);
-            }
-
             return 0;
         }
         catch (Exception error)

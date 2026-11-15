@@ -5,7 +5,6 @@ public class FutureImpliedRate
 {
     private readonly char[] MonthCodes = { 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z' };
     private Dictionary<(int Year, int Month), decimal> futuresImpliedRates = new Dictionary<(int Year, int Month), decimal>();
-    private readonly DateTime effectiveDate;
     public FutureImpliedRate()
     {}
 
