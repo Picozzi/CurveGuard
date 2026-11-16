@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace CurveGuard;
 
 internal sealed record CurveInputs(
@@ -13,12 +15,13 @@ internal sealed record ValidationFinding(string Code, string Message,
 
 internal sealed record ValidationResult(string Decision, string Bootstrap, IReadOnlyList<ValidationFinding> Findings);
 
-internal sealed record CurveRun(CurveInputs Inputs, object? Curve, ValidationResult Validation);
+internal sealed record CurveRun(CurveInputs Inputs, object? Curve, ValidationResult Validation,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] OisTradeValuation? TradeValuation = null);
 
 internal static class CurveValidation
 {
     public static async Task<CurveRun> RunAsync(CurveInputs inputs,
-        Func<Task<List<FOMCCalculator.MeetingProbability>>>? loadFomcDecisions = null)
+        Func<Task<List<FOMCCalculator.MeetingProbability>>>? loadFomcDecisions = null, OisTrade? trade = null)
     {
         var findings = CheckOisQuotes(inputs.ValuationDate, inputs.OisSnapshot);
         CheckFixings(inputs, findings);
@@ -32,8 +35,8 @@ internal static class CurveValidation
                 inputs = inputs with { FomcDecisions = await loadFomcDecisions() };
 
             var curve = SOFRCurve.Build(inputs.ValuationDate, inputs.SofrFixing,
-                inputs.OisSnapshot, inputs.EffrFixing, inputs.FomcDecisions);
-            return new CurveRun(inputs, curve, new ValidationResult("PASS", "PASS", []));
+                inputs.OisSnapshot, inputs.EffrFixing, inputs.FomcDecisions, trade);
+            return new CurveRun(inputs, curve.Report, new ValidationResult("PASS", "PASS", []), curve.TradeValuation);
         }
         catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException)
         {

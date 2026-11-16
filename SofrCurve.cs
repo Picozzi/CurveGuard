@@ -23,6 +23,11 @@ namespace CurveGuard
         }
 
         public static object Build(DateOnly valuationDate, OvernightSOFR.SOFRFixing fixing, OISSOFR.OISSwapSnapshot swaps, EFFRCalculator.EFFRFixing effr, IReadOnlyList<FOMCCalculator.MeetingProbability> decisions)
+            => Build(valuationDate, fixing, swaps, effr, decisions, trade: null).Report;
+
+        internal static CurveBuildResult Build(DateOnly valuationDate, OvernightSOFR.SOFRFixing fixing,
+            OISSOFR.OISSwapSnapshot swaps, EFFRCalculator.EFFRFixing effr,
+            IReadOnlyList<FOMCCalculator.MeetingProbability> decisions, OisTrade? trade)
         {
             if (fixing.EffectiveDate != PreviousFixingDate(valuationDate) ||
                 DateOnly.FromDateTime(effr.Date) != fixing.EffectiveDate ||
@@ -41,7 +46,7 @@ namespace CurveGuard
                 settings.setEvaluationDate(referenceDate);
                 try
                 {
-                    return Bootstrap(referenceDate, valuationDate, fixing, swaps, effr, decisions);
+                    return Bootstrap(referenceDate, valuationDate, fixing, swaps, effr, decisions, trade);
                 }
                 finally
                 {
@@ -50,9 +55,9 @@ namespace CurveGuard
             }
         }
 
-        private static object Bootstrap(QL.Date referenceDate, DateOnly valuationDate, OvernightSOFR.SOFRFixing fixing,
+        private static CurveBuildResult Bootstrap(QL.Date referenceDate, DateOnly valuationDate, OvernightSOFR.SOFRFixing fixing,
             OISSOFR.OISSwapSnapshot swaps, EFFRCalculator.EFFRFixing effr,
-            IReadOnlyList<FOMCCalculator.MeetingProbability> decisions)
+            IReadOnlyList<FOMCCalculator.MeetingProbability> decisions, OisTrade? trade)
         {
             using var calendar = new QL.UnitedStates(QL.UnitedStates.Market.GovernmentBond);
             using var overnight = new QL.Period(1, QL.TimeUnit.Days);
@@ -148,8 +153,25 @@ namespace CurveGuard
                 }
 
                 var repricing = new List<Repricing> { RepriceDeposit(curve, deposit, accrual, fixing.RatePercent) };
+                OisTradeValuation? tradeValuation = null;
                 foreach (var (quote, helper) in swapsByPillar.Values)
-                    repricing.Add(RepriceSwap(quote, helper));
+                {
+                    var repriced = RepriceSwap(quote, helper);
+                    repricing.Add(repriced);
+                    if (trade is not null && repriced.Tenor == trade.Tenor)
+                    {
+                        using var swap = helper.swap();
+                        var pv = SwapPvAtCoupon(swap, trade.FixedCouponPercent, trade.NotionalUsd);
+                        if (!double.IsFinite(pv))
+                            throw new InvalidOperationException("The sample swap produced a nonfinite PV.");
+
+                        tradeValuation = new OisTradeValuation(repriced.StartDate, repriced.MaturityDate,
+                            repriced.ModelPercent, pv);
+                    }
+                }
+
+                if (trade is not null && tradeValuation is null)
+                    throw new ArgumentException($"No calibration swap is available for the sample trade tenor {trade.Tenor}.");
 
                 var maxResidual = repricing.Max(row => Math.Abs(row.ResidualBp));
                 var maxPv = repricing.Max(row => Math.Abs(row.NpvPerMillion));
@@ -166,7 +188,7 @@ namespace CurveGuard
                 var forwardGapBp = (rightForward - terminalRate) * 10_000;
                 if (!double.IsFinite(forwardGapBp) || Math.Abs(forwardGapBp) > RepricingToleranceBp)
                     throw new InvalidOperationException("The cubic OIS spline did not match the terminal FOMC forward.");
-                return new
+                var report = new
                 {
                     ReferenceDate = referenceDate.ISO(),
                     QuantLibVersion = "1.44",
@@ -203,6 +225,7 @@ namespace CurveGuard
                     Checks = new { RepricingToleranceBp, MaxAbsoluteResidualBp = maxResidual, MaxAbsoluteNpvPerMillion = maxPv,
                         MaxFrontEndDiscountError = maxFrontError, HandoffForwardGapBp = forwardGapBp },
                 };
+                return new CurveBuildResult(report, tradeValuation);
             }
             finally
             {
@@ -340,10 +363,16 @@ namespace CurveGuard
             var percent = quote.Rate!.Value;
             var rate = (double)(percent / 100m);
             var modelRate = helper.impliedQuote();
-            // The fixed leg PV varies linearly with its coupon. Shift the helper swap to the market strike.
-            var pv = (swap.NPV() + (rate - swap.fixedRate()) * 10_000 * swap.fixedLegBPS()) * Notional / swap.nominal();
+            var pv = SwapPvAtCoupon(swap, percent, Notional);
             return new Repricing("ois", quote.Tenor!, quote.Source, quote.Method, quote.Trades, quote.CloseTrades,
                 start.ISO(), maturity.ISO(), pillar.ISO(), percent, modelRate * 100, (modelRate - rate) * 10_000, pv);
+        }
+
+        private static double SwapPvAtCoupon(QL.OvernightIndexedSwap swap, decimal couponPercent, double notional)
+        {
+            // QuantLib's fixed leg BPS is the signed PV change for a 1 bp increase in the coupon.
+            var couponChangeBp = ((double)(couponPercent / 100m) - swap.fixedRate()) * 10_000;
+            return (swap.NPV() + couponChangeBp * swap.fixedLegBPS()) * notional / swap.nominal();
         }
 
         private static List<ForwardSample> SampleForwards(QL.YieldTermStructure curve, QL.Date referenceDate, QL.Date lastDate,
