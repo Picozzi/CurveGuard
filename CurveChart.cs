@@ -81,22 +81,11 @@ internal static class CurveChart
         near.Axes.Bottom.TickGenerator = monthTicks;
         near.Axes.SetLimitsX(CalendarAxis(valuation.AddDays(-5)), CalendarAxis(through.AddDays(12)));
 
-        var reportDirectory = FindReportDirectory();
+        var reportDirectory = ProjectPaths.ReportDirectory;
         Directory.CreateDirectory(reportDirectory);
         var output = Path.Combine(reportDirectory, $"sofr-forward-{valuation:yyyy-MM-dd}.png");
         chart.SavePng(output, 1440, 1060);
         return output;
-    }
-
-    private static string FindReportDirectory()
-    {
-        for (DirectoryInfo? directory = new(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
-        {
-            if (File.Exists(Path.Combine(directory.FullName, "CurveGuard.csproj")))
-                return Path.Combine(directory.FullName, "reports");
-        }
-
-        return Path.Combine(AppContext.BaseDirectory, "reports");
     }
 
     private static void Draw(Plot plot, IReadOnlyList<Point> steps, IReadOnlyList<Point> forwards,

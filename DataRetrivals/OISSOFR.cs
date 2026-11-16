@@ -29,7 +29,8 @@ namespace CurveGuard
         private DataRetrieval _dataRetrieval;
         private const string ArchiveEndpoint = "https://checkmyswap.com/api/curves/USD";
         private record OisResponse(string? Currency, DateOnly? Date, OisApiQuote?[]? Curve, string? FetchedAt);
-        public record OisApiQuote(string? Tenor, decimal? Rate, DateTime? Date, string? Source, string? Method, int? Trades, int? CloseTrades);
+        public record OisApiQuote(string? Tenor = null, decimal? Rate = null, DateTime? Date = null,
+            string? Source = null, string? Method = null, int? Trades = null, int? CloseTrades = null);
         
         public OISSOFR()
         {
@@ -65,26 +66,12 @@ namespace CurveGuard
                 throw new KeyNotFoundException($"No CheckMySwap USD OIS snapshot for {date}", error);
             }
 
-            if (payload is not { Currency: "USD", Curve: { Length: > 0 } rates } || payload.Date != expectedDate)
-                throw new JsonException($"expected a nonempty USD OIS curve for {date}");
+            if (payload is not { Currency: "USD", Date: { } observationDate, Curve: { } rates })
+                throw new JsonException($"expected a dated USD OIS snapshot for {date}");
 
-            var quotes = new List<OisApiQuote>(rates.Length);
-            var tenors = new HashSet<string>();
-            foreach (var row in rates)
-            {
-                if (row is not { Tenor: { } tenor, Rate: not null, Date: { } quoteDate, Source: { } source, Method: { } method } ||
-                    DateOnly.FromDateTime(quoteDate) != expectedDate || string.IsNullOrWhiteSpace(tenor) ||
-                    string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(method) ||
-                    row.Trades is < 0 || row.CloseTrades is < 0 || !tenors.Add(tenor))
-                {
-                    throw new JsonException($"invalid or duplicate OIS quote for {row?.Tenor ?? "unknown tenor"} on {date}");
-                }
-
-                quotes.Add(row);
-            }
-
-            return new OISSwapSnapshot(expectedDate.ToDateTime(TimeOnly.MinValue), "CheckMySwap", url.AbsoluteUri, payload.FetchedAt,
-                quotes.AsReadOnly());
+            var quotes = rates.Select(row => row ?? throw new JsonException($"null OIS quote for {date}")).ToArray();
+            return new OISSwapSnapshot(observationDate.ToDateTime(TimeOnly.MinValue), "CheckMySwap", url.AbsoluteUri,
+                payload.FetchedAt, Array.AsReadOnly(quotes));
         }
     }
 }

@@ -3,12 +3,12 @@ using YahooQuotesApi;
 
 public class FutureImpliedRate
 {
-    private readonly char[] MonthCodes = { 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z' };
-    private Dictionary<(int Year, int Month), decimal> futuresImpliedRates = new Dictionary<(int Year, int Month), decimal>();
-    public FutureImpliedRate()
-    {}
+    private static readonly char[] MonthCodes = { 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z' };
 
-    public async Task<Dictionary<(int Year, int Month), decimal>> GetFuturesImpliedRates(DateTime effectiveDate)
+    public sealed record ZqImpliedRate(int Year, int Month, decimal RatePercent,
+        string? Ticker = null, DateOnly? CloseDate = null);
+
+    public async Task<IReadOnlyList<ZqImpliedRate>> GetFuturesQuotesAsync(DateTime effectiveDate)
     {
         List<(DateTime Date, string Ticker)> tickers = new List<(DateTime Date, string Ticker)>();
         
@@ -28,6 +28,7 @@ public class FutureImpliedRate
             .Build();
 
         var histories = await yahooQuotes.GetHistoryAsync(tickers.Select(t => t.Ticker));
+        var quotes = new List<ZqImpliedRate>(tickers.Count);
         foreach (var ticker in tickers)
         {
             if (!histories.TryGetValue(ticker.Ticker, out var result) || !result.HasValue)
@@ -41,8 +42,10 @@ public class FutureImpliedRate
             var exchangeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(history.ExchangeTimezoneName) ?? chicago;
             var close = history.Ticks
                 .Select(tick => (Date: tick.Date.InZone(exchangeZone).Date, Price: tick.Close))
-                .LastOrDefault(tick => tick.Date >= firstDate && tick.Date <= valuationDate &&
-                    double.IsFinite(tick.Price) && tick.Price > 0);
+                .Where(tick => tick.Date >= firstDate && tick.Date <= valuationDate &&
+                    double.IsFinite(tick.Price) && tick.Price > 0)
+                .OrderBy(tick => tick.Date)
+                .LastOrDefault();
 
             if (close.Price == 0)
             {
@@ -50,14 +53,11 @@ public class FutureImpliedRate
                 continue;
             }
 
-            if (close.Date != valuationDate)
-                Console.Error.WriteLine($"Yahoo Finance: using {ticker.Ticker} close from {close.Date:yyyy-MM-dd} for {valuationDate:yyyy-MM-dd}.");
-
-            futuresImpliedRates[(ticker.Date.Year, ticker.Date.Month)] = 100m - (decimal)close.Price;
+            var closeDate = new DateOnly(close.Date.Year, close.Date.Month, close.Date.Day);
+            quotes.Add(new ZqImpliedRate(ticker.Date.Year, ticker.Date.Month, 100m - (decimal)close.Price,
+                ticker.Ticker, closeDate));
         }
 
-        if (futuresImpliedRates.Count == 0)
-            throw new InvalidOperationException($"No Yahoo Finance ZQ daily closes available for {valuationDate:yyyy-MM-dd} or the prior seven days.");
-        return futuresImpliedRates;
+        return quotes;
     }
 }
