@@ -7,7 +7,7 @@ namespace CurveGuard
     {
         private const uint SettlementDays = 2;
         private const int PaymentLagDays = 2;
-        private const double RepricingToleranceBp = 0.01;
+        internal const double RepricingToleranceBp = 0.01;
         private const double Notional = 1_000_000;
         private static readonly object QuantLibLock = new();
 
@@ -166,7 +166,7 @@ namespace CurveGuard
                             throw new InvalidOperationException("The sample swap produced a nonfinite PV.");
 
                         tradeValuation = new OisTradeValuation(repriced.StartDate, repriced.MaturityDate,
-                            repriced.ModelPercent, pv);
+                            repriced.ModelPercent, pv, FixedLegAnnuity(swap, curve));
                     }
                 }
 
@@ -373,6 +373,24 @@ namespace CurveGuard
             // QuantLib's fixed leg BPS is the signed PV change for a 1 bp increase in the coupon.
             var couponChangeBp = ((double)(couponPercent / 100m) - swap.fixedRate()) * 10_000;
             return (swap.NPV() + couponChangeBp * swap.fixedLegBPS()) * notional / swap.nominal();
+        }
+
+        private static double FixedLegAnnuity(QL.OvernightIndexedSwap swap, QL.YieldTermStructure curve)
+        {
+            using var fixedLeg = swap.fixedLeg();
+            var annuity = 0.0;
+            for (var i = 0; i < fixedLeg.Count; i++)
+            {
+                using var cashFlow = fixedLeg[i];
+                using var coupon = QL.NQuantLibc.as_fixed_rate_coupon(cashFlow);
+                using var paymentDate = coupon.date();
+                annuity += coupon.accrualPeriod() * curve.discount(paymentDate);
+            }
+
+            if (!double.IsFinite(annuity) || annuity <= 0)
+                throw new InvalidOperationException("The sample swap must have a finite, positive fixed leg annuity.");
+
+            return annuity;
         }
 
         private static List<ForwardSample> SampleForwards(QL.YieldTermStructure curve, QL.Date referenceDate, QL.Date lastDate,

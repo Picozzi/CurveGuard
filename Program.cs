@@ -93,12 +93,13 @@ internal static class Program
             new("missing_zq_close_date", "missing-zq-close-date.json", "MISSING_ZQ_CLOSE_DATE"),
             new("5y_plus_1bp", "5y-plus-1bp.json", BumpBp: 1),
             new("5y_plus_10bp", "5y-plus-10bp.json", BumpBp: 10),
+            new("5y_doubled_pv", "5y-doubled-pv.json", IsRiskFailure: true),
         ];
 
         var riskCommand = args is ["--risk", ..];
-        if (riskCommand && args.Length > 2)
+        if (riskCommand && args.Length != 1)
         {
-            Console.Error.WriteLine("Usage: dotnet run -- --risk [saved-run.json]");
+            Console.Error.WriteLine("Usage: dotnet run -- --risk");
             return 2;
         }
 
@@ -124,21 +125,19 @@ internal static class Program
 
         try
         {
+            if (selected[0].IsRiskFailure)
+                return await TestRiskFailureAsync(directory, selected[0].FileName);
+
             if (selected[0].BumpBp.HasValue)
             {
-                var customBaseline = riskCommand && args.Length == 2 ? args[1] : null;
-                var baseline = await ReadSavedInputsAsync(customBaseline ?? Path.Combine(directory, baselineFile));
-                Dictionary<int, CurveInputs>? savedBumps = null;
-                if (customBaseline is null)
-                {
-                    savedBumps = new Dictionary<int, CurveInputs>(selected.Length);
-                    foreach (var fixture in selected)
-                        savedBumps.Add(fixture.BumpBp!.Value, await ReadSavedInputsAsync(Path.Combine(directory, fixture.FileName)));
-                }
+                var baseline = await ReadSavedInputsAsync(Path.Combine(directory, baselineFile));
+                var savedBumps = new Dictionary<int, CurveInputs>(selected.Length);
+                foreach (var fixture in selected)
+                    savedBumps.Add(fixture.BumpBp!.Value, await ReadSavedInputsAsync(Path.Combine(directory, fixture.FileName)));
 
                 var report = await CurveRisk.RunAsync(baseline, savedBumps);
                 Console.WriteLine(JsonSerializer.Serialize(report, JsonOptions));
-                return report.Scenarios.All(scenario => scenario.Validation.Decision == "PASS") ? 0 : 1;
+                return report.Passed ? 0 : 1;
             }
 
             var guard = selected[0];
@@ -161,21 +160,57 @@ internal static class Program
         }
     }
 
+    private static async Task<int> TestRiskFailureAsync(string directory, string fileName)
+    {
+        var path = Path.Combine(directory, fileName);
+        var fixture = await ReadFixtureAsync<RiskFailureFixture>(path);
+        var baseline = await ReadSavedInputsAsync(Path.Combine(directory, fixture.BaselineFile));
+        var savedBumps = new Dictionary<int, CurveInputs>(fixture.Bumps.Count);
+        var reportedPvOverrides = new Dictionary<int, double>(fixture.Bumps.Count);
+        foreach (var bump in fixture.Bumps)
+        {
+            if (bump.BumpBp <= 0 || !double.IsFinite(bump.ReportedPvUsd))
+                throw new JsonException($"The fixture '{path}' requires positive bumps and finite reported PVs.");
+
+            savedBumps.Add(bump.BumpBp, await ReadSavedInputsAsync(Path.Combine(directory, bump.InputsFile)));
+            reportedPvOverrides.Add(bump.BumpBp, bump.ReportedPvUsd);
+        }
+
+        var report = await CurveRisk.RunAsync(baseline, savedBumps, reportedPvOverrides);
+        var failedChecks = report.Checks.Where(check => !check.Passed)
+            .Select(check => new RiskCheckKey(check.Name, check.BumpBp)).ToHashSet();
+        var passed = report.Scenarios.All(scenario => scenario.Validation.Decision == "PASS") &&
+            failedChecks.Count > 0 && failedChecks.SetEquals(fixture.ExpectedFailedChecks);
+        var result = new { Fixture = path, fixture.ExpectedFailedChecks, Report = report, Passed = passed };
+        Console.WriteLine(JsonSerializer.Serialize(result, JsonOptions));
+        return passed ? 0 : 1;
+    }
+
     private static async Task<CurveInputs> ReadSavedInputsAsync(string path)
+        => (await ReadFixtureAsync<SavedRun>(path)).Inputs;
+
+    private static async Task<T> ReadFixtureAsync<T>(string path) where T : class
     {
         var projectDirectory = ProjectPaths.RootDirectory
             ?? throw new DirectoryNotFoundException("Could not find the project root containing CurveGuard.csproj.");
         path = Path.GetFullPath(path, projectDirectory);
 
         using var file = File.OpenRead(path);
-        var snapshot = await JsonSerializer.DeserializeAsync<SavedRun>(file, JsonOptions)
-            ?? throw new JsonException($"The fixture '{path}' must contain inputs.");
-        return snapshot.Inputs;
+        return await JsonSerializer.DeserializeAsync<T>(file, JsonOptions)
+            ?? throw new JsonException($"The fixture '{path}' must contain a JSON object.");
     }
 
     private sealed record SavedRun(CurveInputs Inputs);
 
-    private sealed record TestFixture(string Name, string FileName, string? ExpectedCode = null, int? BumpBp = null);
+    private sealed record TestFixture(string Name, string FileName, string? ExpectedCode = null, int? BumpBp = null,
+        bool IsRiskFailure = false);
+
+    private sealed record RiskFailureFixture(string BaselineFile, IReadOnlyList<RiskFailureBump> Bumps,
+        IReadOnlyList<RiskCheckKey> ExpectedFailedChecks);
+
+    private sealed record RiskFailureBump(int BumpBp, string InputsFile, double ReportedPvUsd);
+
+    private sealed record RiskCheckKey(string Name, int? BumpBp);
 
     private sealed record GuardTestResult(string Scenario, string Fixture, string ExpectedDecision, string? ExpectedCode, ValidationResult Validation, bool Passed);
 }

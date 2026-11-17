@@ -1,0 +1,19 @@
+{
+  "baseline_file": "sofr-forward-2026-11-02.json",
+  "bumps": [
+    {
+      "bump_bp": 1,
+      "inputs_file": "5y-plus-1bp.json",
+      "reported_pv_usd": 890.5059742572719
+    },
+    {
+      "bump_bp": 10,
+      "inputs_file": "5y-plus-10bp.json",
+      "reported_pv_usd": 8897.240096621184
+    }
+  ],
+  "expected_failed_checks": [
+    { "name": "pv_change_usd", "bump_bp": 1 },
+    { "name": "pv_change_usd", "bump_bp": 10 }
+  ]
+}
