@@ -46,9 +46,8 @@ internal static class Program
             DateTime handoff = valuationDate.AddYears(1); //this is the split between the forward flat curve and the OIS curve. The FOMC rate predictions are used for the front end, and the OIS curve is used for the back end. The handoff is one year from the valuation date.
             
             var zqQuotes = futuresTask.Result;
-            var inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result,
-                swapsTask.Result, [], zqQuotes);
-            var run = await CurveValidation.RunAsync(inputs, () =>
+            var inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, [], zqQuotes);
+            var run = await CurveRisk.RunLiveAsync(inputs, () =>
             {
                 var zqRates = zqQuotes.ToDictionary(quote => (quote.Year, quote.Month), quote => quote.RatePercent);
                 return new FOMCCalculator(valuationDate).LoadFrontEndAsync(handoff, effrTask.Result, zqRates);

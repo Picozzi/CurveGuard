@@ -26,12 +26,42 @@ internal static class CurveRisk
     private const double UsdRoundingTolerance = 0.01;
     private const double BumpRatioTolerance = 0.5;
 
+    public static async Task<CurveRun> RunLiveAsync(CurveInputs inputs,
+        Func<Task<List<FOMCCalculator.MeetingProbability>>> loadFomcDecisions)
+    {
+        var baseRate = FindFiveYearRate(inputs.OisSnapshot);
+        var trade = baseRate is { } rate ? CreateTrade(rate) : null;
+        var baseRun = await CurveValidation.RunAsync(inputs, loadFomcDecisions, trade);
+        if (baseRun.Curve is null)
+            return baseRun;
+
+        if (trade is null)
+            return Quarantine(baseRun, new("MISSING_5Y_OIS_QUOTE", "Live pricing checks require a 5Y OIS quote.", "5Y"));
+
+        var bumps = new Dictionary<int, CurveInputs>
+        {
+            [1] = CreateLiveBump(baseRun.Inputs, 1),
+            [10] = CreateLiveBump(baseRun.Inputs, 10),
+        };
+        var risk = await CheckScenariosAsync(baseRun, trade, bumps);
+        var run = baseRun with { PricingRisk = risk };
+        return risk.Passed ? run : Quarantine(run,
+            new("PRICING_RISK_FAILED", "The 5Y OIS pricing checks failed. See pricing_risk for details.", "5Y"));
+    }
+
     public static async Task<OisRiskReport> RunAsync(CurveInputs inputs, IReadOnlyDictionary<int, CurveInputs> savedBumps,
         IReadOnlyDictionary<int, double>? reportedPvOverrides = null)
     {
-        var baseRate = GetFiveYearRate(inputs.OisSnapshot);
-        var trade = new OisTrade("5Y", baseRate, 1_000_000);
+        var trade = CreateTrade(GetFiveYearRate(inputs.OisSnapshot));
         var baseRun = await CurveValidation.RunAsync(inputs, trade: trade);
+        return await CheckScenariosAsync(baseRun, trade, savedBumps, reportedPvOverrides);
+    }
+
+    private static async Task<OisRiskReport> CheckScenariosAsync(CurveRun baseRun, OisTrade trade,
+        IReadOnlyDictionary<int, CurveInputs> bumps, IReadOnlyDictionary<int, double>? reportedPvOverrides = null)
+    {
+        var valuationDate = baseRun.Inputs.ValuationDate;
+        var baseRate = trade.FixedCouponPercent;
         var baseValuation = baseRun.TradeValuation;
         var scenarios = new List<OisRiskScenario>
         {
@@ -48,12 +78,12 @@ internal static class CurveRisk
 
         if (baseValuation is not null)
         {
-            foreach (var (bumpBp, bumpedInputs) in savedBumps.OrderBy(entry => entry.Key))
+            foreach (var (bumpBp, bumpedInputs) in bumps.OrderBy(entry => entry.Key))
             {
                 var bumpedRate = GetFiveYearRate(bumpedInputs.OisSnapshot);
                 var differenceBp = (bumpedRate - baseRate) * 100m;
-                if (bumpedInputs.ValuationDate != inputs.ValuationDate || differenceBp != bumpBp)
-                    throw new ArgumentException($"The +{bumpBp} bp fixture must use the baseline valuation date and a 5Y rate {bumpBp} bp above the baseline.");
+                if (bumpedInputs.ValuationDate != valuationDate || differenceBp != bumpBp)
+                    throw new ArgumentException($"The +{bumpBp} bp scenario must use the baseline valuation date and a 5Y rate {bumpBp} bp above the baseline.");
 
                 var bumpedRun = await CurveValidation.RunAsync(bumpedInputs, trade: trade);
                 var bumpedValuation = bumpedRun.TradeValuation;
@@ -71,7 +101,7 @@ internal static class CurveRisk
             }
         }
 
-        if (savedBumps.ContainsKey(1) && savedBumps.ContainsKey(10))
+        if (bumps.ContainsKey(1) && bumps.ContainsKey(10))
         {
             var oneBp = scenarios.Find(scenario => scenario.BumpBp == 1)?.PvChangeUsd;
             var tenBp = scenarios.Find(scenario => scenario.BumpBp == 10)?.PvChangeUsd;
@@ -79,9 +109,30 @@ internal static class CurveRisk
             checks.Add(WithinTolerance("ten_bp_to_one_bp_ratio", null, ratio, 10, BumpRatioTolerance));
         }
 
-        return new OisRiskReport(inputs.ValuationDate, trade, baseValuation?.StartDate, baseValuation?.MaturityDate,
+        return new OisRiskReport(valuationDate, trade, baseValuation?.StartDate, baseValuation?.MaturityDate,
             scenarios, checks);
     }
+
+    private static OisTrade CreateTrade(decimal rate) => new("5Y", rate, 1_000_000);
+
+    private static CurveInputs CreateLiveBump(CurveInputs baseline, int bumpBp)
+    {
+        var snapshot = baseline.OisSnapshot;
+        var quotes = snapshot.Quotes.Select(quote => quote is { Tenor: "5Y", Rate: { } rate }
+            ? quote with { Rate = rate + bumpBp / 100m }
+            : quote).ToArray();
+        return baseline with
+        {
+            OisSnapshot = new OISSOFR.OISSwapSnapshot(snapshot.ObservationDate, snapshot.Source, snapshot.Url,
+                snapshot.ProviderCollectionTime, quotes),
+        };
+    }
+
+    private static CurveRun Quarantine(CurveRun run, ValidationFinding finding) => run with
+    {
+        Curve = null,
+        Validation = run.Validation with { Decision = "QUARANTINE", Findings = [finding] },
+    };
 
     private static OisRiskCheck WithinTolerance(string name, int? bumpBp, double? actual, double? expected, double? tolerance)
     {
@@ -90,11 +141,11 @@ internal static class CurveRisk
         return new OisRiskCheck(name, bumpBp, actual, expected, tolerance, passed);
     }
 
-    private static decimal GetFiveYearRate(OISSOFR.OISSwapSnapshot snapshot)
-    {
-        if (snapshot.Quotes.Where(quote => quote?.Tenor == "5Y").Take(2).ToArray() is not [{ Rate: { } rate }])
-            throw new ArgumentException("The pricing run requires exactly one 5Y OIS quote with a rate.");
+    private static decimal GetFiveYearRate(OISSOFR.OISSwapSnapshot snapshot) => FindFiveYearRate(snapshot)
+        ?? throw new ArgumentException("The pricing run requires exactly one 5Y OIS quote with a rate.");
 
-        return rate;
-    }
+    private static decimal? FindFiveYearRate(OISSOFR.OISSwapSnapshot snapshot)
+        => snapshot.Quotes.Where(quote => quote?.Tenor == "5Y").Take(2).ToArray() is [{ Rate: { } rate }]
+            ? rate
+            : null;
 }

@@ -16,7 +16,8 @@ internal sealed record ValidationFinding(string Code, string Message,
 internal sealed record ValidationResult(string Decision, string Bootstrap, IReadOnlyList<ValidationFinding> Findings);
 
 internal sealed record CurveRun(CurveInputs Inputs, object? Curve, ValidationResult Validation,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] OisTradeValuation? TradeValuation = null);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] OisTradeValuation? TradeValuation = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] OisRiskReport? PricingRisk = null);
 
 internal static class CurveValidation
 {
