@@ -11,6 +11,10 @@
     <PackageReference Include="YahooQuotesApi" Version="7.1.2" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="tests/**/*.cs" />
+    <InternalsVisibleTo Include="CurveGuard.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="MeetingCSVs/fomc-meetings-2026-2027.json"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest" />
