@@ -12,7 +12,7 @@ public class CurveValidationTests
         const double toleranceBp = 0.01;
         var baseline = await SavedFixtures.ReadAsync<BaselineFixture>(SavedFixtures.Baseline);
 
-        var run = await CurveValidation.RunAsync(baseline.Inputs);
+        var run = await CurveRisk.BuildValidatedCurveAsync(baseline.Inputs);
 
         Assert.Equal("PASS", run.Validation.Decision);
         Assert.Equal("PASS", run.Validation.Bootstrap);
@@ -21,7 +21,7 @@ public class CurveValidationTests
 
         var curve = JsonSerializer.SerializeToElement(run.Curve, SavedFixtures.JsonOptions);
         Assert.Equal(baseline.Curve.GetProperty("reference_date").GetString(), curve.GetProperty("reference_date").GetString());
-        var actual = curve.GetProperty("repricing").EnumerateArray().ToArray();
+        var actual = curve.GetProperty("repricings").EnumerateArray().ToArray();
         var expected = baseline.Curve.GetProperty("repricing").EnumerateArray().Select(RepricingKey);
         Assert.Equal(expected, actual.Select(RepricingKey));
         Assert.All(actual, row => Assert.InRange(row.GetProperty("residual_bp").GetDouble(), -toleranceBp, toleranceBp));
@@ -85,26 +85,26 @@ public class CurveValidationTests
     [Fact]
     public void PreviousFixingDateSkipsWeekend()
     {
-        Assert.Equal(new DateOnly(2026, 10, 30), SOFRCurve.PreviousFixingDate(new DateOnly(2026, 11, 2)));
+        Assert.Equal(new DateOnly(2026, 10, 30), SOFRCurveCreation.PreviousFixingDate(new DateOnly(2026, 11, 2)));
     }
 
     [Fact]
     public void PreviousFixingDateSkipsHoliday()
     {
-        Assert.Equal(new DateOnly(2026, 9, 4), SOFRCurve.PreviousFixingDate(new DateOnly(2026, 9, 8)));
+        Assert.Equal(new DateOnly(2026, 9, 4), SOFRCurveCreation.PreviousFixingDate(new DateOnly(2026, 9, 8)));
     }
 
     [Fact]
     public void PreviousFixingDateRejectsWeekendValuation()
     {
-        Assert.Throws<ArgumentException>(() => SOFRCurve.PreviousFixingDate(new DateOnly(2026, 11, 1)));
+        Assert.Throws<ArgumentException>(() => SOFRCurveCreation.PreviousFixingDate(new DateOnly(2026, 11, 1)));
     }
 
     private static async Task AssertInvalidFixtureQuarantinesAsync(string fixture, string findingCode)
     {
         var inputs = await SavedFixtures.ReadInputsAsync(fixture);
 
-        var saved = await CurveValidation.RunAsync(inputs);
+        var saved = await CurveRisk.BuildValidatedCurveAsync(inputs);
         var live = await CurveRisk.RunLiveAsync(inputs, () =>
             throw new InvalidOperationException("FOMC data should only load after input validation passes."));
 

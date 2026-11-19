@@ -2,13 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace CurveGuard
 {
-    public record ValidationFinding(string Code, string Message, string? Tenor = null, DateOnly? QuoteDate = null, DateOnly? ExpectedDate = null, string? Contract = null);
-
-    public record ValidationResult(string Decision, string Bootstrap, IReadOnlyList<ValidationFinding> Findings);
-
     public static class CurveInputValidation
     {
-        public static async Task<ValidationResult> RunValidation(CurveInputs inputs)
+        public static async Task<ValidationResult> RunInputValidation(CurveInputs inputs)
         {
             try
             {

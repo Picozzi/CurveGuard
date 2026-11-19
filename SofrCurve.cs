@@ -47,13 +47,13 @@ namespace CurveGuard
         public sealed record FrontSegment(DateOnly StartDate, DateOnly EndDate, DateOnly? DecisionDate, decimal ZqImpliedEffrPercent, double RawForwardPercent, double CalibratedForwardPercent, double DiscountFactorAtEnd);
     }
 
-    public static class SOFRCurveCreation
+    public class SOFRCurveCreation
     {
         private const uint SettlementDays = 2;
         private const int PaymentLagDays = 2;
         internal const double RepricingToleranceBp = 0.01;
         private const double Notional = 1_000_000;
-        private static readonly object QuantLibLock = new();
+        internal static readonly object QuantLibLock = new();
 
         public static DateOnly PreviousFixingDate(DateOnly valuationDate)
         {
@@ -339,7 +339,7 @@ namespace CurveGuard
             return maxError;
         }
 
-        private static QL.OISRateHelper CreateOisHelper(string tenorText, decimal percent, QL.Sofr index, QL.Calendar calendar,
+        public static QL.OISRateHelper CreateOisHelper(string tenorText, decimal percent, QL.Sofr index, QL.Calendar calendar,
             QL.DayCounter fixedDayCount)
         {
             using var tenor = new QL.Period(tenorText);
@@ -458,7 +458,7 @@ namespace CurveGuard
             return discount;
         }
 
-        private static QL.Date ToQuantLibDate(DateOnly date) => new(date.Day, (QL.Month)date.Month, date.Year);
+        public static QL.Date ToQuantLibDate(DateOnly date) => new(date.Day, (QL.Month)date.Month, date.Year);
         private static DateOnly ToDateOnly(QL.Date date) => DateOnly.ParseExact(date.ISO(), "yyyy-MM-dd", CultureInfo.InvariantCulture);
         private static double YearFraction(DateOnly start, DateOnly end) => (end.DayNumber - start.DayNumber) / 365.0;
     }

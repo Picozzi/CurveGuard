@@ -69,7 +69,7 @@ namespace CurveGuard
         {
             ValidationResult results;
 
-            results = await CurveInputValidation.RunValidation(inputs);
+            results = await CurveInputValidation.RunInputValidation(inputs);
             
             try
             {
@@ -93,4 +93,7 @@ namespace CurveGuard
         List<FOMCCalculator.MeetingProbability> FomcDecisions,
         List<FutureImpliedRate.ZqImpliedRate> ZqImpliedRates
     );
+    public record ValidationFinding(string Code, string Message, string? Tenor = null, DateOnly? QuoteDate = null, DateOnly? ExpectedDate = null, string? Contract = null);
+
+    public record ValidationResult(string Decision, string Bootstrap, IReadOnlyList<ValidationFinding> Findings);
 }
