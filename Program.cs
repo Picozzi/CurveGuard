@@ -11,13 +11,13 @@ namespace CurveGuard
             WriteIndented = true,
         };
 
-        public static async Task<int> Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var valuationDate = new DateTime(2026, 11, 2);
-            return await Run(valuationDate);
+            await Run(valuationDate);
         }
 
-        private static async Task<int> Run(DateTime valuationDate)
+        private static async Task Run(DateTime valuationDate)
         {
             try
             {
@@ -46,9 +46,6 @@ namespace CurveGuard
                 
                 var inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, FOMCMeeting.Result, futuresTask.Result);
              
-                var curve = SOFRCurveCreation.Build(inputs);
-
-                return 1;
                 // var reportDirectory = ProjectPaths.ReportDirectory;
                 // Directory.CreateDirectory(reportDirectory);
                 // var reportPath = Path.Combine(reportDirectory, $"sofr-quarantine-{valuationDateOnly:yyyy-MM-dd}.json");
@@ -65,8 +62,25 @@ namespace CurveGuard
             catch (Exception error)
             {
                 Console.Error.WriteLine($"CurveGuard: {error.Message}");
-                return 1;
             }
+        }
+
+        private static async Task<ValidationResult> ActualRun(CurveInputs inputs)
+        {
+            ValidationResult results;
+
+            results = await CurveInputValidation.RunValidation(inputs);
+            
+            try
+            {
+                var curve = SOFRCurveCreation.Build(inputs);
+            }
+            catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException)
+            {
+                results = new ValidationResult("QUARANTINE", "FAIL", [new("CURVE_BUILD_FAILED", error.Message)]);
+            }
+
+            return results;
         }
     }
 
