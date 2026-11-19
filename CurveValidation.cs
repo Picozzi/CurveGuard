@@ -3,13 +3,7 @@ using System.Text.Json.Serialization;
 namespace CurveGuard
 {
 
-internal sealed record CurveInputs(
-    DateOnly ValuationDate,
-    OvernightSOFR.SOFRFixing SofrFixing,
-    EFFRCalculator.EFFRFixing EffrFixing,
-    OISSOFR.OISSwapSnapshot OisSnapshot,
-    IReadOnlyList<FOMCCalculator.MeetingProbability> FomcDecisions,
-    IReadOnlyList<FutureImpliedRate.ZqImpliedRate>? ZqImpliedRates = null);
+
 
 internal sealed record ValidationFinding(string Code, string Message,
     string? Tenor = null, DateOnly? QuoteDate = null, DateOnly? ExpectedDate = null, string? Contract = null);
@@ -22,7 +16,7 @@ internal sealed record CurveRun(CurveInputs Inputs, object? Curve, ValidationRes
 
 internal static class CurveValidation
 {
-    public static async Task<CurveRun> RunAsync(CurveInputs inputs, List<FOMCCalculator.MeetingProbability> loadFomcDecisions, OisTrade? trade = null)
+    public static async Task<CurveRun> RunAsync(CurveInputs inputs, OisTrade? trade = null)
     {
         var findings = CheckOisQuotes(inputs.ValuationDate, inputs.OisSnapshot);
         CheckFixings(inputs, findings);

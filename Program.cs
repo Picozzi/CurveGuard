@@ -14,10 +14,10 @@ namespace CurveGuard
         public static async Task<int> Main(string[] args)
         {
             var valuationDate = new DateTime(2026, 11, 2);
-            return await BuildSOFRCurveAsync(valuationDate);
+            return await Run(valuationDate);
         }
 
-        private static async Task<int> BuildSOFRCurveAsync(DateTime valuationDate)
+        private static async Task<int> Run(DateTime valuationDate)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace CurveGuard
                 //QuantLib requires a DateOnly for the valuation date.
                 DateOnly valuationDateOnly = DateOnly.FromDateTime(valuationDate);
 
-                var fixingDate = SOFRCurve.PreviousFixingDate(valuationDateOnly);
+                var fixingDate = SOFRCurveCreation.PreviousFixingDate(valuationDateOnly);
                 
                 var fixingTask = new OvernightSOFR().GetSOFRFixingAsync(fixingDate);
                 var swapsTask = new OISSOFR().GetOisSwapRatesAsync(valuationDate);
@@ -46,20 +46,21 @@ namespace CurveGuard
                 
                 var inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, FOMCMeeting.Result, futuresTask.Result);
              
-                var run = await CurveRisk.RunLiveAsync(inputs);
+                var curve = SOFRCurveCreation.Build(inputs);
 
-                var reportDirectory = ProjectPaths.ReportDirectory;
-                Directory.CreateDirectory(reportDirectory);
-                var reportPath = Path.Combine(reportDirectory, $"sofr-quarantine-{valuationDateOnly:yyyy-MM-dd}.json");
-                if (run.Curve is { } curve)
-                {
-                    var chart = CurveChart.Save(JsonSerializer.SerializeToElement(curve, JsonOptions));
-                    reportPath = Path.ChangeExtension(chart, ".json");
-                }
+                return 1;
+                // var reportDirectory = ProjectPaths.ReportDirectory;
+                // Directory.CreateDirectory(reportDirectory);
+                // var reportPath = Path.Combine(reportDirectory, $"sofr-quarantine-{valuationDateOnly:yyyy-MM-dd}.json");
+                // if (run.Curve is { } curve)
+                // {
+                //     var chart = CurveChart.Save(JsonSerializer.SerializeToElement(curve, JsonOptions));
+                //     reportPath = Path.ChangeExtension(chart, ".json");
+                // }
 
-                await File.WriteAllTextAsync(reportPath, JsonSerializer.Serialize(run, JsonOptions) + Environment.NewLine);
-                Console.WriteLine($"{run.Validation.Decision}: saved {reportPath}");
-                return run.Curve is null ? 1 : 0;
+                // await File.WriteAllTextAsync(reportPath, JsonSerializer.Serialize(run, JsonOptions) + Environment.NewLine);
+                // Console.WriteLine($"{run.Validation.Decision}: saved {reportPath}");
+                // return run.Curve is null ? 1 : 0;
             }
             catch (Exception error)
             {
@@ -68,4 +69,14 @@ namespace CurveGuard
             }
         }
     }
+
+    public sealed record CurveInputs
+    (
+        DateOnly ValuationDate,
+        OvernightSOFR.SOFRFixing SofrFixing,
+        EFFRCalculator.EFFRFixing EffrFixing,
+        OISSOFR.OISSwapSnapshot OisSnapshot,
+        List<FOMCCalculator.MeetingProbability> FomcDecisions,
+        List<FutureImpliedRate.ZqImpliedRate> ZqImpliedRates
+    );
 }

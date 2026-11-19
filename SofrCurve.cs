@@ -1,9 +1,53 @@
 using System.Globalization;
+using QuantLib;
 using QL = QuantLib;
 
 namespace CurveGuard
 {
-    public static class SOFRCurve
+    public class SOFRCurve
+    {
+        public required string ReferenceDate { get; init; }
+        public string QuantLibVersion { get; init; } = "1.44";
+        public string Bootstrap { get; init; } = "QuantLib iterative discount-factor bootstrap";
+        public string Interpolation { get; init; } =
+            "Log-linear discount factors through the one-year handoff, " +
+            "cubic log-discount spline with a matched forward at the handoff thereafter";
+        public string CurveDayCount { get; init; } = "Actual/365 Fixed";
+        public bool Extrapolation { get; init; } = false;
+
+        public required OvernightAnchorInfo OvernightAnchor { get; init; }
+        public required OisSourceInfo OisSource { get; init; }
+        public required FomcFrontEndInfo FomcFrontEnd { get; init; }
+        public required CoverageInfo Coverage { get; init; }
+        public required List<Pillar> Pillars { get; init; }
+        public required List<Repricing> Repricings { get; init; }
+        public required List<ForwardSample> MonthlyAndPillarForwards { get; init; }
+
+        public sealed record OvernightAnchorInfo(
+            DateOnly EffectiveDate, decimal RatePercent, string Source, string Use);
+
+        public sealed record OisSourceInfo(
+            string Source, string Url, string? ProviderCollectionTime, DateTime ObservationDate,
+            uint SpotLagBusinessDays, int PaymentLagBusinessDays, string Convention);
+
+        public sealed record FomcFrontEndInfo(
+            DateOnly HandoffDate, double HandoffDiscountFactor, double HandoffForwardPercent,
+            double EffrFixingPercent, decimal StartingSofrMinusEffrBp,
+            double PostFirstDecisionLevelAdjustmentBp, string Source,
+            IReadOnlyList<FrontSegment> Segments, IReadOnlyList<string> ExcludedShortOisTenors);
+
+        public sealed record CoverageInfo(string OvernightPillar, string FirstOisTenor, string FirstOisPillar, string LastPillar);
+        public sealed record Pillar(string Date, double DiscountFactor, double? ContinuousZeroPercent);
+        public sealed record ForwardSample(string Date, double DiscountFactor, double InstantaneousForwardPercent);
+
+        public sealed record Repricing(string Instrument, string Tenor, string? Source, string? Method, int? Trades,
+            int? CloseTrades, string StartDate, string MaturityDate, string PillarDate, decimal QuotePercent,
+            double ModelPercent, double ResidualBp, double NpvPerMillion);
+        public sealed record ProjectedSegment(DateOnly StartDate, DateOnly EndDate, DateOnly? DecisionDate, decimal ExpectedEffrPercent, double RawRate);
+        public sealed record FrontSegment(DateOnly StartDate, DateOnly EndDate, DateOnly? DecisionDate, decimal ZqImpliedEffrPercent, double RawForwardPercent, double CalibratedForwardPercent, double DiscountFactorAtEnd);
+    }
+
+    public static class SOFRCurveCreation
     {
         private const uint SettlementDays = 2;
         private const int PaymentLagDays = 2;
@@ -22,13 +66,10 @@ namespace CurveGuard
             return DateOnly.ParseExact(previous.ISO(), "yyyy-MM-dd", CultureInfo.InvariantCulture);
         }
 
-        public static object Build(DateOnly valuationDate, OvernightSOFR.SOFRFixing fixing, OISSOFR.OISSwapSnapshot swaps, EFFRCalculator.EFFRFixing effr, IReadOnlyList<FOMCCalculator.MeetingProbability> decisions)
-            => Build(valuationDate, fixing, swaps, effr, decisions, trade: null).Report;
-
-        internal static CurveBuildResult Build(DateOnly valuationDate, OvernightSOFR.SOFRFixing fixing,
-            OISSOFR.OISSwapSnapshot swaps, EFFRCalculator.EFFRFixing effr,
-            IReadOnlyList<FOMCCalculator.MeetingProbability> decisions, OisTrade? trade)
+        public static SOFRCurve Build(CurveInputs inputs)
         {
+            var (valuationDate, fixing, effr, swaps, decisions, _) = inputs;
+
             if (fixing.EffectiveDate != PreviousFixingDate(valuationDate) ||
                 DateOnly.FromDateTime(effr.Date) != fixing.EffectiveDate ||
                 DateOnly.FromDateTime(swaps.ObservationDate) != valuationDate)
@@ -46,18 +87,18 @@ namespace CurveGuard
                 settings.setEvaluationDate(referenceDate);
                 try
                 {
-                    return Bootstrap(referenceDate, valuationDate, fixing, swaps, effr, decisions, trade);
+                    return Bootstrap(referenceDate, valuationDate, fixing, swaps, effr, decisions);
                 }
                 finally
                 {
-                    settings.setEvaluationDate(previousDate);
+                    //settings.setEvaluationDate(previousDate);
                 }
             }
         }
 
-        private static CurveBuildResult Bootstrap(QL.Date referenceDate, DateOnly valuationDate, OvernightSOFR.SOFRFixing fixing,
+        private static SOFRCurve Bootstrap(QL.Date referenceDate, DateOnly valuationDate, OvernightSOFR.SOFRFixing fixing,
             OISSOFR.OISSwapSnapshot swaps, EFFRCalculator.EFFRFixing effr,
-            IReadOnlyList<FOMCCalculator.MeetingProbability> decisions, OisTrade? trade)
+            IReadOnlyList<FOMCCalculator.MeetingProbability> decisions)
         {
             using var calendar = new QL.UnitedStates(QL.UnitedStates.Market.GovernmentBond);
             using var overnight = new QL.Period(1, QL.TimeUnit.Days);
@@ -110,7 +151,7 @@ namespace CurveGuard
                 var levelAdjustment = oneYear.Helper is not null && front.Count > 1
                     ? FitOneYearLevel(front, oneYear.Helper, oneYear.Quote.Rate!.Value, accrual)
                     : 0.0;
-                var frontSegments = new List<FrontSegment>(front.Count);
+                var frontSegments = new List<SOFRCurve.FrontSegment>(front.Count);
                 var integratedRate = 0.0;
                 var switchIndex = 1u; // The reference date is index zero and the overnight deposit is index one.
                 using var unadjusted = new QL.NullCalendar();
@@ -119,7 +160,7 @@ namespace CurveGuard
                     var calibratedRate = segment.RawRate + (i == 0 ? 0 : levelAdjustment);
                     integratedRate += calibratedRate * YearFraction(segment.StartDate, segment.EndDate);
                     var discount = RequireDiscount(Math.Exp(-integratedRate));
-                    frontSegments.Add(new FrontSegment(segment.StartDate, segment.EndDate, segment.DecisionDate,
+                    frontSegments.Add(new SOFRCurve.FrontSegment(segment.StartDate, segment.EndDate, segment.DecisionDate,
                         segment.ExpectedEffrPercent, segment.RawRate * 100, calibratedRate * 100, discount));
                     using var end = ToQuantLibDate(segment.EndDate);
                     if (end.serialNumber() == depositPillar.serialNumber())
@@ -142,36 +183,19 @@ namespace CurveGuard
                     jumps, jumpDates, interpolation);
                 using var dates = curve.dates(); // Forces iterative calibration.
                 using var values = curve.data();
-                var pillars = new List<Pillar>(dates.Count);
+                var pillars = new List<SOFRCurve.Pillar>(dates.Count);
                 for (var i = 0; i < dates.Count; i++)
                 {
                     using var date = dates[i];
                     var discount = RequireDiscount(values[i]);
                     var t = curveDayCount.yearFraction(referenceDate, date);
                     double? zero = t > 0 ? -Math.Log(discount) / t * 100 : null;
-                    pillars.Add(new Pillar(date.ISO(), discount, zero));
+                    pillars.Add(new SOFRCurve.Pillar(date.ISO(), discount, zero));
                 }
 
-                var repricing = new List<Repricing> { RepriceDeposit(curve, deposit, accrual, fixing.RatePercent) };
-                OisTradeValuation? tradeValuation = null;
+                var repricing = new List<SOFRCurve.Repricing> { RepriceDeposit(curve, deposit, accrual, fixing.RatePercent) };
                 foreach (var (quote, helper) in swapsByPillar.Values)
-                {
-                    var repriced = RepriceSwap(quote, helper);
-                    repricing.Add(repriced);
-                    if (trade is not null && repriced.Tenor == trade.Tenor)
-                    {
-                        using var swap = helper.swap();
-                        var pv = SwapPvAtCoupon(swap, trade.FixedCouponPercent, trade.NotionalUsd);
-                        if (!double.IsFinite(pv))
-                            throw new InvalidOperationException("The sample swap produced a nonfinite PV.");
-
-                        tradeValuation = new OisTradeValuation(repriced.StartDate, repriced.MaturityDate,
-                            repriced.ModelPercent, pv, FixedLegAnnuity(swap, curve));
-                    }
-                }
-
-                if (trade is not null && tradeValuation is null)
-                    throw new ArgumentException($"No calibration swap is available for the sample trade tenor {trade.Tenor}.");
+                    repricing.Add(RepriceSwap(quote, helper));
 
                 var maxResidual = repricing.Max(row => Math.Abs(row.ResidualBp));
                 var maxPv = repricing.Max(row => Math.Abs(row.NpvPerMillion));
@@ -188,44 +212,43 @@ namespace CurveGuard
                 var forwardGapBp = (rightForward - terminalRate) * 10_000;
                 if (!double.IsFinite(forwardGapBp) || Math.Abs(forwardGapBp) > RepricingToleranceBp)
                     throw new InvalidOperationException("The cubic OIS spline did not match the terminal FOMC forward.");
-                var report = new
+                var sofrCurve = new SOFRCurve
                 {
                     ReferenceDate = referenceDate.ISO(),
-                    QuantLibVersion = "1.44",
-                    Bootstrap = "QuantLib iterative discount-factor bootstrap",
-                    Interpolation = "Log-linear discount factors through the one-year handoff, cubic log-discount spline with a matched forward at the handoff thereafter",
-                    CurveDayCount = "Actual/365 Fixed",
-                    Extrapolation = false,
-                    OvernightAnchor = new
-                    {
-                        fixing.EffectiveDate, fixing.RatePercent, Source = "Federal Reserve Bank of New York",
-                        Use = "Previous business day's published fixing as a proxy for a same-day-start overnight deposit",
-                    },
-                    OisSource = new
-                    {
-                        swaps.Source, swaps.Url, swaps.ProviderCollectionTime, swaps.ObservationDate,
-                        SpotLagBusinessDays = SettlementDays, PaymentLagBusinessDays = PaymentLagDays,
-                        Convention = "US Government Bond calendar, annual Actual/360 fixed leg, compounded SOFR",
-                    },
-                    FomcFrontEnd = new
-                    {
-                        HandoffDate = handoffDate, HandoffDiscountFactor = handoffDiscount,
-                        HandoffForwardPercent = terminalRate * 100,
-                        EffrFixingPercent = effr.Rate, StartingSofrMinusEffrBp = (fixing.RatePercent - (decimal)effr.Rate) * 100m,
-                        PostFirstDecisionLevelAdjustmentBp = levelAdjustment * 10_000,
-                        Source = "Dated Yahoo ZQ closes, Federal Reserve FOMC schedule and New York Fed fixings",
-                        Segments = frontSegments,
-                        ExcludedShortOisTenors = excludedTenors,
-                    },
-                    Coverage = new { OvernightPillar = pillars[1].Date, FirstOisTenor = repricing[1].Tenor,
-                        FirstOisPillar = repricing[1].PillarDate, LastPillar = pillars[^1].Date },
+                    OvernightAnchor = new(
+                        fixing.EffectiveDate,
+                        fixing.RatePercent,
+                        Source: "Federal Reserve Bank of New York",
+                        Use: "Previous business day's published fixing as a proxy for a same-day-start overnight deposit"),
+                    OisSource = new(
+                        swaps.Source,
+                        swaps.Url,
+                        swaps.ProviderCollectionTime,
+                        swaps.ObservationDate,
+                        SpotLagBusinessDays: SettlementDays,
+                        PaymentLagBusinessDays: PaymentLagDays,
+                        Convention: "US Government Bond calendar, annual Actual/360 fixed leg, compounded SOFR"),
+                    FomcFrontEnd = new(
+                        HandoffDate: handoffDate,
+                        HandoffDiscountFactor: handoffDiscount,
+                        HandoffForwardPercent: terminalRate * 100,
+                        EffrFixingPercent: effr.Rate,
+                        StartingSofrMinusEffrBp: (fixing.RatePercent - (decimal)effr.Rate) * 100m,
+                        PostFirstDecisionLevelAdjustmentBp: levelAdjustment * 10_000,
+                        Source: "Dated Yahoo ZQ closes, Federal Reserve FOMC schedule and New York Fed fixings",
+                        Segments: frontSegments,
+                        ExcludedShortOisTenors: excludedTenors),
+                    Coverage = new(
+                        OvernightPillar: pillars[1].Date,
+                        FirstOisTenor: repricing[1].Tenor,
+                        FirstOisPillar: repricing[1].PillarDate,
+                        LastPillar: pillars[^1].Date),
                     Pillars = pillars,
-                    Repricing = repricing,
+                    Repricings = repricing,
                     MonthlyAndPillarForwards = forwards,
-                    Checks = new { RepricingToleranceBp, MaxAbsoluteResidualBp = maxResidual, MaxAbsoluteNpvPerMillion = maxPv,
-                        MaxFrontEndDiscountError = maxFrontError, HandoffForwardGapBp = forwardGapBp },
                 };
-                return new CurveBuildResult(report, tradeValuation);
+
+                return sofrCurve;
             }
             finally
             {
@@ -234,14 +257,14 @@ namespace CurveGuard
             }
         }
 
-        private static List<ProjectedSegment> BuildFrontEnd(DateOnly valuationDate, DateOnly handoff, QL.Calendar calendar,
+        private static List<SOFRCurve.ProjectedSegment> BuildFrontEnd(DateOnly valuationDate, DateOnly handoff, QL.Calendar calendar,
             DateOnly overnightEnd, OvernightSOFR.SOFRFixing fixing, EFFRCalculator.EFFRFixing effr,
             IReadOnlyList<FOMCCalculator.MeetingProbability> decisions)
         {
             var overnightDays = overnightEnd.DayNumber - valuationDate.DayNumber;
             var forward = Math.Log(1 + (double)fixing.RateDecimal * overnightDays / 360) / YearFraction(valuationDate, overnightEnd);
             var expectedEffr = (decimal)effr.Rate;
-            var segments = new List<ProjectedSegment>();
+            var segments = new List<SOFRCurve.ProjectedSegment>();
             var start = valuationDate;
             DateOnly? priorDecision = null;
             foreach (var decision in decisions)
@@ -255,18 +278,18 @@ namespace CurveGuard
                 if (effective < overnightEnd || effective <= start)
                     throw new ArgumentException("FOMC effective dates must be ordered and outside the overnight accrual interval.");
 
-                segments.Add(new ProjectedSegment(start, effective, priorDecision, expectedEffr, forward));
+                segments.Add(new SOFRCurve.ProjectedSegment(start, effective, priorDecision, expectedEffr, forward));
                 var move = decision.PostMeetingRate - decision.PreMeetingRate;
                 expectedEffr += move;
                 forward += (double)(move / 100m) * 365 / 360;
                 start = effective;
                 priorDecision = decisionDate;
             }
-            segments.Add(new ProjectedSegment(start, handoff, priorDecision, expectedEffr, forward));
+            segments.Add(new SOFRCurve.ProjectedSegment(start, handoff, priorDecision, expectedEffr, forward));
             return segments;
         }
 
-        private static double FitOneYearLevel(List<ProjectedSegment> front, QL.OISRateHelper swap, decimal parRatePercent,
+        private static double FitOneYearLevel(List<SOFRCurve.ProjectedSegment> front, QL.OISRateHelper swap, decimal parRatePercent,
             QL.DayCounter dayCount)
         {
             // An annual 1Y OIS has one payment on each leg. The common payment discount cancels in the par condition.
@@ -296,7 +319,7 @@ namespace CurveGuard
                 : throw new ArgumentException("The 1Y OIS quote cannot be used to fit the FOMC front-end level.");
         }
 
-        private static double CheckFrontEnd(QL.YieldTermStructure curve, List<FrontSegment> segments)
+        private static double CheckFrontEnd(QL.YieldTermStructure curve, List<SOFRCurve.FrontSegment> segments)
         {
             var maxError = 0.0;
             var startDiscount = 1.0;
@@ -340,7 +363,7 @@ namespace CurveGuard
                 fixedDayCount: fixedDayCount);
         }
 
-        private static Repricing RepriceDeposit(QL.YieldTermStructure curve, QL.DepositRateHelper helper, QL.DayCounter dayCount,
+        private static SOFRCurve.Repricing RepriceDeposit(QL.YieldTermStructure curve, QL.DepositRateHelper helper, QL.DayCounter dayCount,
             decimal percent)
         {
             using var start = helper.earliestDate();
@@ -350,11 +373,11 @@ namespace CurveGuard
             var accrual = dayCount.yearFraction(start, maturity);
             var pv = Notional * ((1 + rate * accrual) * curve.discount(maturity) - curve.discount(start));
             var modelRate = helper.impliedQuote();
-            return new Repricing("deposit_proxy", "ON", "New York Fed", "published_fixing_proxy", null, null,
+            return new SOFRCurve.Repricing("deposit_proxy", "ON", "New York Fed", "published_fixing_proxy", null, null,
                 start.ISO(), maturity.ISO(), pillar.ISO(), percent, modelRate * 100, (modelRate - rate) * 10_000, pv);
         }
 
-        private static Repricing RepriceSwap(OISSOFR.OisApiQuote quote, QL.OISRateHelper helper)
+        private static SOFRCurve.Repricing RepriceSwap(OISSOFR.OisApiQuote quote, QL.OISRateHelper helper)
         {
             using var start = helper.earliestDate();
             using var maturity = helper.maturityDate();
@@ -364,7 +387,7 @@ namespace CurveGuard
             var rate = (double)(percent / 100m);
             var modelRate = helper.impliedQuote();
             var pv = SwapPvAtCoupon(swap, percent, Notional);
-            return new Repricing("ois", quote.Tenor!, quote.Source, quote.Method, quote.Trades, quote.CloseTrades,
+            return new SOFRCurve.Repricing("ois", quote.Tenor!, quote.Source, quote.Method, quote.Trades, quote.CloseTrades,
                 start.ISO(), maturity.ISO(), pillar.ISO(), percent, modelRate * 100, (modelRate - rate) * 10_000, pv);
         }
 
@@ -393,8 +416,8 @@ namespace CurveGuard
             return annuity;
         }
 
-        private static List<ForwardSample> SampleForwards(QL.YieldTermStructure curve, QL.Date referenceDate, QL.Date lastDate,
-            QL.DateVector pillarDates, QL.DayCounter dayCount, List<FrontSegment> front)
+        private static List<SOFRCurve.ForwardSample> SampleForwards(QL.YieldTermStructure curve, QL.Date referenceDate, QL.Date lastDate,
+            QL.DateVector pillarDates, QL.DayCounter dayCount, List<SOFRCurve.FrontSegment> front)
         {
             var sampleDates = new SortedSet<int>();
             for (var i = 0; i < pillarDates.Count; i++)
@@ -412,7 +435,7 @@ namespace CurveGuard
                 sampleDates.Add(date.serialNumber());
             }
 
-            var samples = new List<ForwardSample>(sampleDates.Count);
+            var samples = new List<SOFRCurve.ForwardSample>(sampleDates.Count);
             foreach (var serial in sampleDates)
             {
                 using var date = new QL.Date(serial);
@@ -423,7 +446,7 @@ namespace CurveGuard
                 var value = segment?.CalibratedForwardPercent ?? forward.rate() * 100;
                 if (!double.IsFinite(value))
                     throw new InvalidOperationException($"Curve produced a nonfinite forward rate on {date.ISO()}.");
-                samples.Add(new ForwardSample(date.ISO(), RequireDiscount(curve.discount(date)), value));
+                samples.Add(new SOFRCurve.ForwardSample(date.ISO(), RequireDiscount(curve.discount(date)), value));
             }
             return samples;
         }
@@ -438,16 +461,5 @@ namespace CurveGuard
         private static QL.Date ToQuantLibDate(DateOnly date) => new(date.Day, (QL.Month)date.Month, date.Year);
         private static DateOnly ToDateOnly(QL.Date date) => DateOnly.ParseExact(date.ISO(), "yyyy-MM-dd", CultureInfo.InvariantCulture);
         private static double YearFraction(DateOnly start, DateOnly end) => (end.DayNumber - start.DayNumber) / 365.0;
-
-        private sealed record ProjectedSegment(DateOnly StartDate, DateOnly EndDate, DateOnly? DecisionDate,
-            decimal ExpectedEffrPercent, double RawRate);
-        private sealed record FrontSegment(DateOnly StartDate, DateOnly EndDate, DateOnly? DecisionDate,
-            decimal ZqImpliedEffrPercent, double RawForwardPercent, double CalibratedForwardPercent, double DiscountFactorAtEnd);
-        private sealed record Pillar(string Date, double DiscountFactor, double? ContinuousZeroPercent);
-        private sealed record ForwardSample(string Date, double DiscountFactor, double InstantaneousForwardPercent);
-        // Signed PV from the lender's perspective for the deposit and the fixed payer's perspective for OIS.
-        private sealed record Repricing(string Instrument, string Tenor, string? Source, string? Method, int? Trades,
-            int? CloseTrades, string StartDate, string MaturityDate, string PillarDate, decimal QuotePercent,
-            double ModelPercent, double ResidualBp, double NpvPerMillion);
     }
 }

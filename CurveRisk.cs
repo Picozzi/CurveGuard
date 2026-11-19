@@ -1,19 +1,5 @@
 namespace CurveGuard
 {
-    public sealed record CurveInputs
-    (
-        DateOnly ValuationDate,
-        OvernightSOFR.SOFRFixing SofrFixing,
-        EFFRCalculator.EFFRFixing EffrFixing,
-        OISSOFR.OISSwapSnapshot OisSnapshot,
-        List<FOMCCalculator.MeetingProbability> FomcDecisions,
-        List<FutureImpliedRate.ZqImpliedRate> ZqImpliedRates
-    );
-
-
-
-
-
     // internal sealed record OisTrade(string Tenor, decimal FixedCouponPercent, double NotionalUsd)
     // {
     //     public string Side => "pay_fixed";
@@ -22,7 +8,7 @@ namespace CurveGuard
     // internal sealed record OisTradeValuation(string StartDate, string MaturityDate, double ModelParRatePercent, double PvUsd,
     //     double FixedLegAnnuity);
 
-    // internal sealed record CurveBuildResult(object Report, OisTradeValuation? TradeValuation);
+    internal sealed record CurveBuildResult(object Report, OisTradeValuation? TradeValuation);
 
     // internal sealed record OisRiskScenario(int BumpBp, decimal MarketQuotePercent, double? ModelParRatePercent,
     //     double? PvUsd, double? PvChangeUsd, ValidationResult Validation, double? FixedLegAnnuity);
