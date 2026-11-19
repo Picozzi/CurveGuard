@@ -5,10 +5,26 @@ public class FutureImpliedRate
 {
     private static readonly char[] MonthCodes = { 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z' };
 
-    public sealed record ZqImpliedRate(int Year, int Month, decimal RatePercent,
-        string? Ticker = null, DateOnly? CloseDate = null);
+    public sealed class ZqImpliedRate
+    {
+        public int Year { get; init; }
+        public int Month { get; init; }
+        public decimal RatePercent { get; init; }
+        public string? Ticker { get; init; }
+        public DateOnly? CloseDate { get; init; }
 
-    public async Task<IReadOnlyList<ZqImpliedRate>> GetFuturesQuotesAsync(DateTime effectiveDate)
+        public ZqImpliedRate(int year, int month, decimal ratePercent,
+            string? ticker = null, DateOnly? closeDate = null)
+        {
+            Year = year;
+            Month = month;
+            RatePercent = ratePercent;
+            Ticker = ticker;
+            CloseDate = closeDate;
+        }
+    }
+
+    public async Task<List<ZqImpliedRate>> GetFuturesQuotesAsync(DateTime effectiveDate)
     {
         List<(DateTime Date, string Ticker)> tickers = new List<(DateTime Date, string Ticker)>();
         

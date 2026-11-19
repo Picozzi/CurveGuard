@@ -9,7 +9,7 @@ namespace CurveGuard
             this.effectiveDate = effectiveDate;
         }
 
-        public async Task<List<MeetingProbability>> LoadFrontEndAsync(DateTime handoff, EFFRCalculator.EFFRFixing fixing, Dictionary<(int Year, int Month), decimal> futuresImpliedRates)
+        public async Task<List<MeetingProbability>> LoadFOMCRateProbabilitiesAsync(DateTime handoff, EFFRCalculator.EFFRFixing fixing, IReadOnlyList<FutureImpliedRate.ZqImpliedRate> futuresImpliedRates)
         {
             //Scheduled FOMC Decision Dates
             List<DateTime> fomcDates = await new FOMCMeeting().LoadPolicyDecisionDatesAsync(effectiveDate);
@@ -34,7 +34,8 @@ namespace CurveGuard
             return meetings;
         }
 
-        private static List<MeetingProbability> CalculateFedWatch(DateTime asOfDate, decimal targetLower, decimal targetUpper, List<DateTime> fomcDates, Dictionary<(int Year, int Month), decimal> futuresRates, DateTime? through = null)
+        private static List<MeetingProbability> CalculateFedWatch(DateTime asOfDate, decimal targetLower, decimal targetUpper,
+            List<DateTime> fomcDates, IReadOnlyList<FutureImpliedRate.ZqImpliedRate> futuresRates, DateTime? through = null)
         {
             DateOnly asOfDateOnly = DateOnly.FromDateTime(asOfDate);
 
@@ -45,8 +46,8 @@ namespace CurveGuard
             if (upcomingMeetings.Count == 0)
                 return [];
 
-            var ratesByMonth = futuresRates.ToDictionary(quote => new DateTime(quote.Key.Year, quote.Key.Month, 1),
-                quote => quote.Value);
+            var ratesByMonth = futuresRates.ToDictionary(quote => new DateTime(quote.Year, quote.Month, 1),
+                quote => quote.RatePercent);
             var meetingsByMonth = fomcDates.ToLookup(MonthOf);
             var valuationMonth = MonthOf(asOfDate);
             // The bundled calendar covers complete calendar years.

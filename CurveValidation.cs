@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 
-namespace CurveGuard;
+namespace CurveGuard
+{
 
 internal sealed record CurveInputs(
     DateOnly ValuationDate,
@@ -21,8 +22,7 @@ internal sealed record CurveRun(CurveInputs Inputs, object? Curve, ValidationRes
 
 internal static class CurveValidation
 {
-    public static async Task<CurveRun> RunAsync(CurveInputs inputs,
-        Func<Task<List<FOMCCalculator.MeetingProbability>>>? loadFomcDecisions = null, OisTrade? trade = null)
+    public static async Task<CurveRun> RunAsync(CurveInputs inputs, List<FOMCCalculator.MeetingProbability> loadFomcDecisions, OisTrade? trade = null)
     {
         var findings = CheckOisQuotes(inputs.ValuationDate, inputs.OisSnapshot);
         CheckFixings(inputs, findings);
@@ -151,4 +151,5 @@ internal static class CurveValidation
 
         return findings;
     }
+}
 }
