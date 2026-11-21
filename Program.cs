@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace CurveGuard
@@ -77,7 +78,7 @@ namespace CurveGuard
             }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException)
             {
-                results = new ValidationResult("QUARANTINE", "FAIL", [new("CURVE_BUILD_FAILED", error.Message)]);
+                results = new ValidationResult("QUARANTINE", "FAIL", "CURVE_BUILD_FAILED" + " " + error.Message, [], []);
             }
 
             return results;
@@ -93,7 +94,4 @@ namespace CurveGuard
         List<FOMCCalculator.MeetingProbability> FomcDecisions,
         List<FutureImpliedRate.ZqImpliedRate> ZqImpliedRates
     );
-    public record ValidationFinding(string Code, string Message, string? Tenor = null, DateOnly? QuoteDate = null, DateOnly? ExpectedDate = null, string? Contract = null);
-
-    public record ValidationResult(string Decision, string Bootstrap, IReadOnlyList<ValidationFinding> Findings);
 }

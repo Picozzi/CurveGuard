@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace CurveGuard
 {
     public static class CurveInputValidation
@@ -8,27 +6,27 @@ namespace CurveGuard
         {
             try
             {
-                List<ValidationFinding> findings = new List<ValidationFinding>();
+                var findings = new List<ValidationCheck>();
 
                 CheckOisQuotes(inputs.ValuationDate, inputs.OisSnapshot, findings);
                 CheckFixings(inputs, findings);
                 CheckZqCloseDates(inputs, findings);
                 
                 if (findings.Count > 0)
-                    return new ValidationResult("QUARANTINE", "SKIPPED", findings);
+                    return new ValidationResult("QUARANTINE", "SKIPPED", "", findings,[]);
             
-                return new ValidationResult("PASS", "PASS", findings);
+                return new ValidationResult("PASS", "PASS", "", findings, []);
             }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException)
             {
-                return new ValidationResult("QUARANTINE", "FAIL", [new("CURVE_VALIDATION_FAILED", error.Message)]);
+                return new ValidationResult("QUARANTINE", "FAIL", "CURVE_VALIDATION_FAILED" + " " + error.Message, [], []);
             }
         }
         
         //TODO: Make to a helper eventually
         private static bool FitsDecimal(double value) => Math.Abs(value) < (double)decimal.MaxValue;
 
-        private static void CheckZqCloseDates(CurveInputs inputs, List<ValidationFinding> findings)
+        private static void CheckZqCloseDates(CurveInputs inputs, List<ValidationCheck> findings)
         {
             if (inputs.ZqImpliedRates is not { Count: > 0 } quotes)
             {
@@ -58,7 +56,7 @@ namespace CurveGuard
             }
         }
 
-        private static void CheckFixings(CurveInputs inputs, List<ValidationFinding> findings)
+        private static void CheckFixings(CurveInputs inputs, List<ValidationCheck> findings)
         {
             DateOnly expectedDate;
             try
@@ -89,7 +87,7 @@ namespace CurveGuard
                 findings.Add(new("INVALID_EFFR_TARGET_RANGE", "The EFFR target range must have finite, ordered bounds representable as decimals."));
         }
 
-        private static List<ValidationFinding> CheckOisQuotes(DateOnly valuationDate, OISSOFR.OISSwapSnapshot snapshot, List<ValidationFinding> findings)
+        private static void CheckOisQuotes(DateOnly valuationDate, OISSOFR.OISSwapSnapshot snapshot, List<ValidationCheck> findings)
         {
             var snapshotDate = DateOnly.FromDateTime(snapshot.ObservationDate);
             if (snapshotDate != valuationDate)
@@ -127,8 +125,6 @@ namespace CurveGuard
 
             if (!tenors.Contains("1Y"))
                 findings.Add(new("MISSING_1Y_OIS_QUOTE", "The one-year OIS anchor is required to calibrate the FOMC path.", "1Y"));
-
-            return findings;
         }
     }
 }

@@ -12,14 +12,14 @@ public class CurveValidationTests
         const double toleranceBp = 0.01;
         var baseline = await SavedFixtures.ReadAsync<BaselineFixture>(SavedFixtures.Baseline);
 
-        var run = await CurveRisk.BuildValidatedCurveAsync(baseline.Inputs);
+        var validation = await CurveInputValidation.RunInputValidation(baseline.Inputs);
 
-        Assert.Equal("PASS", run.Validation.Decision);
-        Assert.Equal("PASS", run.Validation.Bootstrap);
-        Assert.Empty(run.Validation.Findings);
-        Assert.NotNull(run.Curve);
+        Assert.Equal("PASS", validation.Decision);
+        Assert.Equal("PASS", validation.Result);
+        Assert.Empty(validation.pricingRisks);
+        Assert.Empty(validation.validationRisks);
 
-        var curve = JsonSerializer.SerializeToElement(run.Curve, SavedFixtures.JsonOptions);
+        var curve = JsonSerializer.SerializeToElement(SOFRCurveCreation.Build(baseline.Inputs), SavedFixtures.JsonOptions);
         Assert.Equal(baseline.Curve.GetProperty("reference_date").GetString(), curve.GetProperty("reference_date").GetString());
         var actual = curve.GetProperty("repricings").EnumerateArray().ToArray();
         var expected = baseline.Curve.GetProperty("repricing").EnumerateArray().Select(RepricingKey);
@@ -104,21 +104,12 @@ public class CurveValidationTests
     {
         var inputs = await SavedFixtures.ReadInputsAsync(fixture);
 
-        var saved = await CurveRisk.BuildValidatedCurveAsync(inputs);
-        var live = await CurveRisk.RunLiveAsync(inputs, () =>
-            throw new InvalidOperationException("FOMC data should only load after input validation passes."));
-
-        AssertQuarantined(saved, findingCode);
-        AssertQuarantined(live, findingCode);
-    }
-
-    private static void AssertQuarantined(CurveRun run, string findingCode)
-    {
-        Assert.Equal("QUARANTINE", run.Validation.Decision);
-        Assert.Equal("SKIPPED", run.Validation.Bootstrap);
-        Assert.Equal(findingCode, Assert.Single(run.Validation.Findings).Code);
-        Assert.Null(run.Curve);
-        Assert.Null(run.PricingRisk);
+        var validation = await CurveInputValidation.RunInputValidation(inputs);
+        Assert.Equal("QUARANTINE", validation.Decision);
+        Assert.Equal("SKIPPED", validation.Result);
+        Assert.Empty(validation.pricingRisks);
+        var inputRisk = Assert.Single(validation.validationRisks);
+        Assert.Equal(findingCode, inputRisk.Code);
     }
 
     private static (string? Tenor, string? PillarDate, decimal QuotePercent) RepricingKey(JsonElement row)

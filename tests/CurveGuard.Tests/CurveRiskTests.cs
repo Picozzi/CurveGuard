@@ -23,27 +23,17 @@ public class CurveRiskTests
             [1] = await SavedFixtures.ReadInputsAsync(SavedFixtures.OneBp),
             [10] = await SavedFixtures.ReadInputsAsync(SavedFixtures.TenBp),
         };
-        var savedRisk = await CurveRisk.RunAsync(baseline, savedBumps);
+        var curve = SOFRCurveCreation.Build(baseline);
+        var saved = await CurveRiskValidation.RunPricingValidation(baseline, curve, savedBumps);
+        var live = await CurveRiskValidation.RunPricingValidation(baseline, curve);
 
-        var loaderCalls = 0;
-        var live = await CurveRisk.RunLiveAsync(baseline with { FomcDecisions = [] }, () =>
-        {
-            loaderCalls++;
-            return Task.FromResult(baseline.FomcDecisions.ToList());
-        });
-
-        Assert.Equal(1, loaderCalls);
-        Assert.Equal("PASS", live.Validation.Decision);
-        Assert.NotNull(live.Curve);
-        var liveRisk = Assert.IsType<OisRiskReport>(live.PricingRisk);
-        Assert.True(savedRisk.Passed);
-        Assert.True(liveRisk.Passed);
-        Assert.Equal(savedRisk.Checks, liveRisk.Checks);
-        Assert.Equal([0, 1, 10], liveRisk.Scenarios.Select(scenario => scenario.BumpBp));
-        Assert.Equal([4.418m, 4.428m, 4.518m], liveRisk.Scenarios.Select(scenario => scenario.MarketQuotePercent));
-        Assert.Equal(4.418m, Assert.Single(live.Inputs.OisSnapshot.Quotes, quote => quote.Tenor == "5Y").Rate);
-        Assert.Equal(savedRisk.Scenarios.Select(scenario => scenario.PvChangeUsd),
-            liveRisk.Scenarios.Select(scenario => scenario.PvChangeUsd));
+        Assert.Equal("PASS", saved.Decision);
+        Assert.Equal("PASS", live.Decision);
+        Assert.Empty(live.validationRisks);
+        Assert.Equal(saved.pricingRisks, live.pricingRisks);
+        Assert.Equal(new int?[] { 1, 10 },
+            live.pricingRisks.Where(check => check.Code == "pv_change_usd").Select(check => check.BumpBp));
+        Assert.Equal(4.418m, Assert.Single(baseline.OisSnapshot.Quotes, quote => quote.Tenor == "5Y").Rate);
     }
 
     [Fact]
@@ -56,16 +46,39 @@ public class CurveRiskTests
         foreach (var bump in fixture.Bumps)
             bumps.Add(bump.BumpBp, await SavedFixtures.ReadInputsAsync(bump.InputsFile));
 
-        var report = await CurveRisk.RunAsync(baseline, bumps,
+        var curve = SOFRCurveCreation.Build(baseline);
+        var clean = await CurveRiskValidation.RunPricingValidation(baseline, curve, bumps);
+        var report = await CurveRiskValidation.RunPricingValidation(baseline, curve, bumps,
             fixture.Bumps.ToDictionary(bump => bump.BumpBp, bump => bump.ReportedPvUsd));
 
-        Assert.False(report.Passed);
-        Assert.All(report.Scenarios, scenario => Assert.Equal("PASS", scenario.Validation.Decision));
-        Assert.True(Assert.Single(report.Checks, check => check.Name == "ten_bp_to_one_bp_ratio").Passed);
-        var failures = report.Checks.Where(check => !check.Passed)
-            .Select(check => new PricingCheck(check.Name, check.BumpBp)).ToArray();
+        Assert.Equal("PASS", clean.Decision);
+        Assert.Equal("QUARANTINE", report.Decision);
+        Assert.Empty(report.validationRisks);
+        Assert.True(Assert.Single(report.pricingRisks, check => check.Code == "ten_bp_to_one_bp_ratio").Passed);
+        var failures = report.pricingRisks.Where(check => !check.Passed)
+            .Select(check => new PricingCheck(check.Code, check.BumpBp)).ToArray();
         Assert.Equal([new PricingCheck("pv_change_usd", 1), new PricingCheck("pv_change_usd", 10)], failures);
         Assert.Equal(fixture.ExpectedFailedChecks, failures);
+    }
+
+    [Fact]
+    public async Task MissingFiveYearQuoteIsReportedAsAnInputRisk()
+    {
+        var baseline = await SavedFixtures.ReadInputsAsync(SavedFixtures.Baseline);
+        var snapshot = baseline.OisSnapshot;
+        var inputs = baseline with
+        {
+            OisSnapshot = new OISSOFR.OISSwapSnapshot(snapshot.ObservationDate, snapshot.Source, snapshot.Url,
+                snapshot.ProviderCollectionTime, snapshot.Quotes.Where(quote => quote.Tenor != "5Y").ToArray()),
+        };
+
+        var result = await CurveRiskValidation.RunPricingValidation(inputs, SOFRCurveCreation.Build(inputs));
+
+        Assert.Equal("QUARANTINE", result.Decision);
+        Assert.Equal("PASS", result.Result);
+        Assert.Empty(result.pricingRisks);
+        ValidationCheck inputRisk = Assert.Single(result.validationRisks);
+        Assert.Equal("MISSING_5Y_OIS_QUOTE", inputRisk.Code);
     }
 
     private static async Task AssertSavedBumpPvChangeAsync(string fixture, int bumpBp, double minUsd, double maxUsd)
@@ -73,14 +86,13 @@ public class CurveRiskTests
         var baseline = await SavedFixtures.ReadInputsAsync(SavedFixtures.Baseline);
         var bumped = await SavedFixtures.ReadInputsAsync(fixture);
 
-        var report = await CurveRisk.RunAsync(baseline, new Dictionary<int, CurveInputs> { [bumpBp] = bumped });
+        var report = await CurveRiskValidation.RunPricingValidation(baseline, SOFRCurveCreation.Build(baseline),
+            new Dictionary<int, CurveInputs> { [bumpBp] = bumped });
 
-        Assert.Equal([0, bumpBp], report.Scenarios.Select(scenario => scenario.BumpBp));
-        var scenario = report.Scenarios[1];
-        Assert.Equal("PASS", scenario.Validation.Decision);
-        Assert.Equal(report.Trade.FixedCouponPercent + bumpBp / 100m, scenario.MarketQuotePercent);
-        Assert.InRange(Assert.IsType<double>(scenario.PvChangeUsd), minUsd, maxUsd);
-        Assert.True(report.Passed);
+        Assert.Equal("PASS", report.Decision);
+        var dollarCheck = Assert.Single(report.pricingRisks, check => check.Code == "pv_change_usd");
+        Assert.Equal(bumpBp, dollarCheck.BumpBp);
+        Assert.InRange(Assert.IsType<double>(dollarCheck.Actual), minUsd, maxUsd);
     }
 
     private sealed record PricingFailureFixture(string BaselineFile, IReadOnlyList<PricingFailureBump> Bumps,
