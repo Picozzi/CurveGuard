@@ -20,7 +20,7 @@ public class CurveRiskTests
         var replay = await SavedCurveFixtures.LoadReplayAsync("clean");
         var baseline = replay.Inputs;
         var curve = SOFRCurveCreation.Build(baseline);
-        var saved = await CurveRiskValidation.RunPricingValidation(baseline, curve, replay.SavedBumps);
+        var saved = await CurveRiskValidation.RunPricingValidation(baseline, curve, replay.SavedBumps, null);
         var live = await CurveRiskValidation.RunPricingValidation(baseline, curve);
 
         Assert.NotNull(replay.SavedBumps);
@@ -44,7 +44,7 @@ public class CurveRiskTests
         var baseline = replay.Inputs;
 
         var curve = SOFRCurveCreation.Build(baseline);
-        var clean = await CurveRiskValidation.RunPricingValidation(baseline, curve, replay.SavedBumps);
+        var clean = await CurveRiskValidation.RunPricingValidation(baseline, curve, replay.SavedBumps, null);
         var report = await CurveRiskValidation.RunPricingValidation(baseline, curve, replay.SavedBumps, replay.ReportedPvOverrides);
 
         Assert.NotNull(replay.SavedBumps);
@@ -87,7 +87,7 @@ public class CurveRiskTests
         var bumped = await SavedCurveFixtures.ReadInputsAsync(fixture);
 
         var report = await CurveRiskValidation.RunPricingValidation(baseline, SOFRCurveCreation.Build(baseline),
-            new Dictionary<int, CurveInputs> { [bumpBp] = bumped });
+            new Dictionary<int, CurveInputs> { [bumpBp] = bumped }, null);
 
         Assert.Equal("PASS", report.Decision);
         var dollarCheck = Assert.Single(report.pricingRisks, check => check.Code == "pv_change_usd");

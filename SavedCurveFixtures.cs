@@ -54,14 +54,22 @@ internal static class SavedCurveFixtures
                     [10] = await ReadInputsAsync(TenBp),
                 });
             case "doubled-pv":
-                var fixture = await ReadAsync<PricingFailureFixture>(DoubledPv);
-                var baseline = await ReadInputsAsync(fixture.BaselineFile);
+            {
+                using var fixture = await ReadAsync<JsonDocument>(DoubledPv);
+                var manifest = fixture.RootElement;
+                var baseline = await ReadInputsAsync(manifest.GetProperty("baseline_file").GetString());
                 var bumps = new Dictionary<int, CurveInputs>();
-                foreach (var bump in fixture.Bumps)
-                    bumps.Add(bump.BumpBp, await ReadInputsAsync(bump.InputsFile));
+                var reportedPvs = new Dictionary<int, double>();
+                foreach (var bump in manifest.GetProperty("bumps").EnumerateArray())
+                {
+                    var bumpBp = bump.GetProperty("bump_bp").GetInt32();
+                    var inputsFile = bump.GetProperty("inputs_file").GetString();
+                    bumps.Add(bumpBp, await ReadInputsAsync(inputsFile));
+                    reportedPvs.Add(bumpBp, bump.GetProperty("reported_pv_usd").GetDouble());
+                }
 
-                return new SavedCurveReplay(baseline, bumps,
-                    fixture.Bumps.ToDictionary(bump => bump.BumpBp, bump => bump.ReportedPvUsd));
+                return new SavedCurveReplay(baseline, bumps, reportedPvs);
+            }
             default:
                 if (ReplayNames.Contains(caseName))
                     return new SavedCurveReplay(await ReadInputsAsync($"{caseName}.json"));
@@ -70,9 +78,9 @@ internal static class SavedCurveFixtures
         }
     }
 
-    public static async Task<CurveInputs> ReadInputsAsync(string name) => (await ReadAsync<SavedInputs>(name)).Inputs;
+    public static async Task<CurveInputs> ReadInputsAsync(string? name) => (await ReadAsync<SavedCurveReplay>(name)).Inputs;
 
-    public static Task<T> ReadAsync<T>(string name) where T : class
+    public static Task<T> ReadAsync<T>(string? name) where T : class
     {
         if (string.IsNullOrWhiteSpace(name) || Path.GetFileName(name) != name)
             throw new ArgumentException("Expected a fixture filename from the examples directory.", nameof(name));
@@ -81,8 +89,4 @@ internal static class SavedCurveFixtures
             ?? throw new DirectoryNotFoundException("Could not find the project root containing CurveGuard.csproj.");
         return Reader.GetJsonAsync<T>(Path.Combine(root, "examples", name));
     }
-
-    private sealed record SavedInputs(CurveInputs Inputs);
-    private sealed record PricingFailureFixture(string BaselineFile, IReadOnlyList<PricingFailureBump> Bumps);
-    private sealed record PricingFailureBump(int BumpBp, string InputsFile, double ReportedPvUsd);
 }
