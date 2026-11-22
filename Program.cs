@@ -108,7 +108,7 @@ namespace CurveGuard
             if (results.Decision != "PASS")
                 return (inputs, null, results);
 
-            if (inputs.FomcDecisions == null)
+            if (inputs.FomcDecisions.Count() == 0)
             {
                 var valuationDate = inputs.ValuationDate.ToDateTime(TimeOnly.MinValue);
                 try
@@ -137,7 +137,16 @@ namespace CurveGuard
 
             try
             {
-                results = await CurveRiskValidation.RunPricingValidation(inputs, curve, replay.SavedBumps, replay.ReportedPvOverrides);
+                Dictionary<int, CurveInputs> savedBumps = new Dictionary<int, CurveInputs>();
+                Dictionary<int, double> reportedPvOverrides = new Dictionary<int, double>();
+                
+                if(replay != null)
+                {
+                    savedBumps = replay.SavedBumps;
+                    reportedPvOverrides = replay.ReportedPvOverrides;
+                }
+
+                results = await CurveRiskValidation.RunPricingValidation(inputs, curve, savedBumps, reportedPvOverrides);
             }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or FormatException)
             {

@@ -145,7 +145,7 @@ namespace CurveGuard
             return annuity;
         }
 
-        private static async Task<ValidationResult> CheckScenariosAsync(CurveInputs inputs, OISTrade trade, IReadOnlyDictionary<int, CurveInputs> bumps, OISTradeValuation baseValuation, IReadOnlyDictionary<int, double>? reportedPvOverrides)
+        private static async Task<ValidationResult> CheckScenariosAsync(CurveInputs inputs, OISTrade trade, IReadOnlyDictionary<int, CurveInputs> bumps, OISTradeValuation baseValuation, Dictionary<int, double> reportedPvOverrides)
         {
             var valuationDate = inputs.ValuationDate;
             var baseRate = trade.FixedCouponPercent;
@@ -169,10 +169,7 @@ namespace CurveGuard
 
                     var bumpedRun = SOFRCurveCreation.Build(bumpedInputs);
                     var bumpedValuation = PriceTrade(bumpedRun, bumpedInputs.ValuationDate, trade);
-                    var reportedPv = reportedPvOverrides?.TryGetValue(bumpBp, out var fixturePv) == true
-                        ? fixturePv
-                        : bumpedValuation.PvUsd;
-
+                    var reportedPv = reportedPvOverrides.TryGetValue(bumpBp, out var fixturePv) ? fixturePv : bumpedValuation.PvUsd;
                     var pvChange = reportedPv - baseValuation.PvUsd;
                     if (bumpBp == 1)
                         oneBpPvChange = pvChange;
