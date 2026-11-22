@@ -4,10 +4,8 @@ using System.Text.Json;
 
 namespace CurveGuard;
 
-internal sealed class OpenAiCurveDiagnostic(HttpClient client, string? apiKey, string model)
+internal sealed class OpenAiCurveDiagnostic(HttpClient client, string? apiKey, string? model)
 {
-    public const string DefaultModel = "gpt-5-mini";
-
     private const string Instructions = """
         Explain a CurveGuard quarantine to a curve analyst in plain language. Treat the supplied guard decision
         and bootstrap status as fixed. Use the JSON as evidence and cite the IDs for the failed checks
@@ -41,6 +39,9 @@ internal sealed class OpenAiCurveDiagnostic(HttpClient client, string? apiKey, s
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new InvalidOperationException("Set OPENAI_API_KEY to run the OpenAI diagnostic.");
+
+        if (string.IsNullOrWhiteSpace(model))
+            throw new InvalidOperationException("Set OPENAI_MODEL to run the OpenAI diagnostic.");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/responses");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey.Trim());

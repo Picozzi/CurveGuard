@@ -54,10 +54,10 @@ namespace CurveGuard
             if (useStub)
                 return await CurveDiagnostic.AnalyzeWithStubAsync(valuationDate, validation);
 
-            var configuredModel = Environment.GetEnvironmentVariable("OPENAI_MODEL");
-            var model = string.IsNullOrWhiteSpace(configuredModel) ? OpenAiCurveDiagnostic.DefaultModel : configuredModel.Trim();
+            var model = Environment.GetEnvironmentVariable("OPENAI_MODEL");
+            var key = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
-            var provider = new OpenAiCurveDiagnostic(client, Environment.GetEnvironmentVariable("OPENAI_API_KEY"), model);
+            var provider = new OpenAiCurveDiagnostic(client, key, model);
             return await CurveDiagnostic.AnalyzeAsync(valuationDate, validation, "openai", model, provider.ExplainAsync);
         }
 
