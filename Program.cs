@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using DotNetEnv;
 
 namespace CurveGuard
 {
@@ -14,6 +15,8 @@ namespace CurveGuard
 
         public static async Task Main(string[] args)
         {
+            if (ProjectPaths.RootDirectory is { } projectRoot)
+                Env.NoClobber().Load(Path.Combine(projectRoot, ".env"));
             var valuationDate = new DateTime(2026, 11, 19);
             await Run(valuationDate);
         }
@@ -48,6 +51,7 @@ namespace CurveGuard
                 var swapsTask = new OISSOFR().GetOisSwapRatesAsync(valuationDate);
                 var effrTask = new EFFRCalculator().GetEffrFixingAsync(fixingDate);
                 var futuresTask = new FutureImpliedRate().GetFuturesQuotesAsync(valuationDate);
+
                 await Task.WhenAll(fixingTask, swapsTask, effrTask, futuresTask);
              
                 var handoff = valuationDate.AddYears(1);

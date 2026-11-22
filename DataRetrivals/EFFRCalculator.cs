@@ -45,8 +45,6 @@ namespace CurveGuard
             _dataRetrieval = new DataRetrieval(httpClient, effrJsonOptions);
         }
         
-        public Task<EFFRFixing> GetLatestEffrAsync() => FetchEffrAsync(new Uri($"{EffrEndpoint}/last/1.json"));
-
         public Task<EFFRFixing> GetEffrFixingAsync(DateOnly effectiveDate)
         {
             var date = effectiveDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -67,7 +65,6 @@ namespace CurveGuard
             {
                 throw new JsonException("New York Fed response did not contain one EFFR fixing with a valid target range.");
             }
-
             return new EFFRFixing(date.ToDateTime(TimeOnly.MinValue), rate, lower, upper);
         }
     }

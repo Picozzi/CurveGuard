@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="DotNetEnv" Version="3.2.0" />
     <PackageReference Include="QuantLib" Version="1.44.0" />
     <PackageReference Include="ScottPlot" Version="5.1.59" />
     <PackageReference Include="YahooQuotesApi" Version="7.1.2" />
@@ -15,8 +16,6 @@
     <InternalsVisibleTo Include="CurveGuard.Tests" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="MeetingCSVs/fomc-meetings-2026-2027.json"
-          CopyToOutputDirectory="PreserveNewest"
-          CopyToPublishDirectory="PreserveNewest" />
+    <None Update="MeetingCSVs/fomc-meetings-2026-2027.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

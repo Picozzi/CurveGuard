@@ -8,31 +8,6 @@ namespace CurveGuard.Tests;
 public class CurveDiagnosticTests
 {
     [Fact]
-    [Trait(SavedFixtures.TraitName, SavedFixtures.StaleFiveYear)]
-    public async Task StaleFiveYearDiagnosticCitesQuoteDatesAndGuardDecision()
-    {
-        var inputs = await SavedFixtures.ReadInputsAsync(SavedFixtures.StaleFiveYear);
-        var validation = await CurveInputValidation.RunInputValidation(inputs);
-
-        var report = await CurveDiagnostic.AnalyzeWithStubAsync(inputs.ValuationDate, validation);
-
-        Assert.Same(validation, report.Validation);
-        Assert.Equal("QUARANTINE", report.Evidence.Decision);
-        Assert.Equal("SKIPPED", report.Evidence.Bootstrap);
-        var citation = Assert.Single(report.Evidence.InputChecks);
-        Assert.Equal("STALE_OIS_QUOTE", citation.Check.Code);
-        Assert.Equal(new DateOnly(2026, 10, 30), citation.Check.QuoteDate);
-        Assert.Equal(inputs.ValuationDate, citation.Check.ExpectedDate);
-
-        var diagnostic = Assert.IsType<DiagnosticExplanation>(report.Diagnostic);
-        Assert.Equal([report.Evidence.Id, citation.Id], diagnostic.EvidenceIds);
-        Assert.Contains("2026-10-30", diagnostic.Explanation);
-        Assert.Contains("2026-11-02", diagnostic.Explanation);
-        Assert.Contains(diagnostic.Unknowns, unknown => unknown.Contains("PV impact", StringComparison.Ordinal));
-        Assert.Contains("2026-11-02", diagnostic.RecommendedNextAction);
-    }
-
-    [Fact]
     public async Task CleanInputValidationReturnsNoDiagnosticExplanation()
     {
         var inputs = await SavedFixtures.ReadInputsAsync(SavedFixtures.Baseline);

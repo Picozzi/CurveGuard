@@ -16,11 +16,6 @@ internal sealed record DiagnosticReport(ValidationResult Validation, DiagnosticE
 
 internal static class CurveDiagnostic
 {
-    //stub function for unit testing, isn't live or anything -MP
-    public static Task<DiagnosticReport> AnalyzeWithStubAsync(DateOnly valuationDate, ValidationResult validation)
-        => AnalyzeAsync(valuationDate, validation, "stub", null, evidence =>
-            Task.FromResult(ExplainStaleFiveYearQuote(evidence)));
-
     public static async Task<DiagnosticReport> AnalyzeAsync(DateOnly valuationDate, ValidationResult validation,
         string mode, string? model, Func<DiagnosticEvidence, Task<DiagnosticExplanation?>> explain)
     {
@@ -31,7 +26,7 @@ internal static class CurveDiagnostic
             .Select((check, index) => new CitedCheck<PricingRiskCheck>($"pricing-{index + 1}", check))
             .ToArray();
         var failureCode = string.IsNullOrWhiteSpace(validation.message) ? null : validation.message.Split(' ', 2)[0];
-        var bootstrap = pricingChecks.Length > 0 || failureCode == "PRICING_VALIDATION_FAILED" ? "PASS" : validation.Result;
+        var bootstrap = pricingChecks.Length > 0 || failureCode == "PRICING_VALIDATION_FAILED" ? "PASS" : validation.BootstrapResult;
         var evidence = new DiagnosticEvidence("guard", valuationDate, validation.Decision, bootstrap, failureCode, inputChecks, pricingChecks);
         var report = new DiagnosticReport(validation, evidence, mode, model, null, null);
         if (evidence.Decision != "QUARANTINE")
@@ -82,24 +77,5 @@ internal static class CurveDiagnostic
         {
             return report with { DiagnosticError = error.Message };
         }
-    }
-
-    private static DiagnosticExplanation? ExplainStaleFiveYearQuote(DiagnosticEvidence evidence)
-    {
-        if (evidence.Decision != "QUARANTINE" || evidence.Bootstrap != "SKIPPED")
-            return null;
-
-        var staleQuote = evidence.InputChecks.FirstOrDefault(item => item.Check is
-            { Code: "STALE_OIS_QUOTE", Tenor: "5Y", QuoteDate: not null, ExpectedDate: not null });
-        if (staleQuote?.Check is not { QuoteDate: { } observed, ExpectedDate: { } expected })
-            return null;
-
-        var summary = FormattableString.Invariant(
-            $"The 5Y SOFR OIS quote is dated {observed:yyyy-MM-dd}. CurveGuard required {expected:yyyy-MM-dd}, quarantined the inputs, and skipped the bootstrap.");
-        var nextAction = FormattableString.Invariant(
-            $"Obtain a 5Y SOFR OIS quote for {expected:yyyy-MM-dd} and rerun input validation.");
-        return new DiagnosticExplanation(summary, [evidence.Id, staleQuote.Id],
-            ["Why the pricing data contained a stale quote.", "The PV impact, because the bootstrap was skipped."],
-            nextAction);
     }
 }

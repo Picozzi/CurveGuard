@@ -177,7 +177,7 @@ namespace CurveGuard
 
             var passed = checks.All(check => check.Passed);
             var pricingChecks = checks.Select(check => check with { Tenor = trade.Tenor, QuoteDate = valuationDate }).ToList();
-            return new ValidationResult(passed ? "PASS" : "QUARANTINE", passed ? "PASS" : "FAIL", "", [], pricingChecks);
+            return new ValidationResult(passed ? "PASS" : "QUARANTINE", "PASS",pricingChecks.Count > 0 ? "INPUT_VALIDATION_FAILED One or more input checks failed." : "", [], pricingChecks);
         }
 
         private static decimal? FindFiveYearRate(CurveInputs inputs)
