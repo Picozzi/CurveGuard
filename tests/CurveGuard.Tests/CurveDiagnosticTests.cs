@@ -10,7 +10,7 @@ public class CurveDiagnosticTests
     [Fact]
     public async Task CleanInputValidationReturnsNoDiagnosticExplanation()
     {
-        var inputs = await SavedFixtures.ReadInputsAsync(SavedFixtures.Baseline);
+        var inputs = await SavedCurveFixtures.ReadInputsAsync(SavedCurveFixtures.Baseline);
         var validation = await CurveInputValidation.RunInputValidation(inputs);
 
         var report = await CurveDiagnostic.AnalyzeAsync(inputs.ValuationDate, validation, "openai", "test-model",
@@ -28,7 +28,7 @@ public class CurveDiagnosticTests
     [InlineData("unknown-check", false)]
     public async Task OpenAiDiagnosticAcceptsOnlyKnownInputCitations(string citation, bool accepted)
     {
-        var inputs = await SavedFixtures.ReadInputsAsync(SavedFixtures.StaleFiveYear);
+        var inputs = await SavedCurveFixtures.ReadInputsAsync(SavedCurveFixtures.StaleFiveYear);
         var validation = await CurveInputValidation.RunInputValidation(inputs);
         var reply = JsonSerializer.Serialize(new
         {
@@ -85,7 +85,7 @@ public class CurveDiagnosticTests
     [Fact]
     public async Task OpenAiRequestFailurePreservesOriginalGuardReport()
     {
-        var inputs = await SavedFixtures.ReadInputsAsync(SavedFixtures.StaleFiveYear);
+        var inputs = await SavedCurveFixtures.ReadInputsAsync(SavedCurveFixtures.StaleFiveYear);
         var validation = await CurveInputValidation.RunInputValidation(inputs);
         using var client = new HttpClient(new DiagnosticHandler((_, _) =>
             Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized))));

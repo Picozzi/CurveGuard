@@ -16,7 +16,8 @@ namespace CurveGuard
         private const double UsdRoundingTolerance = 0.01;
         private const double BumpRatioTolerance = 0.5;
 
-        public static async Task<ValidationResult> RunPricingValidation(CurveInputs inputs, SOFRCurve curve, IReadOnlyDictionary<int, CurveInputs>? savedBumps = null, IReadOnlyDictionary<int, double>? reportedPvOverrides = null)
+        //Live
+        public static async Task<ValidationResult> RunPricingValidation(CurveInputs inputs, SOFRCurve curve)
         {
             if (FindFiveYearRate(inputs) is not { } base5YRate)
                 return new ValidationResult("QUARANTINE", "PASS",
@@ -26,13 +27,27 @@ namespace CurveGuard
             var trade = CreateTrade(base5YRate);
             OISTradeValuation valuation = PriceTrade(curve, inputs.ValuationDate, trade);
 
-            var bumps = savedBumps ?? new Dictionary<int, CurveInputs>
+            var bumps = new Dictionary<int, CurveInputs>
             {
                 [1] = CreateLiveBump(inputs, 1),
                 [10] = CreateLiveBump(inputs, 10),
             };
 
-            return await CheckScenariosAsync(inputs, trade, bumps, valuation, reportedPvOverrides);
+            return await CheckScenariosAsync(inputs, trade, bumps, valuation, null);
+        }
+
+        //Replay
+        public static async Task<ValidationResult> RunPricingValidation(CurveInputs inputs, SOFRCurve curve, Dictionary<int, CurveInputs> savedBumps, Dictionary<int, double> reportedPvOverrides)
+        {
+            if (FindFiveYearRate(inputs) is not { } base5YRate)
+                return new ValidationResult("QUARANTINE", "PASS",
+                    "MISSING_5Y_OIS_QUOTE Pricing checks were skipped because a unique 5Y OIS rate was unavailable.",
+                    [new("MISSING_5Y_OIS_QUOTE", "Pricing checks require exactly one 5Y OIS quote with a rate.", "5Y")], []);
+            
+            var trade = CreateTrade(base5YRate);
+            OISTradeValuation valuation = PriceTrade(curve, inputs.ValuationDate, trade);
+
+            return await CheckScenariosAsync(inputs, trade, savedBumps, valuation, reportedPvOverrides);
         }
 
         private static OISTradeValuation PriceTrade(SOFRCurve curve, DateOnly valuationDate, OISTrade trade)

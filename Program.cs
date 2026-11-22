@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using DotNetEnv;
+using YahooQuotesApi;
 
 namespace CurveGuard
 {
@@ -15,14 +16,65 @@ namespace CurveGuard
 
         public static async Task Main(string[] args)
         {
-            if (ProjectPaths.RootDirectory is { } projectRoot)
-                Env.NoClobber().Load(Path.Combine(projectRoot, ".env"));
-            var valuationDate = new DateTime(2026, 11, 19);
-            await Run(valuationDate);
+            string replayName = string.Empty;
+
+            foreach(string arg in args)
+            {
+                var splitArgument = arg.Split('=');
+                string category = splitArgument.First();
+                string input = splitArgument.Last();
+
+                if(category == "REPLAY")
+                    replayName = input;
+            }
+            
+            bool live = replayName == string.Empty ? true : false;
+
+
+            if(!live)
+            {
+                List<string> cases = new List<string>();
+
+                if (string.Equals(replayName, "ALL", StringComparison.OrdinalIgnoreCase))
+                    cases = SavedCurveFixtures.ReplayNames.ToList();
+                else if (replayName.Length > 0)
+                    cases.Add(replayName);
+
+                foreach (var replayCase in cases)
+                {
+                    try
+                    {
+                        SavedCurveReplay replay = await SavedCurveFixtures.LoadReplayAsync(replayCase);
+                        var inputs = replay.Inputs;
+                        var run = await RunFromInputsAsync(inputs, replay);
+                        await SaveRunReportAsync(run.Inputs, run.Curve, run.Validation, replayCase);
+                    }
+                    catch (Exception error)
+                    {
+                        Console.Error.WriteLine($"CurveGuard replay '{replayCase}': {error.Message}");
+                    }
+                }
+            }
+            else
+            {
+                try
+                    {
+                        var inputs = await LoadLiveInputsAsync(new DateTime(2026, 11, 19));
+                        var run = await RunFromInputsAsync(inputs, null);
+                        await SaveRunReportAsync(run.Inputs, run.Curve, run.Validation, null);
+                    }
+                    catch (Exception error)
+                    {
+                        Console.Error.WriteLine($"CurveGuard: {error.Message}");
+                    }
+            }
         }
 
         private static async Task<DiagnosticReport> ExplainDiagnosticAsync(DateOnly valuationDate, ValidationResult validation)
         {
+            if (ProjectPaths.RootDirectory is { } projectRoot)
+                Env.NoClobber().Load(Path.Combine(projectRoot, ".env"));
+
             var key = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
             var model = Environment.GetEnvironmentVariable("OPENAI_MODEL");
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
@@ -30,91 +82,82 @@ namespace CurveGuard
             return await CurveDiagnostic.AnalyzeAsync(valuationDate, validation, "openai", model, provider.ExplainAsync);
         }
 
-        private static async Task Run(DateTime valuationDate)
+        private static async Task<CurveInputs> LoadLiveInputsAsync(DateTime valuationDate)
         {
-            try
+            /*
+            Note from MP:
+            We use T−1 business day because the New York Fed publishes the fixing the next business morning, around 8 a.m. ET for SOFR and 9 a.m. ET for EFFR. Using a fixing dated T in a replay as of T would give the model information that only became available on T+1.
+
+            For Example:
+            For the November 13 valuation, CurveGuard uses the November 12 fixings to anchor overnight SOFR and calculate the SOFR–EFFR spread. The curve itself still starts on November 13, and the OIS and ZQ inputs are selected as of that valuation date.
+            */
+            var valuationDateOnly = DateOnly.FromDateTime(valuationDate);
+            var fixingDate = SOFRCurveCreation.PreviousFixingDate(valuationDateOnly);
+            var fixingTask = new OvernightSOFR().GetSOFRFixingAsync(fixingDate);
+            var swapsTask = new OISSOFR().GetOisSwapRatesAsync(valuationDate);
+            var effrTask = new EFFRCalculator().GetEffrFixingAsync(fixingDate);
+            var futuresTask = new FutureImpliedRate().GetFuturesQuotesAsync(valuationDate);
+
+            await Task.WhenAll(fixingTask, swapsTask, effrTask, futuresTask);
+            return new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, [], futuresTask.Result);
+        }
+
+        private static async Task<(CurveInputs Inputs, SOFRCurve? Curve, ValidationResult Validation)> RunFromInputsAsync(CurveInputs inputs, SavedCurveReplay replay)
+        {
+            var results = await CurveInputValidation.RunInputValidation(inputs);
+            if (results.Decision != "PASS")
+                return (inputs, null, results);
+
+            if (inputs.FomcDecisions == null)
             {
-                /*
-                Note from MP:
-                We use T−1 business day because the New York Fed publishes the fixing the next business morning, around 8 a.m. ET for SOFR and 9 a.m. ET for EFFR. Using a fixing dated T in a replay as of T would give the model information that only became available on T+1.
-                
-                For Example:
-                For the November 13 valuation, CurveGuard uses the November 12 fixings to anchor overnight SOFR and calculate the SOFR–EFFR spread. The curve itself still starts on November 13, and the OIS and ZQ inputs are selected as of that valuation date.
-                */
-
-                //QuantLib requires a DateOnly for the valuation date.
-                DateOnly valuationDateOnly = DateOnly.FromDateTime(valuationDate);
-
-                var fixingDate = SOFRCurveCreation.PreviousFixingDate(valuationDateOnly);
-                
-                var fixingTask = new OvernightSOFR().GetSOFRFixingAsync(fixingDate);
-                var swapsTask = new OISSOFR().GetOisSwapRatesAsync(valuationDate);
-                var effrTask = new EFFRCalculator().GetEffrFixingAsync(fixingDate);
-                var futuresTask = new FutureImpliedRate().GetFuturesQuotesAsync(valuationDate);
-
-                await Task.WhenAll(fixingTask, swapsTask, effrTask, futuresTask);
-             
-                var inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, [], futuresTask.Result);
-                ValidationResult results = await CurveInputValidation.RunInputValidation(inputs);
-
-                if (results.Decision != "PASS")
-                {
-                    await SaveRunReportAsync(inputs, null, results);
-                    return;
-                }
-
-                var handoff = valuationDate.AddYears(1);
-                List<FOMCCalculator.MeetingProbability> decisions = new List<FOMCCalculator.MeetingProbability>();
-
+                var valuationDate = inputs.ValuationDate.ToDateTime(TimeOnly.MinValue);
                 try
                 {
-                    decisions = await new FOMCCalculator(valuationDate).LoadFOMCRateProbabilitiesAsync(handoff, effrTask.Result, futuresTask.Result);
+                    var decisions = await new FOMCCalculator(valuationDate).LoadFOMCRateProbabilitiesAsync(
+                        valuationDate.AddYears(1), inputs.EffrFixing, inputs.ZqImpliedRates);
+                    inputs = inputs with { FomcDecisions = decisions };
                 }
                 catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or IOException or JsonException)
                 {
                     results = new ValidationResult("QUARANTINE", "SKIPPED", $"FOMC_BUILD_FAILED {error.Message}", [], []);
-                    await SaveRunReportAsync(inputs, null, results);
-                    return;
+                    return (inputs, null, results);
                 }
-
-                inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, decisions, futuresTask.Result);
-
-                SOFRCurve curve;
-                try
-                {
-                    curve = SOFRCurveCreation.Build(inputs);
-                }
-                catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or IOException or JsonException)
-                {
-                    results = new ValidationResult("QUARANTINE", "FAIL", $"CURVE_BUILD_FAILED {error.Message}", [], []);
-                    await SaveRunReportAsync(inputs, null, results);
-                    return;
-                }
-
-                try
-                {
-                    results = await CurveRiskValidation.RunPricingValidation(inputs, curve);
-                }
-                catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or FormatException)
-                {
-                    results = new ValidationResult("QUARANTINE", "PASS", $"PRICING_VALIDATION_FAILED {error.Message}", [], []);
-                }
-
-                await SaveRunReportAsync(inputs, curve, results);
             }
-            catch (Exception error)
+
+            SOFRCurve curve;
+            try
             {
-                Console.Error.WriteLine($"CurveGuard: {error.Message}");
+                curve = SOFRCurveCreation.Build(inputs);
             }
+            catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or IOException or JsonException)
+            {
+                results = new ValidationResult("QUARANTINE", "FAIL", $"CURVE_BUILD_FAILED {error.Message}", [], []);
+                return (inputs, null, results);
+            }
+
+            try
+            {
+                results = await CurveRiskValidation.RunPricingValidation(inputs, curve, replay.SavedBumps, replay.ReportedPvOverrides);
+            }
+            catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or FormatException)
+            {
+                results = new ValidationResult("QUARANTINE", "PASS", $"PRICING_VALIDATION_FAILED {error.Message}", [], []);
+            }
+
+            return (inputs, curve, results);
         }
 
-        private static async Task SaveRunReportAsync(CurveInputs inputs, SOFRCurve? curve, ValidationResult validation)
+        private static async Task SaveRunReportAsync(CurveInputs inputs, SOFRCurve? curve, ValidationResult validation, string? replayCase)
         {
-            var passed = validation.Decision == "PASS" && curve is not null;
-            var reportDirectory = ProjectPaths.ReportDirectory;
+            bool liveRun = replayCase == null; 
+            bool passed = validation.Decision == "PASS" && curve is not null;
+            string reportDirectory = liveRun ? ProjectPaths.ReportDirectory : Path.Combine(ProjectPaths.ReportDirectory, "replays");
             Directory.CreateDirectory(reportDirectory);
-            var prefix = passed ? "sofr-forward" : "sofr-quarantine";
-            var reportPath = Path.Combine(reportDirectory, $"{prefix}-{inputs.ValuationDate:yyyy-MM-dd}.json");
+           
+            string prefix = passed ? "sofr-forward" : "sofr-quarantine";
+            string reportName = liveRun ? $"{prefix}-{inputs.ValuationDate:yyyy-MM-dd}.json" : $"{replayCase}.json";
+            
+            var reportPath = Path.Combine(reportDirectory, reportName);
             var report = new { Inputs = inputs, Curve = curve, Validation = validation };
 
             await WriteReportAsync(reportPath, report);
