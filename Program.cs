@@ -14,54 +14,18 @@ namespace CurveGuard
 
         public static async Task Main(string[] args)
         {
-            // if (args is ["--diagnose", ..])
-            //     await RunDiagnosticAsync(args);
-
             var valuationDate = new DateTime(2026, 11, 19);
             await Run(valuationDate);
         }
 
-        private static async Task<int> RunDiagnosticAsync(string[] args)
+        private static async Task<DiagnosticReport> ExplainDiagnosticAsync(DateOnly valuationDate, ValidationResult validation)
         {
-            if (args is not ["--diagnose", "stale-5y"] and not ["--diagnose", "stale-5y", "--stub"])
-            {
-                Console.Error.WriteLine("Usage: dotnet run -- --diagnose stale-5y [--stub]");
-                return 2;
-            }
-
-            try
-            {
-                var root = ProjectPaths.RootDirectory
-                    ?? throw new DirectoryNotFoundException("Could not find the CurveGuard project root.");
-                using var fixture = File.OpenRead(Path.Combine(root, "examples", "stale-5y.json"));
-                var saved = await JsonSerializer.DeserializeAsync<DiagnosticFixture>(fixture, JsonOptions)
-                    ?? throw new JsonException("The diagnostic fixture must contain saved inputs.");
-                var validation = await CurveInputValidation.RunInputValidation(saved.Inputs);
-                var report = await ExplainDiagnosticAsync(saved.Inputs.ValuationDate, validation, useStub: args.Length == 3);
-                Console.WriteLine(JsonSerializer.Serialize(report, JsonOptions));
-                return report.DiagnosticError is null ? 0 : 1;
-            }
-            catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException)
-            {
-                Console.Error.WriteLine($"CurveGuard: {error.Message}");
-                return 1;
-            }
-        }
-
-        private static async Task<DiagnosticReport> ExplainDiagnosticAsync(
-            DateOnly valuationDate, ValidationResult validation, bool useStub)
-        {
-            if (useStub)
-                return await CurveDiagnostic.AnalyzeWithStubAsync(valuationDate, validation);
-
-            var model = Environment.GetEnvironmentVariable("OPENAI_MODEL");
             var key = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+            var model = Environment.GetEnvironmentVariable("OPENAI_MODEL");
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
             var provider = new OpenAiCurveDiagnostic(client, key, model);
             return await CurveDiagnostic.AnalyzeAsync(valuationDate, validation, "openai", model, provider.ExplainAsync);
         }
-
-        private sealed record DiagnosticFixture(CurveInputs Inputs);
 
         private static async Task Run(DateTime valuationDate)
         {
@@ -85,45 +49,77 @@ namespace CurveGuard
                 var effrTask = new EFFRCalculator().GetEffrFixingAsync(fixingDate);
                 var futuresTask = new FutureImpliedRate().GetFuturesQuotesAsync(valuationDate);
                 await Task.WhenAll(fixingTask, swapsTask, effrTask, futuresTask);
+             
+                var handoff = valuationDate.AddYears(1);
+                var decisions = await new FOMCCalculator(valuationDate).LoadFOMCRateProbabilitiesAsync(handoff, effrTask.Result, futuresTask.Result);
 
-                DateTime handoff = valuationDate.AddYears(1); //this is the split between the forward flat curve and the OIS curve. The FOMC rate predictions are used for the front end, and the OIS curve is used for the back end. The handoff is one year from the valuation date.
-                
-                var FOMCMeeting = new FOMCCalculator(valuationDate).LoadFOMCRateProbabilitiesAsync(handoff, effrTask.Result, futuresTask.Result);
-                
-                var inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, FOMCMeeting.Result, futuresTask.Result);
-
+                var inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, decisions, futuresTask.Result);
                 ValidationResult results = await CurveInputValidation.RunInputValidation(inputs);
-
-                if(results.Decision != "PASS")
-                    throw new Exception();
+                if (results.Decision != "PASS")
+                {
+                    await SaveRunReportAsync(inputs, null, results);
+                    return;
+                }
 
                 SOFRCurve curve;
                 try
                 {
                     curve = SOFRCurveCreation.Build(inputs);
                 }
-                catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException)
+                catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or IOException or JsonException)
                 {
-                    results = new ValidationResult("QUARANTINE", "FAIL", "CURVE_BUILD_FAILED" + " " + error.Message, [], []);
-                    throw new Exception();
+                    results = new ValidationResult("QUARANTINE", "FAIL", $"CURVE_BUILD_FAILED {error.Message}", [], []);
+                    await SaveRunReportAsync(inputs, null, results);
+                    return;
                 }
 
-                results = await CurveRiskValidation.RunPricingValidation(inputs, curve);
+                try
+                {
+                    results = await CurveRiskValidation.RunPricingValidation(inputs, curve);
+                }
+                catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or FormatException)
+                {
+                    results = new ValidationResult("QUARANTINE", "FAIL", $"PRICING_VALIDATION_FAILED {error.Message}", [], []);
+                }
 
-                if(results.Decision != "PASS")
-                    throw new Exception();
-
-                var chartPath = CurveChart.Save(JsonSerializer.SerializeToElement(curve, JsonOptions));
-                var reportPath = Path.ChangeExtension(chartPath, ".json");
-                var report = new { Inputs = inputs, Curve = curve, Validation = results };
-
-                await File.WriteAllTextAsync(reportPath, JsonSerializer.Serialize(report, JsonOptions) + Environment.NewLine);
-                Console.WriteLine($"{results.Decision}: saved {reportPath}");
+                await SaveRunReportAsync(inputs, curve, results);
             }
             catch (Exception error)
             {
                 Console.Error.WriteLine($"CurveGuard: {error.Message}");
             }
+        }
+
+        private static async Task SaveRunReportAsync(CurveInputs inputs, SOFRCurve? curve, ValidationResult validation)
+        {
+            string reportPath;
+            string reportJson;
+            if (validation.Decision == "PASS" && curve is not null)
+            {
+                var chartPath = CurveChart.Save(JsonSerializer.SerializeToElement(curve, JsonOptions));
+                reportPath = Path.ChangeExtension(chartPath, ".json");
+                reportJson = JsonSerializer.Serialize(new { Inputs = inputs, Curve = curve, Validation = validation }, JsonOptions);
+            }
+            else
+            {
+                var diagnostic = await ExplainDiagnosticAsync(inputs.ValuationDate, validation);
+                var reportDirectory = ProjectPaths.ReportDirectory;
+                Directory.CreateDirectory(reportDirectory);
+                reportPath = Path.Combine(reportDirectory, $"sofr-quarantine-{inputs.ValuationDate:yyyy-MM-dd}.json");
+                reportJson = JsonSerializer.Serialize(new
+                {
+                    Inputs = inputs,
+                    Curve = curve,
+                    Validation = validation,
+                    diagnostic.Evidence,
+                    diagnostic.Model,
+                    diagnostic.Diagnostic,
+                    diagnostic.DiagnosticError,
+                }, JsonOptions);
+            }
+
+            await File.WriteAllTextAsync(reportPath, reportJson + Environment.NewLine);
+            Console.WriteLine($"{validation.Decision}: saved {reportPath}");
         }
     }
 

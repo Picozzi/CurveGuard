@@ -2,10 +2,11 @@ using System.Text.Json;
 
 namespace CurveGuard;
 
-internal sealed record CitedValidationCheck(string Id, ValidationCheck Check);
+internal sealed record CitedCheck<T>(string Id, T Check);
 
 internal sealed record DiagnosticEvidence(string Id, DateOnly ValuationDate, string Decision, string Bootstrap,
-    IReadOnlyList<CitedValidationCheck> InputChecks);
+    string? FailureCode, IReadOnlyList<CitedCheck<ValidationCheck>> InputChecks,
+    IReadOnlyList<CitedCheck<PricingRiskCheck>> PricingChecks);
 
 internal sealed record DiagnosticExplanation(string Explanation, IReadOnlyList<string> EvidenceIds,
     IReadOnlyList<string> Unknowns, string RecommendedNextAction);
@@ -23,20 +24,37 @@ internal static class CurveDiagnostic
         string mode, string? model, Func<DiagnosticEvidence, Task<DiagnosticExplanation?>> explain)
     {
         var inputChecks = validation.validationRisks
-            .Select((check, index) => new CitedValidationCheck($"input-{index + 1}", check))
+            .Select((check, index) => new CitedCheck<ValidationCheck>($"input-{index + 1}", check))
             .ToArray();
-        var evidence = new DiagnosticEvidence("guard", valuationDate, validation.Decision, validation.Result, inputChecks);
+        var pricingChecks = validation.pricingRisks
+            .Select((check, index) => new CitedCheck<PricingRiskCheck>($"pricing-{index + 1}", check))
+            .ToArray();
+        var failureCode = string.IsNullOrWhiteSpace(validation.message) ? null : validation.message.Split(' ', 2)[0];
+        var bootstrap = pricingChecks.Length > 0 || failureCode == "PRICING_VALIDATION_FAILED" ? "PASS" : validation.Result;
+        var evidence = new DiagnosticEvidence("guard", valuationDate, validation.Decision, bootstrap, failureCode, inputChecks, pricingChecks);
         var report = new DiagnosticReport(validation, evidence, mode, model, null, null);
-        if (evidence.Decision != "QUARANTINE" || inputChecks.Length == 0)
+        if (evidence.Decision != "QUARANTINE")
             return report;
+
+        var failedIds = inputChecks.Select(item => item.Id)
+            .Concat(pricingChecks.Where(item => !item.Check.Passed).Select(item => item.Id))
+            .ToHashSet(StringComparer.Ordinal);
+        if (failedIds.Count == 0 && failureCode is not null)
+            failedIds.Add(evidence.Id);
+        if (failedIds.Count == 0)
+            return report;
+
+        var knownIds = inputChecks.Select(item => item.Id)
+            .Concat(pricingChecks.Select(item => item.Id))
+            .Append(evidence.Id)
+            .ToHashSet(StringComparer.Ordinal);
 
         try
         {
             var explanation = await explain(evidence);
             if (explanation is not null &&
-                (!explanation.EvidenceIds.All(id => id == evidence.Id || inputChecks.Any(check => check.Id == id)) ||
-                 !inputChecks.Any(check => explanation.EvidenceIds.Contains(check.Id))))
-                return report with { DiagnosticError = "The diagnostic did not cite valid input check evidence." };
+                (!explanation.EvidenceIds.All(knownIds.Contains) || !explanation.EvidenceIds.Any(failedIds.Contains)))
+                return report with { DiagnosticError = "The diagnostic did not cite valid failure evidence." };
 
             return report with { Diagnostic = explanation };
         }

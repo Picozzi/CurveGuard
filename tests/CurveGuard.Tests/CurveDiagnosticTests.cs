@@ -103,7 +103,7 @@ public class CurveDiagnosticTests
         else
         {
             Assert.Null(report.Diagnostic);
-            Assert.Contains("valid input check evidence", report.DiagnosticError);
+            Assert.Contains("valid failure evidence", report.DiagnosticError);
         }
     }
 
@@ -122,6 +122,47 @@ public class CurveDiagnosticTests
         Assert.Equal("QUARANTINE", report.Evidence.Decision);
         Assert.Null(report.Diagnostic);
         Assert.Equal("OpenAI returned HTTP 401.", report.DiagnosticError);
+    }
+
+    [Theory]
+    [InlineData("pricing-1", true)]
+    [InlineData("pricing-2", false)]
+    public async Task PricingQuarantineRequiresCitationOfAFailedCheck(string citation, bool accepted)
+    {
+        var date = new DateOnly(2026, 11, 2);
+        var validation = new ValidationResult("QUARANTINE", "FAIL", "", [],
+            [new("pv_change_usd", 1, 890.51, 445.25, 8.92, false), new("ten_bp_to_one_bp_ratio", null, 10, 10, 0.5, true)]);
+        var report = await CurveDiagnostic.AnalyzeAsync(date, validation, "openai", "test-model", evidence =>
+        {
+            Assert.Equal("PASS", evidence.Bootstrap);
+            Assert.Empty(evidence.InputChecks);
+            Assert.Equal(890.51, evidence.PricingChecks[0].Check.Actual);
+            Assert.Equal(445.25, evidence.PricingChecks[0].Check.Expected);
+            return Task.FromResult<DiagnosticExplanation?>(new DiagnosticExplanation(
+                "A pricing check failed.", [citation], ["Cause of the mismatch."], "Review the PV calculation."));
+        });
+
+        Assert.Same(validation, report.Validation);
+        Assert.Equal(accepted, report.Diagnostic is not null);
+        Assert.Equal(accepted, report.DiagnosticError is null);
+    }
+
+    [Fact]
+    public async Task BootstrapFailureUsesTheGuardCodeAsEvidence()
+    {
+        var date = new DateOnly(2026, 11, 2);
+        var validation = new ValidationResult("QUARANTINE", "FAIL", "CURVE_BUILD_FAILED Internal details", [], []);
+        var report = await CurveDiagnostic.AnalyzeAsync(date, validation, "openai", "test-model", evidence =>
+        {
+            Assert.Equal("FAIL", evidence.Bootstrap);
+            Assert.Equal("CURVE_BUILD_FAILED", evidence.FailureCode);
+            return Task.FromResult<DiagnosticExplanation?>(new DiagnosticExplanation(
+                "Curve building failed.", [evidence.Id], ["Cause of the failure."], "Review the saved guard details."));
+        });
+
+        Assert.Same(validation, report.Validation);
+        Assert.NotNull(report.Diagnostic);
+        Assert.Null(report.DiagnosticError);
     }
 
     private sealed class DiagnosticHandler(
