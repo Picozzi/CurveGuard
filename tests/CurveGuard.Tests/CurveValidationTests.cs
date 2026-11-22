@@ -15,7 +15,8 @@ public class CurveValidationTests
         var validation = await CurveInputValidation.RunInputValidation(baseline.Inputs);
 
         Assert.Equal("PASS", validation.Decision);
-        Assert.Equal("PASS", validation.Result);
+        Assert.Equal("UPCOMING", validation.BootstrapResult);
+        Assert.Empty(validation.message);
         Assert.Empty(validation.pricingRisks);
         Assert.Empty(validation.validationRisks);
 
@@ -106,7 +107,8 @@ public class CurveValidationTests
 
         var validation = await CurveInputValidation.RunInputValidation(inputs);
         Assert.Equal("QUARANTINE", validation.Decision);
-        Assert.Equal("SKIPPED", validation.Result);
+        Assert.Equal("SKIPPED", validation.BootstrapResult);
+        Assert.StartsWith("INPUT_VALIDATION_FAILED ", validation.message);
         Assert.Empty(validation.pricingRisks);
         var inputRisk = Assert.Single(validation.validationRisks);
         Assert.Equal(findingCode, inputRisk.Code);

@@ -29,6 +29,8 @@ public class CurveRiskTests
 
         Assert.Equal("PASS", saved.Decision);
         Assert.Equal("PASS", live.Decision);
+        Assert.Equal("PASS", live.BootstrapResult);
+        Assert.Empty(live.message);
         Assert.Empty(live.validationRisks);
         Assert.Equal(saved.pricingRisks, live.pricingRisks);
         Assert.Equal(new int?[] { 1, 10 },
@@ -53,6 +55,8 @@ public class CurveRiskTests
 
         Assert.Equal("PASS", clean.Decision);
         Assert.Equal("QUARANTINE", report.Decision);
+        Assert.Equal("PASS", report.BootstrapResult);
+        Assert.StartsWith("PRICING_VALIDATION_FAILED ", report.message);
         Assert.Empty(report.validationRisks);
         Assert.True(Assert.Single(report.pricingRisks, check => check.Code == "ten_bp_to_one_bp_ratio").Passed);
         var failures = report.pricingRisks.Where(check => !check.Passed)
@@ -75,7 +79,8 @@ public class CurveRiskTests
         var result = await CurveRiskValidation.RunPricingValidation(inputs, SOFRCurveCreation.Build(inputs));
 
         Assert.Equal("QUARANTINE", result.Decision);
-        Assert.Equal("PASS", result.Result);
+        Assert.Equal("PASS", result.BootstrapResult);
+        Assert.StartsWith("MISSING_5Y_OIS_QUOTE ", result.message);
         Assert.Empty(result.pricingRisks);
         ValidationCheck inputRisk = Assert.Single(result.validationRisks);
         Assert.Equal("MISSING_5Y_OIS_QUOTE", inputRisk.Code);

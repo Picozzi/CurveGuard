@@ -26,8 +26,8 @@ internal static class CurveDiagnostic
             .Select((check, index) => new CitedCheck<PricingRiskCheck>($"pricing-{index + 1}", check))
             .ToArray();
         var failureCode = string.IsNullOrWhiteSpace(validation.message) ? null : validation.message.Split(' ', 2)[0];
-        var bootstrap = pricingChecks.Length > 0 || failureCode == "PRICING_VALIDATION_FAILED" ? "PASS" : validation.BootstrapResult;
-        var evidence = new DiagnosticEvidence("guard", valuationDate, validation.Decision, bootstrap, failureCode, inputChecks, pricingChecks);
+        var evidence = new DiagnosticEvidence("guard", valuationDate, validation.Decision, validation.BootstrapResult,
+            failureCode, inputChecks, pricingChecks);
         var report = new DiagnosticReport(validation, evidence, mode, model, null, null);
         if (evidence.Decision != "QUARANTINE")
             return report;

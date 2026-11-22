@@ -83,7 +83,7 @@ namespace CurveGuard
                 }
                 catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or FormatException)
                 {
-                    results = new ValidationResult("QUARANTINE", "FAIL", $"PRICING_VALIDATION_FAILED {error.Message}", [], []);
+                    results = new ValidationResult("QUARANTINE", "PASS", $"PRICING_VALIDATION_FAILED {error.Message}", [], []);
                 }
 
                 await SaveRunReportAsync(inputs, curve, results);

@@ -19,7 +19,9 @@ namespace CurveGuard
         public static async Task<ValidationResult> RunPricingValidation(CurveInputs inputs, SOFRCurve curve, IReadOnlyDictionary<int, CurveInputs>? savedBumps = null, IReadOnlyDictionary<int, double>? reportedPvOverrides = null)
         {
             if (FindFiveYearRate(inputs) is not { } base5YRate)
-                return new ValidationResult("QUARANTINE", "PASS", "", new List<ValidationCheck>() {new("MISSING_5Y_OIS_QUOTE", "Pricing checks require exactly one 5Y OIS quote with a rate.", "5Y")}, []);
+                return new ValidationResult("QUARANTINE", "PASS",
+                    "MISSING_5Y_OIS_QUOTE Pricing checks were skipped because a unique 5Y OIS rate was unavailable.",
+                    [new("MISSING_5Y_OIS_QUOTE", "Pricing checks require exactly one 5Y OIS quote with a rate.", "5Y")], []);
             
             var trade = CreateTrade(base5YRate);
             OISTradeValuation valuation = PriceTrade(curve, inputs.ValuationDate, trade);
@@ -177,7 +179,8 @@ namespace CurveGuard
 
             var passed = checks.All(check => check.Passed);
             var pricingChecks = checks.Select(check => check with { Tenor = trade.Tenor, QuoteDate = valuationDate }).ToList();
-            return new ValidationResult(passed ? "PASS" : "QUARANTINE", "PASS",pricingChecks.Count > 0 ? "INPUT_VALIDATION_FAILED One or more input checks failed." : "", [], pricingChecks);
+            var message = passed ? "" : "PRICING_VALIDATION_FAILED One or more OIS pricing checks failed.";
+            return new ValidationResult(passed ? "PASS" : "QUARANTINE", "PASS", message, [], pricingChecks);
         }
 
         private static decimal? FindFiveYearRate(CurveInputs inputs)

@@ -13,13 +13,14 @@ namespace CurveGuard
                 CheckZqCloseDates(inputs, findings);
                 
                 if (findings.Count > 0)
-                    return new ValidationResult("QUARANTINE", "SKIPPED", "INPUT_VALIDATION_FAILED One or more input checks failed. Bootstrap was skipped.", findings,[]);
+                    return new ValidationResult("QUARANTINE", "SKIPPED",
+                        "INPUT_VALIDATION_FAILED One or more input checks failed. Bootstrap was skipped.", findings, []);
             
                 return new ValidationResult("PASS", "UPCOMING", "", [], []);
             }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException)
             {
-                return new ValidationResult("QUARANTINE", "FAIL", "CURVE_VALIDATION_FAILED" + " " + error.Message, [], []);
+                return new ValidationResult("QUARANTINE", "SKIPPED", $"CURVE_VALIDATION_FAILED {error.Message}", [], []);
             }
         }
         

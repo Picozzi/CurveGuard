@@ -105,7 +105,7 @@ public class CurveDiagnosticTests
     public async Task PricingQuarantineRequiresCitationOfAFailedCheck(string citation, bool accepted)
     {
         var date = new DateOnly(2026, 11, 2);
-        var validation = new ValidationResult("QUARANTINE", "FAIL", "", [],
+        var validation = new ValidationResult("QUARANTINE", "PASS", "PRICING_VALIDATION_FAILED One or more OIS pricing checks failed.", [],
             [new("pv_change_usd", 1, 890.51, 445.25, 8.92, false), new("ten_bp_to_one_bp_ratio", null, 10, 10, 0.5, true)]);
         var report = await CurveDiagnostic.AnalyzeAsync(date, validation, "openai", "test-model", evidence =>
         {
