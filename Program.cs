@@ -54,16 +54,30 @@ namespace CurveGuard
 
                 await Task.WhenAll(fixingTask, swapsTask, effrTask, futuresTask);
              
-                var handoff = valuationDate.AddYears(1);
-                var decisions = await new FOMCCalculator(valuationDate).LoadFOMCRateProbabilitiesAsync(handoff, effrTask.Result, futuresTask.Result);
-
-                var inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, decisions, futuresTask.Result);
+                var inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, [], futuresTask.Result);
                 ValidationResult results = await CurveInputValidation.RunInputValidation(inputs);
+
                 if (results.Decision != "PASS")
                 {
                     await SaveRunReportAsync(inputs, null, results);
                     return;
                 }
+
+                var handoff = valuationDate.AddYears(1);
+                List<FOMCCalculator.MeetingProbability> decisions = new List<FOMCCalculator.MeetingProbability>();
+
+                try
+                {
+                    decisions = await new FOMCCalculator(valuationDate).LoadFOMCRateProbabilitiesAsync(handoff, effrTask.Result, futuresTask.Result);
+                }
+                catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or IOException or JsonException)
+                {
+                    results = new ValidationResult("QUARANTINE", "SKIPPED", $"FOMC_BUILD_FAILED {error.Message}", [], []);
+                    await SaveRunReportAsync(inputs, null, results);
+                    return;
+                }
+
+                inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, decisions, futuresTask.Result);
 
                 SOFRCurve curve;
                 try
@@ -96,34 +110,49 @@ namespace CurveGuard
 
         private static async Task SaveRunReportAsync(CurveInputs inputs, SOFRCurve? curve, ValidationResult validation)
         {
-            string reportPath;
-            string reportJson;
-            if (validation.Decision == "PASS" && curve is not null)
+            var passed = validation.Decision == "PASS" && curve is not null;
+            var reportDirectory = ProjectPaths.ReportDirectory;
+            Directory.CreateDirectory(reportDirectory);
+            var prefix = passed ? "sofr-forward" : "sofr-quarantine";
+            var reportPath = Path.Combine(reportDirectory, $"{prefix}-{inputs.ValuationDate:yyyy-MM-dd}.json");
+            var report = new { Inputs = inputs, Curve = curve, Validation = validation };
+
+            await WriteReportAsync(reportPath, report);
+            Console.WriteLine($"{validation.Decision}: saved {reportPath}");
+
+            if (passed)
             {
-                var chartPath = CurveChart.Save(JsonSerializer.SerializeToElement(curve, JsonOptions));
-                reportPath = Path.ChangeExtension(chartPath, ".json");
-                reportJson = JsonSerializer.Serialize(new { Inputs = inputs, Curve = curve, Validation = validation }, JsonOptions);
-            }
-            else
-            {
-                var diagnostic = await ExplainDiagnosticAsync(inputs.ValuationDate, validation);
-                var reportDirectory = ProjectPaths.ReportDirectory;
-                Directory.CreateDirectory(reportDirectory);
-                reportPath = Path.Combine(reportDirectory, $"sofr-quarantine-{inputs.ValuationDate:yyyy-MM-dd}.json");
-                reportJson = JsonSerializer.Serialize(new
-                {
-                    Inputs = inputs,
-                    Curve = curve,
-                    Validation = validation,
-                    diagnostic.Evidence,
-                    diagnostic.Model,
-                    diagnostic.Diagnostic,
-                    diagnostic.DiagnosticError,
-                }, JsonOptions);
+                CurveChart.Save(JsonSerializer.SerializeToElement(curve, JsonOptions),
+                    Path.ChangeExtension(reportPath, ".png"));
+                return;
             }
 
-            await File.WriteAllTextAsync(reportPath, reportJson + Environment.NewLine);
-            Console.WriteLine($"{validation.Decision}: saved {reportPath}");
+            var diagnostic = await ExplainDiagnosticAsync(inputs.ValuationDate, validation);
+            await WriteReportAsync(reportPath, new
+            {
+                report.Inputs,
+                report.Curve,
+                report.Validation,
+                diagnostic.Evidence,
+                diagnostic.Model,
+                diagnostic.Diagnostic,
+                diagnostic.DiagnosticError,
+            });
+        }
+
+        private static async Task WriteReportAsync<T>(string reportPath, T report)
+        {
+            var temporaryPath = $"{reportPath}.{Guid.NewGuid():N}.tmp";
+            try
+            {
+                var json = JsonSerializer.Serialize(report, JsonOptions);
+                await File.WriteAllTextAsync(temporaryPath, json + Environment.NewLine);
+                File.Move(temporaryPath, reportPath, overwrite: true);
+            }
+            finally
+            {
+                File.Delete(temporaryPath);
+            }
         }
     }
 
