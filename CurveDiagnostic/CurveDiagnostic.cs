@@ -16,6 +16,7 @@ internal sealed record DiagnosticReport(ValidationResult Validation, DiagnosticE
 
 internal static class CurveDiagnostic
 {
+    //stub function for unit testing, isn't live or anything -MP
     public static Task<DiagnosticReport> AnalyzeWithStubAsync(DateOnly valuationDate, ValidationResult validation)
         => AnalyzeAsync(valuationDate, validation, "stub", null, evidence =>
             Task.FromResult(ExplainStaleFiveYearQuote(evidence)));
