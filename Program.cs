@@ -14,9 +14,54 @@ namespace CurveGuard
 
         public static async Task Main(string[] args)
         {
-            var valuationDate = new DateTime(2026, 11, 2);
+            // if (args is ["--diagnose", ..])
+            //     await RunDiagnosticAsync(args);
+
+            var valuationDate = new DateTime(2026, 11, 19);
             await Run(valuationDate);
         }
+
+        private static async Task<int> RunDiagnosticAsync(string[] args)
+        {
+            if (args is not ["--diagnose", "stale-5y"] and not ["--diagnose", "stale-5y", "--stub"])
+            {
+                Console.Error.WriteLine("Usage: dotnet run -- --diagnose stale-5y [--stub]");
+                return 2;
+            }
+
+            try
+            {
+                var root = ProjectPaths.RootDirectory
+                    ?? throw new DirectoryNotFoundException("Could not find the CurveGuard project root.");
+                using var fixture = File.OpenRead(Path.Combine(root, "examples", "stale-5y.json"));
+                var saved = await JsonSerializer.DeserializeAsync<DiagnosticFixture>(fixture, JsonOptions)
+                    ?? throw new JsonException("The diagnostic fixture must contain saved inputs.");
+                var validation = await CurveInputValidation.RunInputValidation(saved.Inputs);
+                var report = await ExplainDiagnosticAsync(saved.Inputs.ValuationDate, validation, useStub: args.Length == 3);
+                Console.WriteLine(JsonSerializer.Serialize(report, JsonOptions));
+                return report.DiagnosticError is null ? 0 : 1;
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException)
+            {
+                Console.Error.WriteLine($"CurveGuard: {error.Message}");
+                return 1;
+            }
+        }
+
+        private static async Task<DiagnosticReport> ExplainDiagnosticAsync(
+            DateOnly valuationDate, ValidationResult validation, bool useStub)
+        {
+            if (useStub)
+                return await CurveDiagnostic.AnalyzeWithStubAsync(valuationDate, validation);
+
+            var configuredModel = Environment.GetEnvironmentVariable("OPENAI_MODEL");
+            var model = string.IsNullOrWhiteSpace(configuredModel) ? OpenAiCurveDiagnostic.DefaultModel : configuredModel.Trim();
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+            var provider = new OpenAiCurveDiagnostic(client, Environment.GetEnvironmentVariable("OPENAI_API_KEY"), model);
+            return await CurveDiagnostic.AnalyzeAsync(valuationDate, validation, "openai", model, provider.ExplainAsync);
+        }
+
+        private sealed record DiagnosticFixture(CurveInputs Inputs);
 
         private static async Task Run(DateTime valuationDate)
         {
@@ -46,42 +91,39 @@ namespace CurveGuard
                 var FOMCMeeting = new FOMCCalculator(valuationDate).LoadFOMCRateProbabilitiesAsync(handoff, effrTask.Result, futuresTask.Result);
                 
                 var inputs = new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, FOMCMeeting.Result, futuresTask.Result);
-             
-                // var reportDirectory = ProjectPaths.ReportDirectory;
-                // Directory.CreateDirectory(reportDirectory);
-                // var reportPath = Path.Combine(reportDirectory, $"sofr-quarantine-{valuationDateOnly:yyyy-MM-dd}.json");
-                // if (run.Curve is { } curve)
-                // {
-                //     var chart = CurveChart.Save(JsonSerializer.SerializeToElement(curve, JsonOptions));
-                //     reportPath = Path.ChangeExtension(chart, ".json");
-                // }
 
-                // await File.WriteAllTextAsync(reportPath, JsonSerializer.Serialize(run, JsonOptions) + Environment.NewLine);
-                // Console.WriteLine($"{run.Validation.Decision}: saved {reportPath}");
-                // return run.Curve is null ? 1 : 0;
+                ValidationResult results = await CurveInputValidation.RunInputValidation(inputs);
+
+                if(results.Decision != "PASS")
+                    throw new Exception();
+
+                SOFRCurve curve;
+                try
+                {
+                    curve = SOFRCurveCreation.Build(inputs);
+                }
+                catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException)
+                {
+                    results = new ValidationResult("QUARANTINE", "FAIL", "CURVE_BUILD_FAILED" + " " + error.Message, [], []);
+                    throw new Exception();
+                }
+
+                results = await CurveRiskValidation.RunPricingValidation(inputs, curve);
+
+                if(results.Decision != "PASS")
+                    throw new Exception();
+
+                var chartPath = CurveChart.Save(JsonSerializer.SerializeToElement(curve, JsonOptions));
+                var reportPath = Path.ChangeExtension(chartPath, ".json");
+                var report = new { Inputs = inputs, Curve = curve, Validation = results };
+
+                await File.WriteAllTextAsync(reportPath, JsonSerializer.Serialize(report, JsonOptions) + Environment.NewLine);
+                Console.WriteLine($"{results.Decision}: saved {reportPath}");
             }
             catch (Exception error)
             {
                 Console.Error.WriteLine($"CurveGuard: {error.Message}");
             }
-        }
-
-        private static async Task<ValidationResult> ActualRun(CurveInputs inputs)
-        {
-            ValidationResult results;
-
-            results = await CurveInputValidation.RunInputValidation(inputs);
-            
-            try
-            {
-                var curve = SOFRCurveCreation.Build(inputs);
-            }
-            catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException)
-            {
-                results = new ValidationResult("QUARANTINE", "FAIL", "CURVE_BUILD_FAILED" + " " + error.Message, [], []);
-            }
-
-            return results;
         }
     }
 
