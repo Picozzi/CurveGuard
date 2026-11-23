@@ -8,7 +8,7 @@
       "preLaunchTask": "Build CurveGuard",
       "program": "${workspaceFolder}/bin/Debug/net10.0/CurveGuard.dll",
       "cwd": "${workspaceFolder}",
-      "args": ["REPLAY=clean"]
+      "args": ["REPLAY=ALL"]
     },
     {
       "name": "Live",

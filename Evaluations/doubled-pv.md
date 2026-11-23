@@ -1,6 +1,6 @@
 # 5Y OIS pricing discrepancy
 
-[Source fixture](../examples/5y-doubled-pv.json) · [Report after replay](../reports/replays/doubled-pv.json)
+[Source fixture](../examples/5y-doubled-pv.json) · [Report after replay](../reports/replays-eval1/doubled-pv.json)
 
 ## Expected diagnosis
 
@@ -13,17 +13,17 @@
 ## Manual review
 
 | Run date | Model | Prompt revision or commit |
+| 11/22/2026 | gpt-6-luna | b0d017e |
 | --- | --- | --- |
-| | | |
 
 Read the report’s `diagnostic` alongside its `evidence`. Mark each criterion **Pass** or **Fail**. Accept equivalent wording and reasonable rounding.
 
 | Criterion | Grade | Reviewer notes |
 | --- | --- | --- |
-| Factual accuracy — identifies the failure and reports the correct stage and case details | | |
-| Evidence — cites the relevant failed checks and keeps claims within what the evidence shows | | |
-| Next action — gives the analyst a concrete step that addresses the finding | | |
+| Factual accuracy — identifies the failure and reports the correct stage and case details |PASS|verbatim|
+| Evidence — cites the relevant failed checks and keeps claims within what the evidence shows |PASS|correct guards|
+| Next action — gives the analyst a concrete step that addresses the finding |PASS|different than what we expected, but also a valid next step|
 
-**Overall result** (Pass if all three pass, Fail, or No diagnostic) ________________
+**Overall result** (Pass if all three pass, Fail, or No diagnostic) PASS
 
-**Reason or diagnostic error** ________________
+**Reason or diagnostic error** N/A
