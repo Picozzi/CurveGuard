@@ -8,8 +8,9 @@ internal sealed class OpenAiCurveDiagnostic(HttpClient client, string? apiKey, s
 {
     private const string Instructions = """
         Explain a CurveGuard quarantine to a curve analyst in plain language. Treat the supplied guard decision
-        and bootstrap status as fixed. Use only the supplied JSON evidence. Cite failed check IDs or the
-        guard ID when the failure code is the only evidence. Give observed and expected dates for input
+        and bootstrap status as fixed. Use only the supplied JSON evidence. When checks are present, use
+        only check IDs in evidence_ids and include a failed check. For a failure code with empty input_checks
+        and pricing_checks, return ["guard"] as evidence_ids. Give observed and expected dates for input
         checks and actual values, expected values, and bumps for pricing checks when present. Treat a guard
         failure code as evidence of the stage that failed. List pricing impact as unknown when no price
         was measured. Keep the cause unknown unless the evidence establishes it. Recommend one next

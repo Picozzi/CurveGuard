@@ -35,21 +35,20 @@ internal static class CurveDiagnostic
         var failedIds = inputChecks.Select(item => item.Id)
             .Concat(pricingChecks.Where(item => !item.Check.Passed).Select(item => item.Id))
             .ToHashSet(StringComparer.Ordinal);
-        if (failedIds.Count == 0 && failureCode is not null)
+        if (inputChecks.Length == 0 && pricingChecks.Length == 0 && failureCode is not null)
             failedIds.Add(evidence.Id);
         if (failedIds.Count == 0)
             return report;
 
-        var knownIds = inputChecks.Select(item => item.Id)
-            .Concat(pricingChecks.Select(item => item.Id))
-            .Append(evidence.Id)
+        var allowedIds = pricingChecks.Select(item => item.Id)
+            .Concat(failedIds)
             .ToHashSet(StringComparer.Ordinal);
 
         try
         {
             var explanation = await explain(evidence);
             if (explanation is not null &&
-                (!explanation.EvidenceIds.All(knownIds.Contains) || !explanation.EvidenceIds.Any(failedIds.Contains)))
+                (!explanation.EvidenceIds.All(allowedIds.Contains) || !explanation.EvidenceIds.Any(failedIds.Contains)))
                 return report with { DiagnosticError = "The diagnostic did not cite valid failure evidence." };
 
             return report with { Diagnostic = explanation };

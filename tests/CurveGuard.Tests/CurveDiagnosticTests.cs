@@ -24,16 +24,18 @@ public class CurveDiagnosticTests
     }
 
     [Theory]
-    [InlineData("input-1", true)]
-    [InlineData("unknown-check", false)]
-    public async Task OpenAiDiagnosticAcceptsOnlyKnownInputCitations(string citation, bool accepted)
+    [InlineData(true, "input-1")]
+    [InlineData(false, "guard", "input-1")]
+    [InlineData(false, "guard")]
+    [InlineData(false, "unknown-check")]
+    public async Task OpenAiDiagnosticAcceptsOnlyKnownInputCitations(bool accepted, params string[] citations)
     {
         var inputs = await SavedCurveFixtures.ReadInputsAsync(SavedCurveFixtures.StaleFiveYear);
         var validation = await CurveInputValidation.RunInputValidation(inputs);
         var reply = JsonSerializer.Serialize(new
         {
             explanation = "The observed 5Y quote date precedes the valuation date.",
-            evidence_ids = new[] { "guard", citation },
+            evidence_ids = citations,
             unknowns = new[] { "PV impact." },
             recommended_next_action = "Obtain a correctly dated quote.",
         });
@@ -73,7 +75,7 @@ public class CurveDiagnosticTests
         if (accepted)
         {
             Assert.Null(report.DiagnosticError);
-            Assert.Contains(citation, Assert.IsType<DiagnosticExplanation>(report.Diagnostic).EvidenceIds);
+            Assert.Equal(citations, Assert.IsType<DiagnosticExplanation>(report.Diagnostic).EvidenceIds.ToArray());
         }
         else
         {
@@ -100,9 +102,11 @@ public class CurveDiagnosticTests
     }
 
     [Theory]
-    [InlineData("pricing-1", true)]
-    [InlineData("pricing-2", false)]
-    public async Task PricingQuarantineRequiresCitationOfAFailedCheck(string citation, bool accepted)
+    [InlineData(true, "pricing-1")]
+    [InlineData(true, "pricing-1", "pricing-2")]
+    [InlineData(false, "pricing-2")]
+    [InlineData(false, "guard", "pricing-1")]
+    public async Task PricingQuarantineRequiresCitationOfAFailedCheck(bool accepted, params string[] citations)
     {
         var date = new DateOnly(2026, 11, 2);
         var validation = new ValidationResult("QUARANTINE", "PASS", "PRICING_VALIDATION_FAILED One or more OIS pricing checks failed.", [],
@@ -114,7 +118,7 @@ public class CurveDiagnosticTests
             Assert.Equal(890.51, evidence.PricingChecks[0].Check.Actual);
             Assert.Equal(445.25, evidence.PricingChecks[0].Check.Expected);
             return Task.FromResult<DiagnosticExplanation?>(new DiagnosticExplanation(
-                "A pricing check failed.", [citation], ["Cause of the mismatch."], "Review the PV calculation."));
+                "A pricing check failed.", citations, ["Cause of the mismatch."], "Review the PV calculation."));
         });
 
         Assert.Same(validation, report.Validation);
