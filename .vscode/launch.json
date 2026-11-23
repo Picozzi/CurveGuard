@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Replay",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Build CurveGuard",
+      "program": "${workspaceFolder}/bin/Debug/net10.0/CurveGuard.dll",
+      "cwd": "${workspaceFolder}",
+      "args": ["REPLAY=clean"]
+    },
+    {
+      "name": "Live",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Build CurveGuard",
+      "program": "${workspaceFolder}/bin/Debug/net10.0/CurveGuard.dll",
+      "cwd": "${workspaceFolder}",
+      "args": []
+    }
+  ]
+}

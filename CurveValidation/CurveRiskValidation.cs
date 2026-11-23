@@ -169,7 +169,7 @@ namespace CurveGuard
 
                     var bumpedRun = SOFRCurveCreation.Build(bumpedInputs);
                     var bumpedValuation = PriceTrade(bumpedRun, bumpedInputs.ValuationDate, trade);
-                    var reportedPv = reportedPvOverrides.TryGetValue(bumpBp, out var fixturePv) ? fixturePv : bumpedValuation.PvUsd;
+                    var reportedPv = reportedPvOverrides == null ? bumpedValuation.PvUsd : reportedPvOverrides.TryGetValue(bumpBp, out var fixturePv) ? fixturePv : bumpedValuation.PvUsd;
                     var pvChange = reportedPv - baseValuation.PvUsd;
                     if (bumpBp == 1)
                         oneBpPvChange = pvChange;
