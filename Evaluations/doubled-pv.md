@@ -1,6 +1,6 @@
 # 5Y OIS pricing discrepancy
 
-[Source fixture](../examples/5y-doubled-pv.json) · [Report after replay](../reports/replays-eval1/doubled-pv.json)
+[Source fixture](../examples/5y-doubled-pv.json) · [Report after replay](../Evaluations/replays-eval1/doubled-pv.json)
 
 ## Expected diagnosis
 

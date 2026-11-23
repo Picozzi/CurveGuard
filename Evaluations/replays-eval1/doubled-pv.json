@@ -1,0 +1,2960 @@
+{
+  "inputs": {
+    "valuation_date": "2026-11-02",
+    "sofr_fixing": {
+      "effective_date": "2026-10-30",
+      "rate_percent": 3.95,
+      "rate_decimal": 0.0395
+    },
+    "effr_fixing": {
+      "date": "2026-10-30T00:00:00",
+      "rate": 3.88,
+      "target_lower": 3.75,
+      "target_upper": 4
+    },
+    "ois_snapshot": {
+      "observation_date": "2026-11-02T00:00:00",
+      "source": "CheckMySwap",
+      "url": "https://checkmyswap.com/api/curves/USD?date=2026-11-02",
+      "provider_collection_time": "2026-11-03T01:00:04.338501819\u002B00:00",
+      "quotes": [
+        {
+          "tenor": "1Y",
+          "rate": 4.3737,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 74,
+          "close_trades": 9
+        },
+        {
+          "tenor": "2Y",
+          "rate": 4.4447,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 124,
+          "close_trades": 19
+        },
+        {
+          "tenor": "3Y",
+          "rate": 4.4348,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close",
+          "trades": 101,
+          "close_trades": 28
+        },
+        {
+          "tenor": "4Y",
+          "rate": 4.4145,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 37,
+          "close_trades": 10
+        },
+        {
+          "tenor": "5Y",
+          "rate": 4.418,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close",
+          "trades": 208,
+          "close_trades": 43
+        },
+        {
+          "tenor": "7Y",
+          "rate": 4.4446,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 50,
+          "close_trades": 9
+        },
+        {
+          "tenor": "10Y",
+          "rate": 4.5098,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close",
+          "trades": 301,
+          "close_trades": 51
+        },
+        {
+          "tenor": "15Y",
+          "rate": 4.642,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 23,
+          "close_trades": 6
+        },
+        {
+          "tenor": "20Y",
+          "rate": 4.7,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 54,
+          "close_trades": 10
+        },
+        {
+          "tenor": "30Y",
+          "rate": 4.6313,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close",
+          "trades": 233,
+          "close_trades": 33
+        }
+      ]
+    },
+    "fomc_decisions": [
+      {
+        "meeting_date": "2026-12-09T00:00:00",
+        "pre_meeting_rate": 3.8728562029301732510288065844,
+        "post_meeting_rate": 4.0661072907624518518518518519,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.226995648671
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.773004351329
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-01-27T00:00:00",
+        "pre_meeting_rate": 4.0661072907624518518518518519,
+        "post_meeting_rate": 4.1350021362305,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.164440328122612141707888
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.622535610553775716584224
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.213024061323612141707888
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-03-17T00:00:00",
+        "pre_meeting_rate": 4.1326451021081941176470588235,
+        "post_meeting_rate": 4.27071598597935,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0736226423307424355120677892
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.3695371283836930913091696323
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.4391905475543865108454573677
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.1176496817311779623333052108
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-04-28T00:00:00",
+        "pre_meeting_rate": 4.27071598597935,
+        "post_meeting_rate": 4.3349990844726,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0546918760576207046143892284
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.2934479281736079695436205249
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.4212803971346212595576540547
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.2003282543204507537962734022
+          },
+          {
+            "lower": 4.75,
+            "upper": 5.00,
+            "probability": 0.0302515443136993124880627898
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-06-09T00:00:00",
+        "pre_meeting_rate": 4.3354123433428333333333333333,
+        "post_meeting_rate": 4.4133938380650714285714285714,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0376320590810715041592719491
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.2189737129016555421639122734
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.3814061291201594802926881974
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.2692489677553830160264442764
+          },
+          {
+            "lower": 4.75,
+            "upper": 5.00,
+            "probability": 0.0833028885687758376170380159
+          },
+          {
+            "lower": 5.00,
+            "upper": 5.25,
+            "probability": 0.0094362425729546197406452878
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-07-28T00:00:00",
+        "pre_meeting_rate": 4.4133938380650714285714285714,
+        "post_meeting_rate": 4.4300003051758,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0351323168753130449525120233
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.2069279360617333785299903230
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.3706164148095505181562687163
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.2766991046011399797758964856
+          },
+          {
+            "lower": 4.75,
+            "upper": 5.00,
+            "probability": 0.0956545183623170664975806661
+          },
+          {
+            "lower": 5.00,
+            "upper": 5.25,
+            "probability": 0.0143428986821986926870505910
+          },
+          {
+            "lower": 5.25,
+            "upper": 5.50,
+            "probability": 0.0006268106077473194007011947
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-09-15T00:00:00",
+        "pre_meeting_rate": 4.4292676007304962962962962963,
+        "post_meeting_rate": 4.4507372820819037037037037037,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0321151982815014560247455089
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.1921743472556690415785951425
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.3565590568910408633004031927
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.2847646034953981890331810964
+          },
+          {
+            "lower": 4.75,
+            "upper": 5.00,
+            "probability": 0.1112023966701638258036701016
+          },
+          {
+            "lower": 5.00,
+            "upper": 5.25,
+            "probability": 0.0213258369410246840691003652
+          },
+          {
+            "lower": 5.25,
+            "upper": 5.50,
+            "probability": 0.0018047307691376401712591983
+          },
+          {
+            "lower": 5.50,
+            "upper": 5.75,
+            "probability": 0.0000538296960643000190453944
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-10-27T00:00:00",
+        "pre_meeting_rate": 4.4507372820819037037037037037,
+        "post_meeting_rate": 4.4449996948242,
+        "target_ranges": [
+          {
+            "lower": 3.50,
+            "upper": 3.75,
+            "probability": 0.0007370550097602298065026072
+          },
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0357886116160634277158929114
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.1959470337171604136305729447
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.3549113491271210007914122034
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.2807812902701684499786887867
+          },
+          {
+            "lower": 4.75,
+            "upper": 5.00,
+            "probability": 0.1091396982546745636796979474
+          },
+          {
+            "lower": 5.00,
+            "upper": 5.25,
+            "probability": 0.0208778207409086681317380917
+          },
+          {
+            "lower": 5.25,
+            "upper": 5.50,
+            "probability": 0.0017645469783918545789049048
+          },
+          {
+            "lower": 5.50,
+            "upper": 5.75,
+            "probability": 0.0000525942857513916865896027
+          }
+        ]
+      }
+    ],
+    "zq_implied_rates": [
+      {
+        "year": 2026,
+        "month": 11,
+        "rate_percent": 3.879997253418,
+        "ticker": "ZQX26.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2026,
+        "month": 12,
+        "rate_percent": 4.0100021362305,
+        "ticker": "ZQZ26.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 1,
+        "rate_percent": 4.0749969482422,
+        "ticker": "ZQF27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 2,
+        "rate_percent": 4.1350021362305,
+        "ticker": "ZQG27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 3,
+        "rate_percent": 4.1949996948242,
+        "ticker": "ZQH27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 4,
+        "rate_percent": 4.2750015258789,
+        "ticker": "ZQJ27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 5,
+        "rate_percent": 4.3349990844726,
+        "ticker": "ZQK27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 6,
+        "rate_percent": 4.3899993896484,
+        "ticker": "ZQM27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 7,
+        "rate_percent": 4.4150009155274,
+        "ticker": "ZQN27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 8,
+        "rate_percent": 4.4300003051758,
+        "ticker": "ZQQ27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 9,
+        "rate_percent": 4.4400024414062,
+        "ticker": "ZQU27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 10,
+        "rate_percent": 4.4499969482422,
+        "ticker": "ZQV27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 11,
+        "rate_percent": 4.4449996948242,
+        "ticker": "ZQX27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 12,
+        "rate_percent": 4.4250030517578,
+        "ticker": "ZQZ27.CBT",
+        "close_date": "2026-11-02"
+      }
+    ]
+  },
+  "curve": {
+    "reference_date": "2026-11-02",
+    "quant_lib_version": "1.44",
+    "bootstrap": "QuantLib iterative discount-factor bootstrap",
+    "interpolation": "Log-linear discount factors through the one-year handoff, cubic log-discount spline with a matched forward at the handoff thereafter",
+    "curve_day_count": "Actual/365 Fixed",
+    "extrapolation": false,
+    "overnight_anchor": {
+      "effective_date": "2026-10-30",
+      "rate_percent": 3.95,
+      "source": "Federal Reserve Bank of New York",
+      "use": "Previous business day\u0027s published fixing as a proxy for a same-day-start overnight deposit"
+    },
+    "ois_source": {
+      "source": "CheckMySwap",
+      "url": "https://checkmyswap.com/api/curves/USD?date=2026-11-02",
+      "provider_collection_time": "2026-11-03T01:00:04.338501819\u002B00:00",
+      "observation_date": "2026-11-02T00:00:00",
+      "spot_lag_business_days": 2,
+      "payment_lag_business_days": 2,
+      "convention": "US Government Bond calendar, annual Actual/360 fixed leg, compounded SOFR"
+    },
+    "fomc_front_end": {
+      "handoff_date": "2027-11-02",
+      "handoff_discount_factor": 0.957565711672446,
+      "handoff_forward_percent": 4.523745706535544,
+      "effr_fixing_percent": 3.88,
+      "starting_sofr_minus_effr_bp": 7.00,
+      "post_first_decision_level_adjustment_bp": -6.369929182112623,
+      "source": "Dated Yahoo ZQ closes, Federal Reserve FOMC schedule and New York Fed fixings",
+      "segments": [
+        {
+          "start_date": "2026-11-02",
+          "end_date": "2026-12-10",
+          "decision_date": null,
+          "zq_implied_effr_percent": 3.88,
+          "raw_forward_percent": 4.00464141604872,
+          "calibrated_forward_percent": 4.00464141604872,
+          "discount_factor_at_end": 0.9958394633931565
+        },
+        {
+          "start_date": "2026-12-10",
+          "end_date": "2027-01-28",
+          "decision_date": "2026-12-09",
+          "zq_implied_effr_percent": 4.0732510878322786008230452675,
+          "raw_forward_percent": 4.200576546767558,
+          "calibrated_forward_percent": 4.136877254946432,
+          "discount_factor_at_end": 0.9903242821498456
+        },
+        {
+          "start_date": "2027-01-28",
+          "end_date": "2027-03-18",
+          "decision_date": "2027-01-27",
+          "zq_implied_effr_percent": 4.1421459333003267489711934156,
+          "raw_forward_percent": 4.270428265089329,
+          "calibrated_forward_percent": 4.206728973268203,
+          "discount_factor_at_end": 0.9847472976417928
+        },
+        {
+          "start_date": "2027-03-18",
+          "end_date": "2027-04-29",
+          "decision_date": "2027-03-17",
+          "zq_implied_effr_percent": 4.2802168171714826313241345921,
+          "raw_forward_percent": 4.410416800125361,
+          "calibrated_forward_percent": 4.346717508304235,
+          "discount_factor_at_end": 0.979834181994157
+        },
+        {
+          "start_date": "2027-04-29",
+          "end_date": "2027-06-10",
+          "decision_date": "2027-04-28",
+          "zq_implied_effr_percent": 4.3444999156647326313241345921,
+          "raw_forward_percent": 4.475592719431018,
+          "calibrated_forward_percent": 4.411893427609892,
+          "discount_factor_at_end": 0.9748724637337262
+        },
+        {
+          "start_date": "2027-06-10",
+          "end_date": "2027-07-29",
+          "decision_date": "2027-06-09",
+          "zq_implied_effr_percent": 4.4224814103869707265622298302,
+          "raw_forward_percent": 4.5546572904688425,
+          "calibrated_forward_percent": 4.490957998647717,
+          "discount_factor_at_end": 0.9690126812028115
+        },
+        {
+          "start_date": "2027-07-29",
+          "end_date": "2027-09-16",
+          "decision_date": "2027-07-28",
+          "zq_implied_effr_percent": 4.4390878774976992979908012588,
+          "raw_forward_percent": 4.571494402956109,
+          "calibrated_forward_percent": 4.507795111134983,
+          "discount_factor_at_end": 0.9631663498348382
+        },
+        {
+          "start_date": "2027-09-16",
+          "end_date": "2027-10-28",
+          "decision_date": "2027-09-15",
+          "zq_implied_effr_percent": 4.4605575588491067053982086662,
+          "raw_forward_percent": 4.593262274326286,
+          "calibrated_forward_percent": 4.52956298250516,
+          "discount_factor_at_end": 0.9581592906093122
+        },
+        {
+          "start_date": "2027-10-28",
+          "end_date": "2027-11-02",
+          "decision_date": "2027-10-27",
+          "zq_implied_effr_percent": 4.4548199715914030016945049625,
+          "raw_forward_percent": 4.58744499835667,
+          "calibrated_forward_percent": 4.523745706535544,
+          "discount_factor_at_end": 0.9575657116725558
+        }
+      ],
+      "excluded_short_ois_tenors": []
+    },
+    "coverage": {
+      "overnight_pillar": "2026-11-03",
+      "first_ois_tenor": "1Y",
+      "first_ois_pillar": "2027-11-08",
+      "last_pillar": "2056-11-08"
+    },
+    "pillars": [
+      {
+        "date": "2026-11-02",
+        "discount_factor": 1,
+        "continuous_zero_percent": null
+      },
+      {
+        "date": "2026-11-03",
+        "discount_factor": 0.9998902898154232,
+        "continuous_zero_percent": 4.004641416046063
+      },
+      {
+        "date": "2026-12-10",
+        "discount_factor": 0.9958394633931593,
+        "continuous_zero_percent": 4.0046414160460495
+      },
+      {
+        "date": "2027-01-28",
+        "discount_factor": 0.9903242821498554,
+        "continuous_zero_percent": 4.07911907243526
+      },
+      {
+        "date": "2027-03-18",
+        "discount_factor": 0.9847472976418015,
+        "continuous_zero_percent": 4.1250961690591845
+      },
+      {
+        "date": "2027-04-29",
+        "discount_factor": 0.9798341819941754,
+        "continuous_zero_percent": 4.1773888446093155
+      },
+      {
+        "date": "2027-06-10",
+        "discount_factor": 0.9748724637337478,
+        "continuous_zero_percent": 4.22215790136342
+      },
+      {
+        "date": "2027-07-29",
+        "discount_factor": 0.9690126812028907,
+        "continuous_zero_percent": 4.271121487849491
+      },
+      {
+        "date": "2027-09-16",
+        "discount_factor": 0.963166349834892,
+        "continuous_zero_percent": 4.307590065025387
+      },
+      {
+        "date": "2027-10-28",
+        "discount_factor": 0.9581592906093301,
+        "continuous_zero_percent": 4.333486905401795
+      },
+      {
+        "date": "2027-11-02",
+        "discount_factor": 0.957565711672446,
+        "continuous_zero_percent": 4.3360931903621776
+      },
+      {
+        "date": "2027-11-08",
+        "discount_factor": 0.9568539295313931,
+        "continuous_zero_percent": 4.339125204191321
+      },
+      {
+        "date": "2028-11-08",
+        "discount_factor": 0.9148416951700098,
+        "continuous_zero_percent": 4.4079440145887006
+      },
+      {
+        "date": "2029-11-07",
+        "discount_factor": 0.8757655330821382,
+        "continuous_zero_percent": 4.397798479783864
+      },
+      {
+        "date": "2030-11-06",
+        "discount_factor": 0.8388870748600734,
+        "continuous_zero_percent": 4.37698972157468
+      },
+      {
+        "date": "2031-11-06",
+        "discount_factor": 0.80279540018078,
+        "continuous_zero_percent": 4.381104809053358
+      },
+      {
+        "date": "2033-11-08",
+        "discount_factor": 0.7336639072826876,
+        "continuous_zero_percent": 4.410536489833281
+      },
+      {
+        "date": "2036-11-06",
+        "discount_factor": 0.6380358624743734,
+        "continuous_zero_percent": 4.485006482127845
+      },
+      {
+        "date": "2041-11-06",
+        "discount_factor": 0.49757201322971834,
+        "continuous_zero_percent": 4.646643601434068
+      },
+      {
+        "date": "2046-11-07",
+        "discount_factor": 0.3888383874191348,
+        "continuous_zero_percent": 4.7164964369554525
+      },
+      {
+        "date": "2056-11-08",
+        "discount_factor": 0.25311458383729263,
+        "continuous_zero_percent": 4.573862113897897
+      }
+    ],
+    "repricings": [
+      {
+        "instrument": "deposit_proxy",
+        "tenor": "ON",
+        "source": "New York Fed",
+        "method": "published_fixing_proxy",
+        "trades": null,
+        "close_trades": null,
+        "start_date": "2026-11-02",
+        "maturity_date": "2026-11-03",
+        "pillar_date": "2026-11-03",
+        "quote_percent": 3.95,
+        "model_percent": 3.9499999999978996,
+        "residual_bp": -2.100403184712718E-10,
+        "npv_per_million": 0
+      },
+      {
+        "instrument": "ois",
+        "tenor": "1Y",
+        "source": "DTCC:CFTC",
+        "method": "close-thin",
+        "trades": 74,
+        "close_trades": 9,
+        "start_date": "2026-11-04",
+        "maturity_date": "2027-11-04",
+        "pillar_date": "2027-11-08",
+        "quote_percent": 4.3737,
+        "model_percent": 4.373699999999574,
+        "residual_bp": -4.260480856999038E-11,
+        "npv_per_million": -4.142519660632615E-09
+      },
+      {
+        "instrument": "ois",
+        "tenor": "2Y",
+        "source": "DTCC:CFTC",
+        "method": "close-thin",
+        "trades": 124,
+        "close_trades": 19,
+        "start_date": "2026-11-04",
+        "maturity_date": "2028-11-06",
+        "pillar_date": "2028-11-08",
+        "quote_percent": 4.4447,
+        "model_percent": 4.444700000001639,
+        "residual_bp": 1.6389667401028873E-10,
+        "npv_per_million": 3.121114477977471E-08
+      },
+      {
+        "instrument": "ois",
+        "tenor": "3Y",
+        "source": "DTCC:CFTC",
+        "method": "close",
+        "trades": 101,
+        "close_trades": 28,
+        "start_date": "2026-11-04",
+        "maturity_date": "2029-11-05",
+        "pillar_date": "2029-11-07",
+        "quote_percent": 4.4348,
+        "model_percent": 4.434799999968635,
+        "residual_bp": -3.1364494335051063E-09,
+        "npv_per_million": -8.753137104022812E-07
+      },
+      {
+        "instrument": "ois",
+        "tenor": "4Y",
+        "source": "DTCC:CFTC",
+        "method": "close-thin",
+        "trades": 37,
+        "close_trades": 10,
+        "start_date": "2026-11-04",
+        "maturity_date": "2030-11-04",
+        "pillar_date": "2030-11-06",
+        "quote_percent": 4.4145,
+        "model_percent": 4.414500000018066,
+        "residual_bp": 1.806610416821286E-09,
+        "npv_per_million": 6.574185640317864E-07
+      },
+      {
+        "instrument": "ois",
+        "tenor": "5Y",
+        "source": "DTCC:CFTC",
+        "method": "close",
+        "trades": 208,
+        "close_trades": 43,
+        "start_date": "2026-11-04",
+        "maturity_date": "2031-11-04",
+        "pillar_date": "2031-11-06",
+        "quote_percent": 4.418,
+        "model_percent": 4.417999999990035,
+        "residual_bp": -9.96494553540117E-10,
+        "npv_per_million": -4.4372838736705944E-07
+      },
+      {
+        "instrument": "ois",
+        "tenor": "7Y",
+        "source": "DTCC:CFTC",
+        "method": "close-thin",
+        "trades": 50,
+        "close_trades": 9,
+        "start_date": "2026-11-04",
+        "maturity_date": "2033-11-04",
+        "pillar_date": "2033-11-08",
+        "quote_percent": 4.4446,
+        "model_percent": 4.4445999999964245,
+        "residual_bp": -3.575612028683395E-10,
+        "npv_per_million": -2.1371793224034263E-07
+      },
+      {
+        "instrument": "ois",
+        "tenor": "10Y",
+        "source": "DTCC:CFTC",
+        "method": "close",
+        "trades": 301,
+        "close_trades": 51,
+        "start_date": "2026-11-04",
+        "maturity_date": "2036-11-04",
+        "pillar_date": "2036-11-06",
+        "quote_percent": 4.5098,
+        "model_percent": 4.50980000000077,
+        "residual_bp": 7.702172233337023E-11,
+        "npv_per_million": 6.167288901792745E-08
+      },
+      {
+        "instrument": "ois",
+        "tenor": "15Y",
+        "source": "DTCC:CFTC",
+        "method": "close-thin",
+        "trades": 23,
+        "close_trades": 6,
+        "start_date": "2026-11-04",
+        "maturity_date": "2041-11-04",
+        "pillar_date": "2041-11-06",
+        "quote_percent": 4.642,
+        "model_percent": 4.641999999999948,
+        "residual_bp": -5.2735593669694936E-12,
+        "npv_per_million": -5.662137425588298E-09
+      },
+      {
+        "instrument": "ois",
+        "tenor": "20Y",
+        "source": "DTCC:CFTC",
+        "method": "close-thin",
+        "trades": 54,
+        "close_trades": 10,
+        "start_date": "2026-11-04",
+        "maturity_date": "2046-11-05",
+        "pillar_date": "2046-11-07",
+        "quote_percent": 4.7,
+        "model_percent": 4.700000000001016,
+        "residual_bp": 1.0158540675320182E-10,
+        "npv_per_million": 1.318944953254686E-07
+      },
+      {
+        "instrument": "ois",
+        "tenor": "30Y",
+        "source": "DTCC:CFTC",
+        "method": "close",
+        "trades": 233,
+        "close_trades": 33,
+        "start_date": "2026-11-04",
+        "maturity_date": "2056-11-06",
+        "pillar_date": "2056-11-08",
+        "quote_percent": 4.6313,
+        "model_percent": 4.631300000001515,
+        "residual_bp": 1.514760539222948E-10,
+        "npv_per_million": 2.441380431150719E-07
+      }
+    ],
+    "monthly_and_pillar_forwards": [
+      {
+        "date": "2026-11-02",
+        "discount_factor": 1,
+        "instantaneous_forward_percent": 4.00464141604872
+      },
+      {
+        "date": "2026-11-03",
+        "discount_factor": 0.9998902898154232,
+        "instantaneous_forward_percent": 4.00464141604872
+      },
+      {
+        "date": "2026-12-02",
+        "discount_factor": 0.9967139249066037,
+        "instantaneous_forward_percent": 4.00464141604872
+      },
+      {
+        "date": "2026-12-10",
+        "discount_factor": 0.9958394633931593,
+        "instantaneous_forward_percent": 4.136877254946432
+      },
+      {
+        "date": "2027-01-02",
+        "discount_factor": 0.993246890338251,
+        "instantaneous_forward_percent": 4.136877254946432
+      },
+      {
+        "date": "2027-01-28",
+        "discount_factor": 0.9903242821498554,
+        "instantaneous_forward_percent": 4.206728973268203
+      },
+      {
+        "date": "2027-02-02",
+        "discount_factor": 0.9897537580792625,
+        "instantaneous_forward_percent": 4.206728973268203
+      },
+      {
+        "date": "2027-03-02",
+        "discount_factor": 0.9865648918890542,
+        "instantaneous_forward_percent": 4.206728973268203
+      },
+      {
+        "date": "2027-03-18",
+        "discount_factor": 0.9847472976418015,
+        "instantaneous_forward_percent": 4.346717508304235
+      },
+      {
+        "date": "2027-04-02",
+        "discount_factor": 0.9829897918231507,
+        "instantaneous_forward_percent": 4.346717508304235
+      },
+      {
+        "date": "2027-04-29",
+        "discount_factor": 0.9798341819941754,
+        "instantaneous_forward_percent": 4.411893427609892
+      },
+      {
+        "date": "2027-05-02",
+        "discount_factor": 0.9794789375867707,
+        "instantaneous_forward_percent": 4.411893427609892
+      },
+      {
+        "date": "2027-06-02",
+        "discount_factor": 0.9758156119233022,
+        "instantaneous_forward_percent": 4.411893427609892
+      },
+      {
+        "date": "2027-06-10",
+        "discount_factor": 0.9748724637337478,
+        "instantaneous_forward_percent": 4.490957998647717
+      },
+      {
+        "date": "2027-07-02",
+        "discount_factor": 0.972237170453981,
+        "instantaneous_forward_percent": 4.490957998647717
+      },
+      {
+        "date": "2027-07-29",
+        "discount_factor": 0.9690126812028907,
+        "instantaneous_forward_percent": 4.507795111134983
+      },
+      {
+        "date": "2027-08-02",
+        "discount_factor": 0.968534102367768,
+        "instantaneous_forward_percent": 4.507795111134983
+      },
+      {
+        "date": "2027-09-02",
+        "discount_factor": 0.964833121642749,
+        "instantaneous_forward_percent": 4.507795111134983
+      },
+      {
+        "date": "2027-09-16",
+        "discount_factor": 0.963166349834892,
+        "instantaneous_forward_percent": 4.52956298250516
+      },
+      {
+        "date": "2027-10-02",
+        "discount_factor": 0.961255820834729,
+        "instantaneous_forward_percent": 4.52956298250516
+      },
+      {
+        "date": "2027-10-28",
+        "discount_factor": 0.9581592906093301,
+        "instantaneous_forward_percent": 4.523745706535544
+      },
+      {
+        "date": "2027-11-02",
+        "discount_factor": 0.957565711672446,
+        "instantaneous_forward_percent": 4.523745837365195
+      },
+      {
+        "date": "2027-11-08",
+        "discount_factor": 0.9568539295313931,
+        "instantaneous_forward_percent": 4.523140234538915
+      },
+      {
+        "date": "2027-12-02",
+        "discount_factor": 0.9540141041356874,
+        "instantaneous_forward_percent": 4.517562932927734
+      },
+      {
+        "date": "2028-01-02",
+        "discount_factor": 0.9503636710974093,
+        "instantaneous_forward_percent": 4.5102356652362205
+      },
+      {
+        "date": "2028-02-02",
+        "discount_factor": 0.946733153561703,
+        "instantaneous_forward_percent": 4.50276945925622
+      },
+      {
+        "date": "2028-03-02",
+        "discount_factor": 0.9433548834799985,
+        "instantaneous_forward_percent": 4.495659162254788
+      },
+      {
+        "date": "2028-04-02",
+        "discount_factor": 0.9397628820084338,
+        "instantaneous_forward_percent": 4.487924043592722
+      },
+      {
+        "date": "2028-05-02",
+        "discount_factor": 0.9363056827479896,
+        "instantaneous_forward_percent": 4.480306157013612
+      },
+      {
+        "date": "2028-06-02",
+        "discount_factor": 0.9327527933135075,
+        "instantaneous_forward_percent": 4.472297643927091
+      },
+      {
+        "date": "2028-07-02",
+        "discount_factor": 0.9293334197339732,
+        "instantaneous_forward_percent": 4.464415182049331
+      },
+      {
+        "date": "2028-08-02",
+        "discount_factor": 0.9258195898025178,
+        "instantaneous_forward_percent": 4.4561332743033875
+      },
+      {
+        "date": "2028-09-02",
+        "discount_factor": 0.9223255877249763,
+        "instantaneous_forward_percent": 4.447712428246405
+      },
+      {
+        "date": "2028-10-02",
+        "discount_factor": 0.9189631592027856,
+        "instantaneous_forward_percent": 4.439430934917566
+      },
+      {
+        "date": "2028-11-02",
+        "discount_factor": 0.9155081261713137,
+        "instantaneous_forward_percent": 4.430736694180832
+      },
+      {
+        "date": "2028-11-08",
+        "discount_factor": 0.9148416951700098,
+        "instantaneous_forward_percent": 4.429037889948427
+      },
+      {
+        "date": "2028-12-02",
+        "discount_factor": 0.9121833699725526,
+        "instantaneous_forward_percent": 4.422230020278177
+      },
+      {
+        "date": "2029-01-02",
+        "discount_factor": 0.908767152368396,
+        "instantaneous_forward_percent": 4.413429882124246
+      },
+      {
+        "date": "2029-02-02",
+        "discount_factor": 0.9053704985126083,
+        "instantaneous_forward_percent": 4.404622258802209
+      },
+      {
+        "date": "2029-03-02",
+        "discount_factor": 0.902319270311324,
+        "instantaneous_forward_percent": 4.396660552794673
+      },
+      {
+        "date": "2029-04-02",
+        "discount_factor": 0.8989595251119147,
+        "instantaneous_forward_percent": 4.387838683893771
+      },
+      {
+        "date": "2029-05-02",
+        "discount_factor": 0.8957264629747378,
+        "instantaneous_forward_percent": 4.379294264651148
+      },
+      {
+        "date": "2029-06-02",
+        "discount_factor": 0.8924044337559287,
+        "instantaneous_forward_percent": 4.370457667220724
+      },
+      {
+        "date": "2029-07-02",
+        "discount_factor": 0.8892076548020907,
+        "instantaneous_forward_percent": 4.361898994626527
+      },
+      {
+        "date": "2029-08-02",
+        "discount_factor": 0.8859228963667244,
+        "instantaneous_forward_percent": 4.353047668665813
+      },
+      {
+        "date": "2029-09-02",
+        "discount_factor": 0.8826569101335645,
+        "instantaneous_forward_percent": 4.34418885775768
+      },
+      {
+        "date": "2029-10-02",
+        "discount_factor": 0.8795140458226307,
+        "instantaneous_forward_percent": 4.335608688227522
+      },
+      {
+        "date": "2029-11-02",
+        "discount_factor": 0.8762846702470938,
+        "instantaneous_forward_percent": 4.326735148565895
+      },
+      {
+        "date": "2029-11-07",
+        "discount_factor": 0.8757655330821382,
+        "instantaneous_forward_percent": 4.32530323173581
+      },
+      {
+        "date": "2029-12-02",
+        "discount_factor": 0.873176910892607,
+        "instantaneous_forward_percent": 4.318721541012347
+      },
+      {
+        "date": "2030-01-02",
+        "discount_factor": 0.8699825348159045,
+        "instantaneous_forward_percent": 4.3121667559404555
+      },
+      {
+        "date": "2030-02-02",
+        "discount_factor": 0.866804015693647,
+        "instantaneous_forward_percent": 4.307390608841063
+      },
+      {
+        "date": "2030-03-02",
+        "discount_factor": 0.8639455654158829,
+        "instantaneous_forward_percent": 4.3046054467426345
+      },
+      {
+        "date": "2030-04-02",
+        "discount_factor": 0.8607933931564947,
+        "instantaneous_forward_percent": 4.303214448972752
+      },
+      {
+        "date": "2030-05-02",
+        "discount_factor": 0.8577542159806187,
+        "instantaneous_forward_percent": 4.303561822495506
+      },
+      {
+        "date": "2030-06-02",
+        "discount_factor": 0.8546241206555387,
+        "instantaneous_forward_percent": 4.305670724907356
+      },
+      {
+        "date": "2030-07-02",
+        "discount_factor": 0.8516038205095188,
+        "instantaneous_forward_percent": 4.309405098507736
+      },
+      {
+        "date": "2030-08-02",
+        "discount_factor": 0.8484906970850797,
+        "instantaneous_forward_percent": 4.315013901279788
+      },
+      {
+        "date": "2030-09-02",
+        "discount_factor": 0.8453842883476659,
+        "instantaneous_forward_percent": 4.3224013420091465
+      },
+      {
+        "date": "2030-10-02",
+        "discount_factor": 0.8423832901177971,
+        "instantaneous_forward_percent": 4.3312439781190575
+      },
+      {
+        "date": "2030-11-02",
+        "discount_factor": 0.8392864246083556,
+        "instantaneous_forward_percent": 4.34213131922818
+      },
+      {
+        "date": "2030-11-06",
+        "discount_factor": 0.8388870748600734,
+        "instantaneous_forward_percent": 4.343665694741399
+      },
+      {
+        "date": "2030-12-02",
+        "discount_factor": 0.8362925218894581,
+        "instantaneous_forward_percent": 4.353480775218384
+      },
+      {
+        "date": "2031-01-02",
+        "discount_factor": 0.8332021113498933,
+        "instantaneous_forward_percent": 4.36451786253545
+      },
+      {
+        "date": "2031-02-02",
+        "discount_factor": 0.8301155946940949,
+        "instantaneous_forward_percent": 4.3748310630608875
+      },
+      {
+        "date": "2031-03-02",
+        "discount_factor": 0.8273315776416176,
+        "instantaneous_forward_percent": 4.383524016208572
+      },
+      {
+        "date": "2031-04-02",
+        "discount_factor": 0.8242539846647464,
+        "instantaneous_forward_percent": 4.392459497101285
+      },
+      {
+        "date": "2031-05-02",
+        "discount_factor": 0.821280870467636,
+        "instantaneous_forward_percent": 4.400417499898644
+      },
+      {
+        "date": "2031-06-02",
+        "discount_factor": 0.818214540734108,
+        "instantaneous_forward_percent": 4.407928558567138
+      },
+      {
+        "date": "2031-07-02",
+        "discount_factor": 0.8152533074361866,
+        "instantaneous_forward_percent": 4.414508088441044
+      },
+      {
+        "date": "2031-08-02",
+        "discount_factor": 0.8122002535354861,
+        "instantaneous_forward_percent": 4.420594724948476
+      },
+      {
+        "date": "2031-09-02",
+        "discount_factor": 0.8091546988856823,
+        "instantaneous_forward_percent": 4.425957474564016
+      },
+      {
+        "date": "2031-10-02",
+        "discount_factor": 0.8062149964431663,
+        "instantaneous_forward_percent": 4.430457995907719
+      },
+      {
+        "date": "2031-11-02",
+        "discount_factor": 0.8031856425709467,
+        "instantaneous_forward_percent": 4.434396323434797
+      },
+      {
+        "date": "2031-11-06",
+        "discount_factor": 0.80279540018078,
+        "instantaneous_forward_percent": 4.434851766430109
+      },
+      {
+        "date": "2031-12-02",
+        "discount_factor": 0.8002624746001027,
+        "instantaneous_forward_percent": 4.437803117156925
+      },
+      {
+        "date": "2032-01-02",
+        "discount_factor": 0.7972506748173026,
+        "instantaneous_forward_percent": 4.4414008241928995
+      },
+      {
+        "date": "2032-02-02",
+        "discount_factor": 0.7942477541859438,
+        "instantaneous_forward_percent": 4.445084231392751
+      },
+      {
+        "date": "2032-03-02",
+        "discount_factor": 0.7914465444903084,
+        "instantaneous_forward_percent": 4.44860758443281
+      },
+      {
+        "date": "2032-04-02",
+        "discount_factor": 0.7884606040980171,
+        "instantaneous_forward_percent": 4.452456863294496
+      },
+      {
+        "date": "2032-05-02",
+        "discount_factor": 0.7855792388529598,
+        "instantaneous_forward_percent": 4.456263569718978
+      },
+      {
+        "date": "2032-06-02",
+        "discount_factor": 0.7826102895529261,
+        "instantaneous_forward_percent": 4.460281484237191
+      },
+      {
+        "date": "2032-07-02",
+        "discount_factor": 0.7797452368018473,
+        "instantaneous_forward_percent": 4.464251386692766
+      },
+      {
+        "date": "2032-08-02",
+        "discount_factor": 0.7767930104729441,
+        "instantaneous_forward_percent": 4.468437936863506
+      },
+      {
+        "date": "2032-09-02",
+        "discount_factor": 0.7738491819489911,
+        "instantaneous_forward_percent": 4.472710187635258
+      },
+      {
+        "date": "2032-10-02",
+        "discount_factor": 0.771008248512776,
+        "instantaneous_forward_percent": 4.476926221609409
+      },
+      {
+        "date": "2032-11-02",
+        "discount_factor": 0.7680807503269143,
+        "instantaneous_forward_percent": 4.481367108027338
+      },
+      {
+        "date": "2032-12-02",
+        "discount_factor": 0.7652554974472803,
+        "instantaneous_forward_percent": 4.485746338022361
+      },
+      {
+        "date": "2033-01-02",
+        "discount_factor": 0.7623440769282149,
+        "instantaneous_forward_percent": 4.490355860526133
+      },
+      {
+        "date": "2033-02-02",
+        "discount_factor": 0.7594407321243689,
+        "instantaneous_forward_percent": 4.495051082959153
+      },
+      {
+        "date": "2033-03-02",
+        "discount_factor": 0.7568252450683849,
+        "instantaneous_forward_percent": 4.499365590291753
+      },
+      {
+        "date": "2033-04-02",
+        "discount_factor": 0.75393709698205,
+        "instantaneous_forward_percent": 4.504223919697339
+      },
+      {
+        "date": "2033-05-02",
+        "discount_factor": 0.7511496328454996,
+        "instantaneous_forward_percent": 4.509007126843224
+      },
+      {
+        "date": "2033-06-02",
+        "discount_factor": 0.748276962638761,
+        "instantaneous_forward_percent": 4.514034092100946
+      },
+      {
+        "date": "2033-07-02",
+        "discount_factor": 0.7455043640694765,
+        "instantaneous_forward_percent": 4.51898049502981
+      },
+      {
+        "date": "2033-08-02",
+        "discount_factor": 0.7426469396053138,
+        "instantaneous_forward_percent": 4.5241760963567055
+      },
+      {
+        "date": "2033-09-02",
+        "discount_factor": 0.7397971758540972,
+        "instantaneous_forward_percent": 4.52945739760415
+      },
+      {
+        "date": "2033-10-02",
+        "discount_factor": 0.7370465796057325,
+        "instantaneous_forward_percent": 4.534649932454521
+      },
+      {
+        "date": "2033-11-02",
+        "discount_factor": 0.7342117222986607,
+        "instantaneous_forward_percent": 4.540099869541231
+      },
+      {
+        "date": "2033-11-08",
+        "discount_factor": 0.7336639072826876,
+        "instantaneous_forward_percent": 4.541164594788573
+      },
+      {
+        "date": "2033-12-02",
+        "discount_factor": 0.7314754447550421,
+        "instantaneous_forward_percent": 4.545460373877187
+      },
+      {
+        "date": "2034-01-02",
+        "discount_factor": 0.7286552675663801,
+        "instantaneous_forward_percent": 4.551099242470411
+      },
+      {
+        "date": "2034-02-02",
+        "discount_factor": 0.7258424559478065,
+        "instantaneous_forward_percent": 4.55683973994032
+      },
+      {
+        "date": "2034-03-02",
+        "discount_factor": 0.7233081297592164,
+        "instantaneous_forward_percent": 4.562112057131529
+      },
+      {
+        "date": "2034-04-02",
+        "discount_factor": 0.7205091611898596,
+        "instantaneous_forward_percent": 4.568045976265936
+      },
+      {
+        "date": "2034-05-02",
+        "discount_factor": 0.7178073217221967,
+        "instantaneous_forward_percent": 4.573885242845926
+      },
+      {
+        "date": "2034-06-02",
+        "discount_factor": 0.7150224291311229,
+        "instantaneous_forward_percent": 4.580019140583029
+      },
+      {
+        "date": "2034-07-02",
+        "discount_factor": 0.7123340976388866,
+        "instantaneous_forward_percent": 4.58605193473213
+      },
+      {
+        "date": "2034-08-02",
+        "discount_factor": 0.7095630471705122,
+        "instantaneous_forward_percent": 4.592385811508775
+      },
+      {
+        "date": "2034-09-02",
+        "discount_factor": 0.7067989436556352,
+        "instantaneous_forward_percent": 4.598821316705431
+      },
+      {
+        "date": "2034-10-02",
+        "discount_factor": 0.7041305646418916,
+        "instantaneous_forward_percent": 4.605145988584488
+      },
+      {
+        "date": "2034-11-02",
+        "discount_factor": 0.7013799626203052,
+        "instantaneous_forward_percent": 4.611781472365228
+      },
+      {
+        "date": "2034-12-02",
+        "discount_factor": 0.6987245433402554,
+        "instantaneous_forward_percent": 4.618299672017146
+      },
+      {
+        "date": "2035-01-02",
+        "discount_factor": 0.6959872248407427,
+        "instantaneous_forward_percent": 4.625135134596184
+      },
+      {
+        "date": "2035-02-02",
+        "discount_factor": 0.6932565754363504,
+        "instantaneous_forward_percent": 4.632072225585248
+      },
+      {
+        "date": "2035-03-02",
+        "discount_factor": 0.6907958698135892,
+        "instantaneous_forward_percent": 4.638425337039178
+      },
+      {
+        "date": "2035-04-02",
+        "discount_factor": 0.6880777649821804,
+        "instantaneous_forward_percent": 4.645555850092857
+      },
+      {
+        "date": "2035-05-02",
+        "discount_factor": 0.6854535444791523,
+        "instantaneous_forward_percent": 4.652553110307364
+      },
+      {
+        "date": "2035-06-02",
+        "discount_factor": 0.6827482100507957,
+        "instantaneous_forward_percent": 4.659883601916893
+      },
+      {
+        "date": "2035-07-02",
+        "discount_factor": 0.6801362520487269,
+        "instantaneous_forward_percent": 4.667074390098578
+      },
+      {
+        "date": "2035-08-02",
+        "discount_factor": 0.6774434912155717,
+        "instantaneous_forward_percent": 4.674604860033256
+      },
+      {
+        "date": "2035-09-02",
+        "discount_factor": 0.6747570467174657,
+        "instantaneous_forward_percent": 4.682236959029007
+      },
+      {
+        "date": "2035-10-02",
+        "discount_factor": 0.6721632299945499,
+        "instantaneous_forward_percent": 4.689719624868653
+      },
+      {
+        "date": "2035-11-02",
+        "discount_factor": 0.6694890734283253,
+        "instantaneous_forward_percent": 4.6975517023980995
+      },
+      {
+        "date": "2035-12-02",
+        "discount_factor": 0.6669070594299914,
+        "instantaneous_forward_percent": 4.705227895961158
+      },
+      {
+        "date": "2036-01-02",
+        "discount_factor": 0.664245008677757,
+        "instantaneous_forward_percent": 4.713259952237097
+      },
+      {
+        "date": "2036-02-02",
+        "discount_factor": 0.6615890421046466,
+        "instantaneous_forward_percent": 4.721393636674151
+      },
+      {
+        "date": "2036-03-02",
+        "discount_factor": 0.6591098965579117,
+        "instantaneous_forward_percent": 4.729094572367511
+      },
+      {
+        "date": "2036-04-02",
+        "discount_factor": 0.6564655791726284,
+        "instantaneous_forward_percent": 4.737424957509919
+      },
+      {
+        "date": "2036-05-02",
+        "discount_factor": 0.6539122324866173,
+        "instantaneous_forward_percent": 4.745583384063332
+      },
+      {
+        "date": "2036-06-02",
+        "discount_factor": 0.6512795918609299,
+        "instantaneous_forward_percent": 4.754113747928167
+      },
+      {
+        "date": "2036-07-02",
+        "discount_factor": 0.6487374659924684,
+        "instantaneous_forward_percent": 4.762465702172355
+      },
+      {
+        "date": "2036-08-02",
+        "discount_factor": 0.6461163396812452,
+        "instantaneous_forward_percent": 4.771196044749545
+      },
+      {
+        "date": "2036-09-02",
+        "discount_factor": 0.6435010044091114,
+        "instantaneous_forward_percent": 4.780028015470186
+      },
+      {
+        "date": "2036-10-02",
+        "discount_factor": 0.6409755111122322,
+        "instantaneous_forward_percent": 4.788671847731845
+      },
+      {
+        "date": "2036-11-02",
+        "discount_factor": 0.6383714554831526,
+        "instantaneous_forward_percent": 4.797703796927164
+      },
+      {
+        "date": "2036-11-06",
+        "discount_factor": 0.6380358624743734,
+        "instantaneous_forward_percent": 4.79887661291724
+      },
+      {
+        "date": "2036-12-02",
+        "discount_factor": 0.6358568195454917,
+        "instantaneous_forward_percent": 4.806446776804661
+      },
+      {
+        "date": "2037-01-02",
+        "discount_factor": 0.633264029988007,
+        "instantaneous_forward_percent": 4.8153194735511144
+      },
+      {
+        "date": "2037-02-02",
+        "discount_factor": 0.6306771048989889,
+        "instantaneous_forward_percent": 4.824025456825089
+      },
+      {
+        "date": "2037-03-02",
+        "discount_factor": 0.6283456541756287,
+        "instantaneous_forward_percent": 4.831745631800142
+      },
+      {
+        "date": "2037-04-02",
+        "discount_factor": 0.6257701751218012,
+        "instantaneous_forward_percent": 4.840134322053936
+      },
+      {
+        "date": "2037-05-02",
+        "discount_factor": 0.6232836406013822,
+        "instantaneous_forward_percent": 4.848093676420353
+      },
+      {
+        "date": "2037-06-02",
+        "discount_factor": 0.6207203777903199,
+        "instantaneous_forward_percent": 4.856154318098538
+      },
+      {
+        "date": "2037-07-02",
+        "discount_factor": 0.6182458490260615,
+        "instantaneous_forward_percent": 4.863796205829745
+      },
+      {
+        "date": "2037-08-02",
+        "discount_factor": 0.615695178768075,
+        "instantaneous_forward_percent": 4.871528799169971
+      },
+      {
+        "date": "2037-09-02",
+        "discount_factor": 0.6131510482831772,
+        "instantaneous_forward_percent": 4.879094678843786
+      },
+      {
+        "date": "2037-10-02",
+        "discount_factor": 0.6106953003233888,
+        "instantaneous_forward_percent": 4.886257764853925
+      },
+      {
+        "date": "2037-11-02",
+        "discount_factor": 0.6081643067942247,
+        "instantaneous_forward_percent": 4.893495595990078
+      },
+      {
+        "date": "2037-12-02",
+        "discount_factor": 0.6057214408095757,
+        "instantaneous_forward_percent": 4.900341215623008
+      },
+      {
+        "date": "2038-01-02",
+        "discount_factor": 0.6032039300650284,
+        "instantaneous_forward_percent": 4.907250998235519
+      },
+      {
+        "date": "2038-02-02",
+        "discount_factor": 0.6006933999433862,
+        "instantaneous_forward_percent": 4.913994067865613
+      },
+      {
+        "date": "2038-03-02",
+        "discount_factor": 0.5984318948245829,
+        "instantaneous_forward_percent": 4.919941288649033
+      },
+      {
+        "date": "2038-04-02",
+        "discount_factor": 0.5959348831211899,
+        "instantaneous_forward_percent": 4.926367065343745
+      },
+      {
+        "date": "2038-05-02",
+        "discount_factor": 0.5935252959314204,
+        "instantaneous_forward_percent": 4.9324268254758294
+      },
+      {
+        "date": "2038-06-02",
+        "discount_factor": 0.5910425722577998,
+        "instantaneous_forward_percent": 4.938524553234775
+      },
+      {
+        "date": "2038-07-02",
+        "discount_factor": 0.5886469612478311,
+        "instantaneous_forward_percent": 4.944266847033077
+      },
+      {
+        "date": "2038-08-02",
+        "discount_factor": 0.5861788307785516,
+        "instantaneous_forward_percent": 4.950036526312151
+      },
+      {
+        "date": "2038-09-02",
+        "discount_factor": 0.5837182298405359,
+        "instantaneous_forward_percent": 4.955639492408164
+      },
+      {
+        "date": "2038-10-02",
+        "discount_factor": 0.5813442423431063,
+        "instantaneous_forward_percent": 4.960902984376124
+      },
+      {
+        "date": "2038-11-02",
+        "discount_factor": 0.5788986734795996,
+        "instantaneous_forward_percent": 4.966177902008873
+      },
+      {
+        "date": "2038-12-02",
+        "discount_factor": 0.5765393685457729,
+        "instantaneous_forward_percent": 4.9711239276697805
+      },
+      {
+        "date": "2039-01-02",
+        "discount_factor": 0.5741091088069143,
+        "instantaneous_forward_percent": 4.976070796405394
+      },
+      {
+        "date": "2039-02-02",
+        "discount_factor": 0.5716867317844468,
+        "instantaneous_forward_percent": 4.980850952193012
+      },
+      {
+        "date": "2039-03-02",
+        "discount_factor": 0.5695056097275211,
+        "instantaneous_forward_percent": 4.985025218531018
+      },
+      {
+        "date": "2039-04-02",
+        "discount_factor": 0.5670984200979191,
+        "instantaneous_forward_percent": 4.989488081001963
+      },
+      {
+        "date": "2039-05-02",
+        "discount_factor": 0.5647765688802723,
+        "instantaneous_forward_percent": 4.99364824731987
+      },
+      {
+        "date": "2039-06-02",
+        "discount_factor": 0.5623853275948539,
+        "instantaneous_forward_percent": 4.997783061804406
+      },
+      {
+        "date": "2039-07-02",
+        "discount_factor": 0.5600790275831233,
+        "instantaneous_forward_percent": 5.001625761623861
+      },
+      {
+        "date": "2039-08-02",
+        "discount_factor": 0.557703974498984,
+        "instantaneous_forward_percent": 5.005432527019779
+      },
+      {
+        "date": "2039-09-02",
+        "discount_factor": 0.5553372368164722,
+        "instantaneous_forward_percent": 5.0090725792603426
+      },
+      {
+        "date": "2039-10-02",
+        "discount_factor": 0.5530548174701506,
+        "instantaneous_forward_percent": 5.012436477329025
+      },
+      {
+        "date": "2039-11-02",
+        "discount_factor": 0.5507046103017781,
+        "instantaneous_forward_percent": 5.015748480935933
+      },
+      {
+        "date": "2039-12-02",
+        "discount_factor": 0.5484382931513982,
+        "instantaneous_forward_percent": 5.018794912745708
+      },
+      {
+        "date": "2040-01-02",
+        "discount_factor": 0.5461048308404474,
+        "instantaneous_forward_percent": 5.021778867503331
+      },
+      {
+        "date": "2040-02-02",
+        "discount_factor": 0.5437799571892642,
+        "instantaneous_forward_percent": 5.024596109335817
+      },
+      {
+        "date": "2040-03-02",
+        "discount_factor": 0.541612896428734,
+        "instantaneous_forward_percent": 5.027080667176054
+      },
+      {
+        "date": "2040-04-02",
+        "discount_factor": 0.5393047912674718,
+        "instantaneous_forward_percent": 5.029575238283259
+      },
+      {
+        "date": "2040-05-02",
+        "discount_factor": 0.5370794587954162,
+        "instantaneous_forward_percent": 5.031830606153865
+      },
+      {
+        "date": "2040-06-02",
+        "discount_factor": 0.5347885901162599,
+        "instantaneous_forward_percent": 5.033997128425003
+      },
+      {
+        "date": "2040-07-02",
+        "discount_factor": 0.5325800266926557,
+        "instantaneous_forward_percent": 5.0359350300546275
+      },
+      {
+        "date": "2040-08-02",
+        "discount_factor": 0.5303065752260092,
+        "instantaneous_forward_percent": 5.03777350393798
+      },
+      {
+        "date": "2040-09-02",
+        "discount_factor": 0.5280420414321951,
+        "instantaneous_forward_percent": 5.03944526446011
+      },
+      {
+        "date": "2040-10-02",
+        "discount_factor": 0.5258590885358203,
+        "instantaneous_forward_percent": 5.0409043641633735
+      },
+      {
+        "date": "2040-11-02",
+        "discount_factor": 0.523612227167614,
+        "instantaneous_forward_percent": 5.042248076080802
+      },
+      {
+        "date": "2040-12-02",
+        "discount_factor": 0.5214464541341216,
+        "instantaneous_forward_percent": 5.043389709551334
+      },
+      {
+        "date": "2041-01-02",
+        "discount_factor": 0.5192174231686844,
+        "instantaneous_forward_percent": 5.044405373088705
+      },
+      {
+        "date": "2041-02-02",
+        "discount_factor": 0.5169975112879075,
+        "instantaneous_forward_percent": 5.0452543232681695
+      },
+      {
+        "date": "2041-03-02",
+        "discount_factor": 0.5150002987761905,
+        "instantaneous_forward_percent": 5.045877823371281
+      },
+      {
+        "date": "2041-04-02",
+        "discount_factor": 0.5127978449954744,
+        "instantaneous_forward_percent": 5.04640948051573
+      },
+      {
+        "date": "2041-05-02",
+        "discount_factor": 0.5106752208217794,
+        "instantaneous_forward_percent": 5.0467652543514605
+      },
+      {
+        "date": "2041-06-02",
+        "discount_factor": 0.5084909512817523,
+        "instantaneous_forward_percent": 5.046968863119561
+      },
+      {
+        "date": "2041-07-02",
+        "discount_factor": 0.5063859878803018,
+        "instantaneous_forward_percent": 5.047007170727598
+      },
+      {
+        "date": "2041-08-02",
+        "discount_factor": 0.504220030970544,
+        "instantaneous_forward_percent": 5.04688273067566
+      },
+      {
+        "date": "2041-09-02",
+        "discount_factor": 0.5020634270811061,
+        "instantaneous_forward_percent": 5.046591577489097
+      },
+      {
+        "date": "2041-10-02",
+        "discount_factor": 0.499985324664381,
+        "instantaneous_forward_percent": 5.046151083405901
+      },
+      {
+        "date": "2041-11-02",
+        "discount_factor": 0.4978472117901687,
+        "instantaneous_forward_percent": 5.045531881620734
+      },
+      {
+        "date": "2041-11-06",
+        "discount_factor": 0.49757201322971834,
+        "instantaneous_forward_percent": 5.045439841043669
+      },
+      {
+        "date": "2041-12-02",
+        "discount_factor": 0.4957870574178886,
+        "instantaneous_forward_percent": 5.044773032912887
+      },
+      {
+        "date": "2042-01-02",
+        "discount_factor": 0.4936675449891134,
+        "instantaneous_forward_percent": 5.0438224021379
+      },
+      {
+        "date": "2042-02-02",
+        "discount_factor": 0.4915575257765489,
+        "instantaneous_forward_percent": 5.042702533592328
+      },
+      {
+        "date": "2042-03-02",
+        "discount_factor": 0.489659883302211,
+        "instantaneous_forward_percent": 5.041545575567817
+      },
+      {
+        "date": "2042-04-02",
+        "discount_factor": 0.48756800303926146,
+        "instantaneous_forward_percent": 5.040103608296767
+      },
+      {
+        "date": "2042-05-02",
+        "discount_factor": 0.48555271083832946,
+        "instantaneous_forward_percent": 5.038547018845442
+      },
+      {
+        "date": "2042-06-02",
+        "discount_factor": 0.48347967652078666,
+        "instantaneous_forward_percent": 5.036772034745794
+      },
+      {
+        "date": "2042-07-02",
+        "discount_factor": 0.4814826650299099,
+        "instantaneous_forward_percent": 5.03489317092828
+      },
+      {
+        "date": "2042-08-02",
+        "discount_factor": 0.479428563089324,
+        "instantaneous_forward_percent": 5.0327851697745
+      },
+      {
+        "date": "2042-09-02",
+        "discount_factor": 0.477384113357005,
+        "instantaneous_forward_percent": 5.030507930178399
+      },
+      {
+        "date": "2042-10-02",
+        "discount_factor": 0.4754148222403839,
+        "instantaneous_forward_percent": 5.02814301293096
+      },
+      {
+        "date": "2042-11-02",
+        "discount_factor": 0.4733894218440993,
+        "instantaneous_forward_percent": 5.02553275649627
+      },
+      {
+        "date": "2042-12-02",
+        "discount_factor": 0.47143859974622837,
+        "instantaneous_forward_percent": 5.022845564428092
+      },
+      {
+        "date": "2043-01-02",
+        "discount_factor": 0.46943231762463133,
+        "instantaneous_forward_percent": 5.019902291149683
+      },
+      {
+        "date": "2043-02-02",
+        "discount_factor": 0.4674357756290157,
+        "instantaneous_forward_percent": 5.016789779422412
+      },
+      {
+        "date": "2043-03-02",
+        "discount_factor": 0.46564083190568606,
+        "instantaneous_forward_percent": 5.013833014541584
+      },
+      {
+        "date": "2043-04-02",
+        "discount_factor": 0.4636628689431061,
+        "instantaneous_forward_percent": 5.010398404507013
+      },
+      {
+        "date": "2043-05-02",
+        "discount_factor": 0.4617580248927435,
+        "instantaneous_forward_percent": 5.006913450983527
+      },
+      {
+        "date": "2043-06-02",
+        "discount_factor": 0.45979932263871853,
+        "instantaneous_forward_percent": 5.003145824089718
+      },
+      {
+        "date": "2043-07-02",
+        "discount_factor": 0.45791314128139327,
+        "instantaneous_forward_percent": 4.999338595946452
+      },
+      {
+        "date": "2043-08-02",
+        "discount_factor": 0.45597374634902443,
+        "instantaneous_forward_percent": 4.995237951741911
+      },
+      {
+        "date": "2043-09-02",
+        "discount_factor": 0.45404417926237833,
+        "instantaneous_forward_percent": 4.990968069298029
+      },
+      {
+        "date": "2043-10-02",
+        "discount_factor": 0.45218622284419246,
+        "instantaneous_forward_percent": 4.986674787670087
+      },
+      {
+        "date": "2043-11-02",
+        "discount_factor": 0.45027602205483425,
+        "instantaneous_forward_percent": 4.982071888347152
+      },
+      {
+        "date": "2043-12-02",
+        "discount_factor": 0.4484368233170278,
+        "instantaneous_forward_percent": 4.977456332301502
+      },
+      {
+        "date": "2044-01-02",
+        "discount_factor": 0.4465460206801906,
+        "instantaneous_forward_percent": 4.97252041586842
+      },
+      {
+        "date": "2044-02-02",
+        "discount_factor": 0.44466508653621406,
+        "instantaneous_forward_percent": 4.967415261184463
+      },
+      {
+        "date": "2044-03-02",
+        "discount_factor": 0.44291444238541444,
+        "instantaneous_forward_percent": 4.962486258914459
+      },
+      {
+        "date": "2044-04-02",
+        "discount_factor": 0.4410526251737228,
+        "instantaneous_forward_percent": 4.957053546490048
+      },
+      {
+        "date": "2044-05-02",
+        "discount_factor": 0.4392602777356812,
+        "instantaneous_forward_percent": 4.951634945789067
+      },
+      {
+        "date": "2044-06-02",
+        "discount_factor": 0.43741791418612835,
+        "instantaneous_forward_percent": 4.945869216229113
+      },
+      {
+        "date": "2044-07-02",
+        "discount_factor": 0.43564439985161,
+        "instantaneous_forward_percent": 4.940128341075984
+      },
+      {
+        "date": "2044-08-02",
+        "discount_factor": 0.4338215031166106,
+        "instantaneous_forward_percent": 4.934029594591197
+      },
+      {
+        "date": "2044-09-02",
+        "discount_factor": 0.4320085027943418,
+        "instantaneous_forward_percent": 4.9277616098359935
+      },
+      {
+        "date": "2044-10-02",
+        "discount_factor": 0.4302634104506402,
+        "instantaneous_forward_percent": 4.921534680886896
+      },
+      {
+        "date": "2044-11-02",
+        "discount_factor": 0.42846988743366177,
+        "instantaneous_forward_percent": 4.9149336791885245
+      },
+      {
+        "date": "2044-12-02",
+        "discount_factor": 0.4267436451453859,
+        "instantaneous_forward_percent": 4.9083844757577735
+      },
+      {
+        "date": "2045-01-02",
+        "discount_factor": 0.4249696004399349,
+        "instantaneous_forward_percent": 4.90145045710326
+      },
+      {
+        "date": "2045-02-02",
+        "discount_factor": 0.42320545346996596,
+        "instantaneous_forward_percent": 4.894347200383831
+      },
+      {
+        "date": "2045-03-02",
+        "discount_factor": 0.42162053648013337,
+        "instantaneous_forward_percent": 4.887785891671695
+      },
+      {
+        "date": "2045-04-02",
+        "discount_factor": 0.41987522252136866,
+        "instantaneous_forward_percent": 4.880360536302867
+      },
+      {
+        "date": "2045-05-02",
+        "discount_factor": 0.41819562737294286,
+        "instantaneous_forward_percent": 4.873013571124229
+      },
+      {
+        "date": "2045-06-02",
+        "discount_factor": 0.41646977499357524,
+        "instantaneous_forward_percent": 4.865255198764319
+      },
+      {
+        "date": "2045-07-02",
+        "discount_factor": 0.4148090073023356,
+        "instantaneous_forward_percent": 4.857585959278602
+      },
+      {
+        "date": "2045-08-02",
+        "discount_factor": 0.41310260239962543,
+        "instantaneous_forward_percent": 4.849494569690314
+      },
+      {
+        "date": "2045-09-02",
+        "discount_factor": 0.4114060739525297,
+        "instantaneous_forward_percent": 4.841233942454819
+      },
+      {
+        "date": "2045-10-02",
+        "discount_factor": 0.40977367105359863,
+        "instantaneous_forward_percent": 4.83307864927191
+      },
+      {
+        "date": "2045-11-02",
+        "discount_factor": 0.40809656132300737,
+        "instantaneous_forward_percent": 4.824485004561755
+      },
+      {
+        "date": "2045-12-02",
+        "discount_factor": 0.40648293965827126,
+        "instantaneous_forward_percent": 4.81600743703275
+      },
+      {
+        "date": "2046-01-02",
+        "discount_factor": 0.4048252248386909,
+        "instantaneous_forward_percent": 4.807080775275124
+      },
+      {
+        "date": "2046-02-02",
+        "discount_factor": 0.40317735616819916,
+        "instantaneous_forward_percent": 4.797984875626715
+      },
+      {
+        "date": "2046-03-02",
+        "discount_factor": 0.40169741537520287,
+        "instantaneous_forward_percent": 4.7896237601626614
+      },
+      {
+        "date": "2046-04-02",
+        "discount_factor": 0.400068264958019,
+        "instantaneous_forward_percent": 4.780205761770867
+      },
+      {
+        "date": "2046-05-02",
+        "discount_factor": 0.39850102071607185,
+        "instantaneous_forward_percent": 4.770930432929718
+      },
+      {
+        "date": "2046-06-02",
+        "discount_factor": 0.39689119113649574,
+        "instantaneous_forward_percent": 4.761179417445819
+      },
+      {
+        "date": "2046-07-02",
+        "discount_factor": 0.39534262761190253,
+        "instantaneous_forward_percent": 4.751581813531799
+      },
+      {
+        "date": "2046-08-02",
+        "discount_factor": 0.393752083219269,
+        "instantaneous_forward_percent": 4.741497781158668
+      },
+      {
+        "date": "2046-09-02",
+        "discount_factor": 0.39217132484207184,
+        "instantaneous_forward_percent": 4.731244510861457
+      },
+      {
+        "date": "2046-10-02",
+        "discount_factor": 0.39065086647466724,
+        "instantaneous_forward_percent": 4.721160853536856
+      },
+      {
+        "date": "2046-11-02",
+        "discount_factor": 0.3890893337471119,
+        "instantaneous_forward_percent": 4.710574565876176
+      },
+      {
+        "date": "2046-11-07",
+        "discount_factor": 0.3888383874191348,
+        "instantaneous_forward_percent": 4.708851250730645
+      },
+      {
+        "date": "2046-12-02",
+        "discount_factor": 0.38758745285484425,
+        "instantaneous_forward_percent": 4.700253181623138
+      },
+      {
+        "date": "2047-01-02",
+        "discount_factor": 0.3860450264153409,
+        "instantaneous_forward_percent": 4.68967355482599
+      },
+      {
+        "date": "2047-02-02",
+        "discount_factor": 0.3845121783243501,
+        "instantaneous_forward_percent": 4.679184689556756
+      },
+      {
+        "date": "2047-03-02",
+        "discount_factor": 0.38313582418461406,
+        "instantaneous_forward_percent": 4.669788888042387
+      },
+      {
+        "date": "2047-04-02",
+        "discount_factor": 0.38162094440444755,
+        "instantaneous_forward_percent": 4.659472763580563
+      },
+      {
+        "date": "2047-05-02",
+        "discount_factor": 0.3801637926856965,
+        "instantaneous_forward_percent": 4.649575834628869
+      },
+      {
+        "date": "2047-06-02",
+        "discount_factor": 0.3786671359128594,
+        "instantaneous_forward_percent": 4.6394383062670315
+      },
+      {
+        "date": "2047-07-02",
+        "discount_factor": 0.3772274476247145,
+        "instantaneous_forward_percent": 4.62971421272874
+      },
+      {
+        "date": "2047-08-02",
+        "discount_factor": 0.37574866074001845,
+        "instantaneous_forward_percent": 4.619755280477579
+      },
+      {
+        "date": "2047-09-02",
+        "discount_factor": 0.37427882222940745,
+        "instantaneous_forward_percent": 4.609887110217457
+      },
+      {
+        "date": "2047-10-02",
+        "discount_factor": 0.372864834594808,
+        "instantaneous_forward_percent": 4.600423685566824
+      },
+      {
+        "date": "2047-11-02",
+        "discount_factor": 0.3714123467773067,
+        "instantaneous_forward_percent": 4.590734111655183
+      },
+      {
+        "date": "2047-12-02",
+        "discount_factor": 0.3700149869173689,
+        "instantaneous_forward_percent": 4.581443521999235
+      },
+      {
+        "date": "2048-01-02",
+        "discount_factor": 0.3685795141785304,
+        "instantaneous_forward_percent": 4.571932544446292
+      },
+      {
+        "date": "2048-02-02",
+        "discount_factor": 0.36715256198280727,
+        "instantaneous_forward_percent": 4.562512328453321
+      },
+      {
+        "date": "2048-03-02",
+        "discount_factor": 0.3658253104335338,
+        "instantaneous_forward_percent": 4.553782036012452
+      },
+      {
+        "date": "2048-04-02",
+        "discount_factor": 0.36441461151797744,
+        "instantaneous_forward_percent": 4.544537488529145
+      },
+      {
+        "date": "2048-05-02",
+        "discount_factor": 0.3630572998536564,
+        "instantaneous_forward_percent": 4.535677569765525
+      },
+      {
+        "date": "2048-06-02",
+        "discount_factor": 0.36166280856479044,
+        "instantaneous_forward_percent": 4.526611618443507
+      },
+      {
+        "date": "2048-07-02",
+        "discount_factor": 0.3603210295552702,
+        "instantaneous_forward_percent": 4.517924534485941
+      },
+      {
+        "date": "2048-08-02",
+        "discount_factor": 0.358942433033671,
+        "instantaneous_forward_percent": 4.50903717933477
+      },
+      {
+        "date": "2048-09-02",
+        "discount_factor": 0.3575717962728786,
+        "instantaneous_forward_percent": 4.500240586204788
+      },
+      {
+        "date": "2048-10-02",
+        "discount_factor": 0.3562528785030844,
+        "instantaneous_forward_percent": 4.491814171665549
+      },
+      {
+        "date": "2048-11-02",
+        "discount_factor": 0.3548976763234978,
+        "instantaneous_forward_percent": 4.483196174720473
+      },
+      {
+        "date": "2048-12-02",
+        "discount_factor": 0.35359355053122843,
+        "instantaneous_forward_percent": 4.474942595009913
+      },
+      {
+        "date": "2049-01-02",
+        "discount_factor": 0.35225348534524065,
+        "instantaneous_forward_percent": 4.4665031944808735
+      },
+      {
+        "date": "2049-02-02",
+        "discount_factor": 0.3509210005659356,
+        "instantaneous_forward_percent": 4.458154555540515
+      },
+      {
+        "date": "2049-03-02",
+        "discount_factor": 0.34972391939192604,
+        "instantaneous_forward_percent": 4.450691861457596
+      },
+      {
+        "date": "2049-04-02",
+        "discount_factor": 0.34840565639569304,
+        "instantaneous_forward_percent": 4.442515963216647
+      },
+      {
+        "date": "2049-05-02",
+        "discount_factor": 0.34713693209442925,
+        "instantaneous_forward_percent": 4.434690221036705
+      },
+      {
+        "date": "2049-06-02",
+        "discount_factor": 0.3458330943507478,
+        "instantaneous_forward_percent": 4.426692918567344
+      },
+      {
+        "date": "2049-07-02",
+        "discount_factor": 0.34457819489106123,
+        "instantaneous_forward_percent": 4.419040011689626
+      },
+      {
+        "date": "2049-08-02",
+        "discount_factor": 0.3432885046119529,
+        "instantaneous_forward_percent": 4.411221305888457
+      },
+      {
+        "date": "2049-09-02",
+        "discount_factor": 0.34200589931307546,
+        "instantaneous_forward_percent": 4.403493361691023
+      },
+      {
+        "date": "2049-10-02",
+        "discount_factor": 0.3407713486242676,
+        "instantaneous_forward_percent": 4.39610112386404
+      },
+      {
+        "date": "2049-11-02",
+        "discount_factor": 0.3395024820488202,
+        "instantaneous_forward_percent": 4.38855177590307
+      },
+      {
+        "date": "2049-12-02",
+        "discount_factor": 0.33828109832785946,
+        "instantaneous_forward_percent": 4.381332373176161
+      },
+      {
+        "date": "2050-01-02",
+        "discount_factor": 0.3370257060671464,
+        "instantaneous_forward_percent": 4.373961621681661
+      },
+      {
+        "date": "2050-02-02",
+        "discount_factor": 0.33577706172904076,
+        "instantaneous_forward_percent": 4.36668163180104
+      },
+      {
+        "date": "2050-03-02",
+        "discount_factor": 0.3346549987649664,
+        "instantaneous_forward_percent": 4.3601841693847
+      },
+      {
+        "date": "2050-04-02",
+        "discount_factor": 0.3334190146327195,
+        "instantaneous_forward_percent": 4.353076920028598
+      },
+      {
+        "date": "2050-05-02",
+        "discount_factor": 0.33222914499771655,
+        "instantaneous_forward_percent": 4.346285354727735
+      },
+      {
+        "date": "2050-06-02",
+        "discount_factor": 0.3310060025159809,
+        "instantaneous_forward_percent": 4.3393567016349515
+      },
+      {
+        "date": "2050-07-02",
+        "discount_factor": 0.3298284401688935,
+        "instantaneous_forward_percent": 4.332737971459831
+      },
+      {
+        "date": "2050-08-02",
+        "discount_factor": 0.3286178923092851,
+        "instantaneous_forward_percent": 4.325987914193582
+      },
+      {
+        "date": "2050-09-02",
+        "discount_factor": 0.3274136518578543,
+        "instantaneous_forward_percent": 4.319328619886536
+      },
+      {
+        "date": "2050-10-02",
+        "discount_factor": 0.3262542050101475,
+        "instantaneous_forward_percent": 4.312970558606759
+      },
+      {
+        "date": "2050-11-02",
+        "discount_factor": 0.32506219559752414,
+        "instantaneous_forward_percent": 4.306489859914866
+      },
+      {
+        "date": "2050-12-02",
+        "discount_factor": 0.3239144708478405,
+        "instantaneous_forward_percent": 4.300304633555944
+      },
+      {
+        "date": "2051-01-02",
+        "discount_factor": 0.3227344572142267,
+        "instantaneous_forward_percent": 4.294002531152168
+      },
+      {
+        "date": "2051-02-02",
+        "discount_factor": 0.3215604510900479,
+        "instantaneous_forward_percent": 4.287791190606086
+      },
+      {
+        "date": "2051-03-02",
+        "discount_factor": 0.32050517295209907,
+        "instantaneous_forward_percent": 4.282258959435458
+      },
+      {
+        "date": "2051-04-02",
+        "discount_factor": 0.3193424379384832,
+        "instantaneous_forward_percent": 4.276220359454527
+      },
+      {
+        "date": "2051-05-02",
+        "discount_factor": 0.31822276945303296,
+        "instantaneous_forward_percent": 4.270462970845021
+      },
+      {
+        "date": "2051-06-02",
+        "discount_factor": 0.317071467108936,
+        "instantaneous_forward_percent": 4.264602966946266
+      },
+      {
+        "date": "2051-07-02",
+        "discount_factor": 0.31596275555767833,
+        "instantaneous_forward_percent": 4.259018413279494
+      },
+      {
+        "date": "2051-08-02",
+        "discount_factor": 0.3148226659434946,
+        "instantaneous_forward_percent": 4.253337005469094
+      },
+      {
+        "date": "2051-09-02",
+        "discount_factor": 0.3136881916662209,
+        "instantaneous_forward_percent": 4.247746359971548
+      },
+      {
+        "date": "2051-10-02",
+        "discount_factor": 0.31259560791337343,
+        "instantaneous_forward_percent": 4.242422475256934
+      },
+      {
+        "date": "2051-11-02",
+        "discount_factor": 0.3114720225869404,
+        "instantaneous_forward_percent": 4.2370104258567025
+      },
+      {
+        "date": "2051-12-02",
+        "discount_factor": 0.31038987464513346,
+        "instantaneous_forward_percent": 4.231859376099247
+      },
+      {
+        "date": "2052-01-02",
+        "discount_factor": 0.3092769687262758,
+        "instantaneous_forward_percent": 4.2266259230240815
+      },
+      {
+        "date": "2052-02-02",
+        "discount_factor": 0.30816941102876055,
+        "instantaneous_forward_percent": 4.221483231824957
+      },
+      {
+        "date": "2052-03-02",
+        "discount_factor": 0.3071381038762806,
+        "instantaneous_forward_percent": 4.216754494612484
+      },
+      {
+        "date": "2052-04-02",
+        "discount_factor": 0.30604074869917575,
+        "instantaneous_forward_percent": 4.211787471657604
+      },
+      {
+        "date": "2052-05-02",
+        "discount_factor": 0.3049837392789197,
+        "instantaneous_forward_percent": 4.207067092789182
+      },
+      {
+        "date": "2052-06-02",
+        "discount_factor": 0.30389655859908427,
+        "instantaneous_forward_percent": 4.202278665950722
+      },
+      {
+        "date": "2052-07-02",
+        "discount_factor": 0.3028493002094968,
+        "instantaneous_forward_percent": 4.197731122279672
+      },
+      {
+        "date": "2052-08-02",
+        "discount_factor": 0.3017720981096808,
+        "instantaneous_forward_percent": 4.193121291562681
+      },
+      {
+        "date": "2052-09-02",
+        "discount_factor": 0.3006998932085758,
+        "instantaneous_forward_percent": 4.188602222952897
+      },
+      {
+        "date": "2052-10-02",
+        "discount_factor": 0.29966698726246943,
+        "instantaneous_forward_percent": 4.1843153482810935
+      },
+      {
+        "date": "2052-11-02",
+        "discount_factor": 0.298604472494355,
+        "instantaneous_forward_percent": 4.179974875577992
+      },
+      {
+        "date": "2052-12-02",
+        "discount_factor": 0.29758085332406947,
+        "instantaneous_forward_percent": 4.175860836337286
+      },
+      {
+        "date": "2053-01-02",
+        "discount_factor": 0.29652784199489357,
+        "instantaneous_forward_percent": 4.171698959989531
+      },
+      {
+        "date": "2053-02-02",
+        "discount_factor": 0.29547958987667666,
+        "instantaneous_forward_percent": 4.167627845754817
+      },
+      {
+        "date": "2053-03-02",
+        "discount_factor": 0.29453683318651863,
+        "instantaneous_forward_percent": 4.164028722427469
+      },
+      {
+        "date": "2053-04-02",
+        "discount_factor": 0.29349750989900536,
+        "instantaneous_forward_percent": 4.1601303483755885
+      },
+      {
+        "date": "2053-05-02",
+        "discount_factor": 0.292496116761207,
+        "instantaneous_forward_percent": 4.156444146372529
+      },
+      {
+        "date": "2053-06-02",
+        "discount_factor": 0.29146584991120017,
+        "instantaneous_forward_percent": 4.152724368908556
+      },
+      {
+        "date": "2053-07-02",
+        "discount_factor": 0.2904731361602519,
+        "instantaneous_forward_percent": 4.149211001462709
+      },
+      {
+        "date": "2053-08-02",
+        "discount_factor": 0.28945175111606913,
+        "instantaneous_forward_percent": 4.145669820146481
+      },
+      {
+        "date": "2053-09-02",
+        "discount_factor": 0.2884348139203258,
+        "instantaneous_forward_percent": 4.142219400728334
+      },
+      {
+        "date": "2053-10-02",
+        "discount_factor": 0.28745487482590437,
+        "instantaneous_forward_percent": 4.138966702762928
+      },
+      {
+        "date": "2053-11-02",
+        "discount_factor": 0.2864465623273113,
+        "instantaneous_forward_percent": 4.135694879720127
+      },
+      {
+        "date": "2053-12-02",
+        "discount_factor": 0.285474888804993,
+        "instantaneous_forward_percent": 4.132615016542922
+      },
+      {
+        "date": "2054-01-02",
+        "discount_factor": 0.2844750345967183,
+        "instantaneous_forward_percent": 4.129521789434828
+      },
+      {
+        "date": "2054-02-02",
+        "discount_factor": 0.2834794161108372,
+        "instantaneous_forward_percent": 4.126519324451258
+      },
+      {
+        "date": "2054-03-02",
+        "discount_factor": 0.2825837537628046,
+        "instantaneous_forward_percent": 4.123885432443035
+      },
+      {
+        "date": "2054-04-02",
+        "discount_factor": 0.281596081819209,
+        "instantaneous_forward_percent": 4.12105570766335
+      },
+      {
+        "date": "2054-05-02",
+        "discount_factor": 0.2806441893212341,
+        "instantaneous_forward_percent": 4.118403682220712
+      },
+      {
+        "date": "2054-06-02",
+        "discount_factor": 0.2796645772720173,
+        "instantaneous_forward_percent": 4.1157525538275515
+      },
+      {
+        "date": "2054-07-02",
+        "discount_factor": 0.27872040900472905,
+        "instantaneous_forward_percent": 4.1132733636277035
+      },
+      {
+        "date": "2054-08-02",
+        "discount_factor": 0.27774870122673717,
+        "instantaneous_forward_percent": 4.110800831179775
+      },
+      {
+        "date": "2054-09-02",
+        "discount_factor": 0.27678095169047634,
+        "instantaneous_forward_percent": 4.108419060639423
+      },
+      {
+        "date": "2054-10-02",
+        "discount_factor": 0.2758481518838199,
+        "instantaneous_forward_percent": 4.106200539503197
+      },
+      {
+        "date": "2054-11-02",
+        "discount_factor": 0.2748880775256408,
+        "instantaneous_forward_percent": 4.103997365356022
+      },
+      {
+        "date": "2054-12-02",
+        "discount_factor": 0.27396263322663816,
+        "instantaneous_forward_percent": 4.101951679246754
+      },
+      {
+        "date": "2055-01-02",
+        "discount_factor": 0.2730100857952812,
+        "instantaneous_forward_percent": 4.099927101273037
+      },
+      {
+        "date": "2055-02-02",
+        "discount_factor": 0.2720613076238231,
+        "instantaneous_forward_percent": 4.097993285431902
+      },
+      {
+        "date": "2055-03-02",
+        "discount_factor": 0.27120755551851894,
+        "instantaneous_forward_percent": 4.096324624842226
+      },
+      {
+        "date": "2055-04-02",
+        "discount_factor": 0.27026584867836334,
+        "instantaneous_forward_percent": 4.094563549441554
+      },
+      {
+        "date": "2055-05-02",
+        "discount_factor": 0.26935800686415245,
+        "instantaneous_forward_percent": 4.092945700659444
+      },
+      {
+        "date": "2055-06-02",
+        "discount_factor": 0.2684234721180901,
+        "instantaneous_forward_percent": 4.091363221659212
+      },
+      {
+        "date": "2055-07-02",
+        "discount_factor": 0.2675225036655814,
+        "instantaneous_forward_percent": 4.089918207466684
+      },
+      {
+        "date": "2055-08-02",
+        "discount_factor": 0.2665950024529309,
+        "instantaneous_forward_percent": 4.088514324424475
+      },
+      {
+        "date": "2055-09-02",
+        "discount_factor": 0.2656710234194283,
+        "instantaneous_forward_percent": 4.087201203295911
+      },
+      {
+        "date": "2055-10-02",
+        "discount_factor": 0.2647801710168087,
+        "instantaneous_forward_percent": 4.086016858850563
+      },
+      {
+        "date": "2055-11-02",
+        "discount_factor": 0.2638630215985671,
+        "instantaneous_forward_percent": 4.084882333904225
+      },
+      {
+        "date": "2055-12-02",
+        "discount_factor": 0.2629787143542282,
+        "instantaneous_forward_percent": 4.083870824051935
+      },
+      {
+        "date": "2056-01-02",
+        "discount_factor": 0.2620682626328244,
+        "instantaneous_forward_percent": 4.082914895511063
+      },
+      {
+        "date": "2056-02-02",
+        "discount_factor": 0.26116116492926883,
+        "instantaneous_forward_percent": 4.082049728885359
+      },
+      {
+        "date": "2056-03-02",
+        "discount_factor": 0.2603155967728535,
+        "instantaneous_forward_percent": 4.081322547096638
+      },
+      {
+        "date": "2056-04-02",
+        "discount_factor": 0.25941489705908244,
+        "instantaneous_forward_percent": 4.080633048565565
+      },
+      {
+        "date": "2056-05-02",
+        "discount_factor": 0.25854635443242496,
+        "instantaneous_forward_percent": 4.080052209560594
+      },
+      {
+        "date": "2056-06-02",
+        "discount_factor": 0.257652034793838,
+        "instantaneous_forward_percent": 4.079541307437147
+      },
+      {
+        "date": "2056-07-02",
+        "discount_factor": 0.2567896065599553,
+        "instantaneous_forward_percent": 4.079133303472253
+      },
+      {
+        "date": "2056-08-02",
+        "discount_factor": 0.25590154387304814,
+        "instantaneous_forward_percent": 4.078800997534927
+      },
+      {
+        "date": "2056-09-02",
+        "discount_factor": 0.25501661454311736,
+        "instantaneous_forward_percent": 4.078559453513891
+      },
+      {
+        "date": "2056-10-02",
+        "discount_factor": 0.2541631856282226,
+        "instantaneous_forward_percent": 4.078412118859688
+      },
+      {
+        "date": "2056-11-02",
+        "discount_factor": 0.25328433213437734,
+        "instantaneous_forward_percent": 4.078349171025229
+      },
+      {
+        "date": "2056-11-08",
+        "discount_factor": 0.25311458383729263,
+        "instantaneous_forward_percent": 4.078347470836623
+      }
+    ]
+  },
+  "validation": {
+    "decision": "QUARANTINE",
+    "bootstrap_result": "PASS",
+    "message": "PRICING_VALIDATION_FAILED One or more OIS pricing checks failed.",
+    "validation_risks": [],
+    "pricing_risks": [
+      {
+        "code": "baseline_pv_usd",
+        "bump_bp": 0,
+        "actual": -4.4380431063473225E-07,
+        "expected": 0,
+        "tolerance": 4.462964717940199,
+        "passed": true,
+        "tenor": "5Y",
+        "quote_date": "2026-11-02"
+      },
+      {
+        "code": "positive_pv_change",
+        "bump_bp": 1,
+        "actual": 890.5059747010762,
+        "expected": 0,
+        "tolerance": null,
+        "passed": true,
+        "tenor": "5Y",
+        "quote_date": "2026-11-02"
+      },
+      {
+        "code": "pv_change_usd",
+        "bump_bp": 1,
+        "actual": 890.5059747010762,
+        "expected": 445.2529875917759,
+        "tolerance": 8.915494593857957,
+        "passed": false,
+        "tenor": "5Y",
+        "quote_date": "2026-11-02"
+      },
+      {
+        "code": "positive_pv_change",
+        "bump_bp": 10,
+        "actual": 8897.240097064989,
+        "expected": 0,
+        "tolerance": null,
+        "passed": true,
+        "tenor": "5Y",
+        "quote_date": "2026-11-02"
+      },
+      {
+        "code": "pv_change_usd",
+        "bump_bp": 10,
+        "actual": 8897.240097064989,
+        "expected": 4448.620048972526,
+        "tolerance": 8.911584766912725,
+        "passed": false,
+        "tenor": "5Y",
+        "quote_date": "2026-11-02"
+      },
+      {
+        "code": "ten_bp_to_one_bp_ratio",
+        "bump_bp": null,
+        "actual": 9.99121886863432,
+        "expected": 10,
+        "tolerance": 0.5,
+        "passed": true,
+        "tenor": "5Y",
+        "quote_date": "2026-11-02"
+      }
+    ]
+  },
+  "evidence": {
+    "id": "guard",
+    "valuation_date": "2026-11-02",
+    "decision": "QUARANTINE",
+    "bootstrap": "PASS",
+    "failure_code": "PRICING_VALIDATION_FAILED",
+    "input_checks": [],
+    "pricing_checks": [
+      {
+        "id": "pricing-1",
+        "check": {
+          "code": "baseline_pv_usd",
+          "bump_bp": 0,
+          "actual": -4.4380431063473225E-07,
+          "expected": 0,
+          "tolerance": 4.462964717940199,
+          "passed": true,
+          "tenor": "5Y",
+          "quote_date": "2026-11-02"
+        }
+      },
+      {
+        "id": "pricing-2",
+        "check": {
+          "code": "positive_pv_change",
+          "bump_bp": 1,
+          "actual": 890.5059747010762,
+          "expected": 0,
+          "tolerance": null,
+          "passed": true,
+          "tenor": "5Y",
+          "quote_date": "2026-11-02"
+        }
+      },
+      {
+        "id": "pricing-3",
+        "check": {
+          "code": "pv_change_usd",
+          "bump_bp": 1,
+          "actual": 890.5059747010762,
+          "expected": 445.2529875917759,
+          "tolerance": 8.915494593857957,
+          "passed": false,
+          "tenor": "5Y",
+          "quote_date": "2026-11-02"
+        }
+      },
+      {
+        "id": "pricing-4",
+        "check": {
+          "code": "positive_pv_change",
+          "bump_bp": 10,
+          "actual": 8897.240097064989,
+          "expected": 0,
+          "tolerance": null,
+          "passed": true,
+          "tenor": "5Y",
+          "quote_date": "2026-11-02"
+        }
+      },
+      {
+        "id": "pricing-5",
+        "check": {
+          "code": "pv_change_usd",
+          "bump_bp": 10,
+          "actual": 8897.240097064989,
+          "expected": 4448.620048972526,
+          "tolerance": 8.911584766912725,
+          "passed": false,
+          "tenor": "5Y",
+          "quote_date": "2026-11-02"
+        }
+      },
+      {
+        "id": "pricing-6",
+        "check": {
+          "code": "ten_bp_to_one_bp_ratio",
+          "bump_bp": null,
+          "actual": 9.99121886863432,
+          "expected": 10,
+          "tolerance": 0.5,
+          "passed": true,
+          "tenor": "5Y",
+          "quote_date": "2026-11-02"
+        }
+      }
+    ]
+  },
+  "model": "gpt-6-luna",
+  "diagnostic": {
+    "explanation": "Quarantined at pricing validation despite bootstrap PASS. No input checks were supplied. For the 5Y quote dated 2026-11-02, the 1 bp PV change was $890.51 versus $445.25 expected, and the 10 bp change was $8,897.24 versus $4,448.62 expected; both failed. Baseline PV, positive-change checks, and the 10:1 ratio check passed.",
+    "evidence_ids": [
+      "guard",
+      "pricing-3",
+      "pricing-5"
+    ],
+    "unknowns": [
+      "Cause of the PV-change mismatches is not established by the evidence."
+    ],
+    "recommended_next_action": "Have a human reviewer check the PV-change expectations and calculations for the 5Y quote before clearing the quarantine."
+  },
+  "diagnostic_error": null
+}

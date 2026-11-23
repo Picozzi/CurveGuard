@@ -1,6 +1,6 @@
 # Duplicate 5Y OIS tenor
 
-[Source fixture](../examples/duplicate-5y.json) · [Report after replay](../reports/replays-eval1/duplicate-5y.json)
+[Source fixture](../examples/duplicate-5y.json) · [Report after replay](../Evaluations/replays-eval1/duplicate-5y.json)
 
 ## Expected diagnosis
 
