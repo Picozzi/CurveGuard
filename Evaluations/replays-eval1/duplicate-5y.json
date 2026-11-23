@@ -538,16 +538,15 @@
   },
   "model": "gpt-6-luna",
   "diagnostic": {
-    "explanation": "Quarantined at input validation: check input-1 reports more than one OIS quote for tenor 5Y. Bootstrap was skipped. No price was measured, so pricing impact is unknown; the cause of the duplicate is not established.",
+    "explanation": "Quarantined at input validation: more than one OIS quote was supplied for tenor 5Y. Observed quote date: not provided; expected date: not provided. Bootstrap was skipped. Pricing impact is unknown because no price was measured.",
     "evidence_ids": [
-      "guard",
       "input-1"
     ],
     "unknowns": [
-      "Pricing impact; no price was measured.",
-      "Cause of the duplicate 5Y OIS quotes."
+      "Why duplicate 5Y OIS quotes were supplied.",
+      "Pricing impact."
     ],
-    "recommended_next_action": "Have a reviewer inspect the supplied 5Y OIS quotes and resolve the duplicate."
+    "recommended_next_action": "Have a reviewer inspect the 5Y OIS quotes and resolve the duplicate."
   },
   "diagnostic_error": null
 }

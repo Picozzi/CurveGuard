@@ -529,16 +529,14 @@
   },
   "model": "gpt-6-luna",
   "diagnostic": {
-    "explanation": "CurveGuard quarantined the curve at input validation because the SOFR fixing date did not match the expected date: observed 2026-10-29, expected 2026-10-30. Bootstrap was skipped. No price was measured, so pricing impact is unknown. The evidence does not establish why the fixing date differed.",
+    "explanation": "CurveGuard quarantined the curve because input validation failed: the SOFR fixing date was 2026-10-29, but the expected date was 2026-10-30. Bootstrap was skipped, and no price was measured.",
     "evidence_ids": [
-      "guard",
       "input-1"
     ],
     "unknowns": [
-      "Reason for the SOFR fixing date mismatch",
-      "Pricing impact"
+      "Why the fixing date differed; pricing impact is unknown."
     ],
-    "recommended_next_action": "Have a human reviewer verify the SOFR fixing date against the source data and correct or confirm the input."
+    "recommended_next_action": "Have a reviewer verify the SOFR fixing date and correct or confirm the input before rerunning."
   },
   "diagnostic_error": null
 }

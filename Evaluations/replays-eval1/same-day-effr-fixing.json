@@ -529,16 +529,14 @@
   },
   "model": "gpt-6-luna",
   "diagnostic": {
-    "explanation": "The valuation was quarantined because input validation failed. Check input-1 reports an EFFR fixing date of 2026-11-02; the expected date was 2026-10-30. Bootstrap was skipped, so no price was measured and pricing impact is unknown. The underlying cause is not established.",
+    "explanation": "CurveGuard quarantined the curve at input validation: the EFFR fixing date was 2026-11-02, but the expected previous business day was 2026-10-30. Bootstrapping was skipped, so no price was measured and pricing impact is unknown.",
     "evidence_ids": [
-      "guard",
       "input-1"
     ],
     "unknowns": [
-      "Underlying cause of the date mismatch",
-      "Pricing impact"
+      "Why the fixing date did not match; pricing impact."
     ],
-    "recommended_next_action": "Have a reviewer verify the EFFR fixing date, correct it if needed, and rerun the valuation."
+    "recommended_next_action": "Have a reviewer verify the EFFR fixing date and correct the input if needed."
   },
   "diagnostic_error": null
 }

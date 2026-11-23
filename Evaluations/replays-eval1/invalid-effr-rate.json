@@ -529,16 +529,16 @@
   },
   "model": "gpt-6-luna",
   "diagnostic": {
-    "explanation": "CurveGuard quarantined the curve at input validation (guard: INPUT_VALIDATION_FAILED). Check input-1 reports an invalid EFFR rate; bootstrap was skipped. Pricing impact is unknown because no price was measured.",
+    "explanation": "CurveGuard quarantined the curve because input validation failed: the EFFR fixing must be a finite rate representable as a decimal. Bootstrap was skipped, and no price was measured, so pricing impact is unknown. The specific cause is unknown.",
     "evidence_ids": [
-      "guard",
       "input-1"
     ],
     "unknowns": [
-      "The EFFR value and specific cause of its invalidity are not provided.",
-      "Pricing impact is unknown."
+      "Observed and expected fixing dates were not provided.",
+      "The specific issue with the EFFR fixing is unknown.",
+      "Pricing impact is unknown because no price was measured."
     ],
-    "recommended_next_action": "Have a reviewer verify the EFFR fixing and correct or confirm the input."
+    "recommended_next_action": "Have a reviewer inspect the EFFR fixing and confirm it is a finite decimal rate."
   },
   "diagnostic_error": null
 }

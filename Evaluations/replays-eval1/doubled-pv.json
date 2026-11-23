@@ -2945,16 +2945,16 @@
   },
   "model": "gpt-6-luna",
   "diagnostic": {
-    "explanation": "Quarantined at pricing validation despite bootstrap PASS. No input checks were supplied. For the 5Y quote dated 2026-11-02, the 1 bp PV change was $890.51 versus $445.25 expected, and the 10 bp change was $8,897.24 versus $4,448.62 expected; both failed. Baseline PV, positive-change checks, and the 10:1 ratio check passed.",
+    "explanation": "CurveGuard quarantined the curve because pricing validation failed, despite bootstrap passing. For the 5Y quote dated 2026-11-02, the 1 bp PV change was $890.51 versus $445.25 expected, and the 10 bp change was $8,897.24 versus $4,448.62 expected. Both exceeded their validation tolerances. The PV changes were measured; their broader valuation impact is not established.",
     "evidence_ids": [
-      "guard",
       "pricing-3",
       "pricing-5"
     ],
     "unknowns": [
-      "Cause of the PV-change mismatches is not established by the evidence."
+      "The cause of the pricing discrepancies is unknown.",
+      "The broader valuation impact is unknown."
     ],
-    "recommended_next_action": "Have a human reviewer check the PV-change expectations and calculations for the 5Y quote before clearing the quarantine."
+    "recommended_next_action": "Have a human reviewer investigate the 5Y pricing checks and confirm the expected bump responses before releasing the curve."
   },
   "diagnostic_error": null
 }

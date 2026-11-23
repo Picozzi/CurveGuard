@@ -520,16 +520,15 @@
   },
   "model": "gpt-6-luna",
   "diagnostic": {
-    "explanation": "Quarantined at input validation: the required 1Y OIS anchor is reported missing (input-1). Observed quote date: not provided; expected date: not provided. Bootstrap was skipped. No price was measured, so pricing impact is unknown. Why the quote is missing is unknown.",
+    "explanation": "Input validation failed because the required 1Y OIS anchor is missing. Observed quote date: none; expected date: not provided. Bootstrap was skipped, so no price was measured.",
     "evidence_ids": [
-      "guard",
       "input-1"
     ],
     "unknowns": [
-      "Why the 1Y OIS quote is missing",
-      "Pricing impact"
+      "Why the quote is missing.",
+      "Pricing impact."
     ],
-    "recommended_next_action": "Have a reviewer verify the 1Y OIS quote and its applicable date."
+    "recommended_next_action": "Have a reviewer verify the source data and provide or confirm the required 1Y OIS quote."
   },
   "diagnostic_error": null
 }

@@ -529,16 +529,15 @@
   },
   "model": "gpt-6-luna",
   "diagnostic": {
-    "explanation": "Quarantined at input validation: ZQZ26.CBT closed on 2026-10-30, before the expected valuation-date close of 2026-11-02 (input-1). Bootstrap was skipped. No price was measured, so pricing impact is unknown; the reason the close is stale is not established.",
+    "explanation": "CurveGuard quarantined the curve during input validation because the ZQ close was stale: observed date 2026-10-30; expected date 2026-11-02. Bootstrap was skipped, so pricing impact is unknown. The reason the close was stale is not established.",
     "evidence_ids": [
-      "guard",
       "input-1"
     ],
     "unknowns": [
       "Pricing impact; no price was measured.",
       "Why the ZQ close predates the valuation date."
     ],
-    "recommended_next_action": "Have a reviewer verify the ZQZ26.CBT close date and obtain or confirm the expected 2026-11-02 input."
+    "recommended_next_action": "Have a reviewer verify the ZQ close date and obtain a current close before rerunning the curve."
   },
   "diagnostic_error": null
 }

@@ -529,16 +529,15 @@
   },
   "model": "gpt-6-luna",
   "diagnostic": {
-    "explanation": "Quarantined at input validation: the 5Y OIS quote is dated 2026-10-30, before the expected date of 2026-11-02 (input-1). Bootstrap was skipped. No price was measured, so pricing impact is unknown; the underlying cause is not established.",
+    "explanation": "Quarantined during input validation: the 5Y OIS quote is dated 2026-10-30, before the expected date of 2026-11-02. Bootstrap was skipped; pricing impact is unknown because no price was measured.",
     "evidence_ids": [
-      "input-1",
-      "guard"
+      "input-1"
     ],
     "unknowns": [
-      "Pricing impact",
-      "Underlying cause"
+      "Pricing impact was not measured.",
+      "Why the quote was stale is unknown."
     ],
-    "recommended_next_action": "Have a human reviewer verify the 5Y OIS quote date and provide a valid quote if needed."
+    "recommended_next_action": "Have a reviewer verify the 5Y OIS quote date and obtain a current quote if needed."
   },
   "diagnostic_error": null
 }

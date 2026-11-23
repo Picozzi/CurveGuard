@@ -529,17 +529,15 @@
   },
   "model": "gpt-6-luna",
   "diagnostic": {
-    "explanation": "Guard guard quarantined the valuation at input validation (INPUT_VALIDATION_FAILED); bootstrap was skipped. Check input-1 reports an invalid EFFR target range. No observed or expected dates were provided. Pricing impact is unknown because no price was measured. The specific cause is unknown from the supplied evidence.",
+    "explanation": "Quarantined during input validation because the EFFR target range did not meet the requirement for finite, ordered decimal bounds. The check provides no observed or expected date. Bootstrap was skipped, and pricing impact is unknown because no price was measured.",
     "evidence_ids": [
-      "guard",
       "input-1"
     ],
     "unknowns": [
-      "Observed and expected dates for input-1",
-      "Actual EFFR target bounds and the specific cause",
-      "Pricing impact"
+      "The EFFR bounds and the reason they failed are not provided.",
+      "Observed and expected dates are not provided."
     ],
-    "recommended_next_action": "Have a reviewer inspect the EFFR target range and confirm its bounds are finite, ordered, and representable as decimals."
+    "recommended_next_action": "Have a human reviewer verify the EFFR target-range bounds and correct them if needed."
   },
   "diagnostic_error": null
 }

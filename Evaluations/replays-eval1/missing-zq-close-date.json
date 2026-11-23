@@ -529,16 +529,15 @@
   },
   "model": "gpt-6-luna",
   "diagnostic": {
-    "explanation": "Quarantined at input validation: ZQZ26.CBT has no observed close date; expected date was 2026-11-02. Bootstrap was skipped. Pricing impact is unknown because no price was measured. The reason the close date is missing is unknown.",
+    "explanation": "CurveGuard quarantined the curve because input validation failed: ZQZ26.CBT has no observed close date (observed: none; expected: 2026-11-02). Bootstrap was skipped, so no price was measured and pricing impact is unknown.",
     "evidence_ids": [
-      "input-1",
-      "guard"
+      "input-1"
     ],
     "unknowns": [
-      "Why the observed close date is missing",
-      "Pricing impact"
+      "Why the ZQ quote has no observed close date.",
+      "Pricing impact; no price was measured."
     ],
-    "recommended_next_action": "Have a human reviewer verify the ZQ quote\u2019s close date and correct or confirm the input."
+    "recommended_next_action": "Have a reviewer verify the ZQZ26.CBT close date and correct or confirm the quote date."
   },
   "diagnostic_error": null
 }
