@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "CurveGuard.Web": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5186",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

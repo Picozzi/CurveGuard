@@ -37,7 +37,7 @@ namespace CurveGuard
         }
 
         //Replay
-        public static async Task<ValidationResult> RunPricingValidation(CurveInputs inputs, SOFRCurve curve, Dictionary<int, CurveInputs> savedBumps, Dictionary<int, double> reportedPvOverrides)
+        public static async Task<ValidationResult> RunPricingValidation(CurveInputs inputs, SOFRCurve curve, Dictionary<int, CurveInputs> savedBumps, Dictionary<int, double>? reportedPvOverrides)
         {
             if (FindFiveYearRate(inputs) is not { } base5YRate)
                 return new ValidationResult("QUARANTINE", "PASS",
@@ -145,7 +145,7 @@ namespace CurveGuard
             return annuity;
         }
 
-        private static async Task<ValidationResult> CheckScenariosAsync(CurveInputs inputs, OISTrade trade, IReadOnlyDictionary<int, CurveInputs> bumps, OISTradeValuation baseValuation, Dictionary<int, double> reportedPvOverrides)
+        private static async Task<ValidationResult> CheckScenariosAsync(CurveInputs inputs, OISTrade trade, IReadOnlyDictionary<int, CurveInputs> bumps, OISTradeValuation baseValuation, Dictionary<int, double>? reportedPvOverrides)
         {
             var valuationDate = inputs.ValuationDate;
             var baseRate = trade.FixedCouponPercent;

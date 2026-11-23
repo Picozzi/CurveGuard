@@ -2,6 +2,22 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "CurveGuard Web",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Build CurveGuard.Web",
+      "program": "${workspaceFolder}/CurveGuard.Web/bin/Debug/net10.0/CurveGuard.Web.dll",
+      "cwd": "${workspaceFolder}/CurveGuard.Web",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5186"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      }
+    },
+    {
       "name": "Replay",
       "type": "coreclr",
       "request": "launch",

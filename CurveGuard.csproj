@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);CurveGuard.Web/**</DefaultItemExcludes>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -14,6 +15,7 @@
   <ItemGroup>
     <Compile Remove="tests/**/*.cs" />
     <InternalsVisibleTo Include="CurveGuard.Tests" />
+    <InternalsVisibleTo Include="CurveGuard.Web" />
   </ItemGroup>
   <ItemGroup>
     <None Update="MeetingCSVs/fomc-meetings-2026-2027.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

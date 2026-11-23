@@ -1,7 +1,5 @@
-using System.Diagnostics;
 using System.Text.Json;
 using DotNetEnv;
-using YahooQuotesApi;
 
 namespace CurveGuard
 {
@@ -44,10 +42,7 @@ namespace CurveGuard
                 {
                     try
                     {
-                        SavedCurveReplay replay = await SavedCurveFixtures.LoadReplayAsync(replayCase);
-                        var inputs = replay.Inputs;
-                        var run = await RunFromInputsAsync(inputs, replay);
-                        await SaveRunReportAsync(run.Inputs, run.Curve, run.Validation, replayCase);
+                        await RunReplayAsync(replayCase);
                     }
                     catch (Exception error)
                     {
@@ -59,15 +54,27 @@ namespace CurveGuard
             {
                 try
                     {
-                        var inputs = await LoadLiveInputsAsync(new DateTime(2026, 11, 19));
-                        var run = await RunFromInputsAsync(inputs, null);
-                        await SaveRunReportAsync(run.Inputs, run.Curve, run.Validation, null);
+                        await RunLiveAsync(new DateOnly(2026, 11, 19));
                     }
                     catch (Exception error)
                     {
                         Console.Error.WriteLine($"CurveGuard: {error.Message}");
                     }
             }
+        }
+
+        internal static async Task<JsonElement> RunLiveAsync(DateOnly valuationDate)
+        {
+            var inputs = await LoadLiveInputsAsync(valuationDate.ToDateTime(TimeOnly.MinValue));
+            var run = await RunFromInputsAsync(inputs, null);
+            return await SaveRunReportAsync(run.Inputs, run.Curve, run.Validation, null);
+        }
+
+        internal static async Task<JsonElement> RunReplayAsync(string name)
+        {
+            var replay = await SavedCurveFixtures.LoadReplayAsync(name);
+            var run = await RunFromInputsAsync(replay.Inputs, replay);
+            return await SaveRunReportAsync(run.Inputs, run.Curve, run.Validation, name);
         }
 
         private static async Task<DiagnosticReport> ExplainDiagnosticAsync(DateOnly valuationDate, ValidationResult validation)
@@ -102,7 +109,7 @@ namespace CurveGuard
             return new CurveInputs(valuationDateOnly, fixingTask.Result, effrTask.Result, swapsTask.Result, [], futuresTask.Result);
         }
 
-        private static async Task<(CurveInputs Inputs, SOFRCurve? Curve, ValidationResult Validation)> RunFromInputsAsync(CurveInputs inputs, SavedCurveReplay replay)
+        private static async Task<(CurveInputs Inputs, SOFRCurve? Curve, ValidationResult Validation)> RunFromInputsAsync(CurveInputs inputs, SavedCurveReplay? replay)
         {
             var results = await CurveInputValidation.RunInputValidation(inputs);
             if (results.Decision != "PASS")
@@ -137,16 +144,10 @@ namespace CurveGuard
 
             try
             {
-                Dictionary<int, CurveInputs> savedBumps = new Dictionary<int, CurveInputs>();
-                Dictionary<int, double> reportedPvOverrides = new Dictionary<int, double>();
-                
-                if(replay != null)
-                {
-                    savedBumps = replay.SavedBumps;
-                    reportedPvOverrides = replay.ReportedPvOverrides;
-                }
-
-                results = await CurveRiskValidation.RunPricingValidation(inputs, curve, savedBumps, reportedPvOverrides);
+                results = replay is null
+                    ? await CurveRiskValidation.RunPricingValidation(inputs, curve)
+                    : await CurveRiskValidation.RunPricingValidation(inputs, curve, replay.SavedBumps
+                        ?? throw new ArgumentException("Pricing this replay requires saved bump scenarios."), replay.ReportedPvOverrides);
             }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException or ApplicationException or FormatException)
             {
@@ -156,7 +157,7 @@ namespace CurveGuard
             return (inputs, curve, results);
         }
 
-        private static async Task SaveRunReportAsync(CurveInputs inputs, SOFRCurve? curve, ValidationResult validation, string? replayCase)
+        private static async Task<JsonElement> SaveRunReportAsync(CurveInputs inputs, SOFRCurve? curve, ValidationResult validation, string? replayCase)
         {
             bool liveRun = replayCase == null; 
             bool passed = validation.Decision == "PASS" && curve is not null;
@@ -169,18 +170,18 @@ namespace CurveGuard
             var reportPath = Path.Combine(reportDirectory, reportName);
             var report = new { Inputs = inputs, Curve = curve, Validation = validation };
 
-            await WriteReportAsync(reportPath, report);
+            var saved = await WriteReportAsync(reportPath, report);
             Console.WriteLine($"{validation.Decision}: saved {reportPath}");
 
             if (passed)
             {
                 CurveChart.Save(JsonSerializer.SerializeToElement(curve, JsonOptions),
                     Path.ChangeExtension(reportPath, ".png"));
-                return;
+                return saved;
             }
 
             var diagnostic = await ExplainDiagnosticAsync(inputs.ValuationDate, validation);
-            await WriteReportAsync(reportPath, new
+            return await WriteReportAsync(reportPath, new
             {
                 report.Inputs,
                 report.Curve,
@@ -192,14 +193,15 @@ namespace CurveGuard
             });
         }
 
-        private static async Task WriteReportAsync<T>(string reportPath, T report)
+        private static async Task<JsonElement> WriteReportAsync<T>(string reportPath, T report)
         {
             var temporaryPath = $"{reportPath}.{Guid.NewGuid():N}.tmp";
             try
             {
-                var json = JsonSerializer.Serialize(report, JsonOptions);
-                await File.WriteAllTextAsync(temporaryPath, json + Environment.NewLine);
+                var json = JsonSerializer.SerializeToElement(report, JsonOptions);
+                await File.WriteAllTextAsync(temporaryPath, json.GetRawText() + Environment.NewLine);
                 File.Move(temporaryPath, reportPath, overwrite: true);
+                return json;
             }
             finally
             {
