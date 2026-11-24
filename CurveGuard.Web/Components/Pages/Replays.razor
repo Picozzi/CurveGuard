@@ -4,13 +4,13 @@
 <PageTitle>Replays · CurveGuard</PageTitle>
 
 <div class="section-intro">
-    <div class="kicker"><span></span>Curve validation</div>
+    <div class="kicker"><span></span>Curve Validation</div>
     <h1>Replays</h1>
     <p>Inspect a saved market scenario or rerun it through validation.</p>
 </div>
 <div class="replay-grid">
     <nav class="catalog" aria-label="Replay fixtures">
-        <div class="catalog-heading"><h2>Fixture catalog</h2><span>@Workspace.Fixtures.Count</span></div>
+        <div class="catalog-heading"><h2>Fixture Catalog</h2><span>@Workspace.Fixtures.Count</span></div>
         @foreach (var name in Workspace.Fixtures)
         {
             <a class="@(name == selected ? "selected" : "")" href="@($"/replays/{name}")" aria-current="@(name == selected ? "page" : null)">@name</a>
@@ -18,8 +18,8 @@
     </nav>
     <section class="replay-detail">
         <div class="replay-head">
-            <div><div class="kicker">Selected fixture</div><h2>@selected</h2></div>
-            <button class="primary" disabled="@(busy || !Workspace.Fixtures.Contains(selected))" @onclick="Run"><i class="play" aria-hidden="true"></i>@(busy ? "Running…" : "Run replay")</button>
+            <div><div class="kicker">Selected Fixture</div><h2>@selected</h2></div>
+            <button class="primary" disabled="@(busy || !Workspace.Fixtures.Contains(selected))" @onclick="Run"><i class="play" aria-hidden="true"></i>@(busy ? "Running…" : "Run Replay")</button>
         </div>
         @if (error is not null) { <p class="error" role="alert">@error</p> }
         @if (report is not null)

@@ -1,32 +1,32 @@
 @page "/"
 @inject RunWorkspace Workspace
-<PageTitle>Live runs · CurveGuard</PageTitle>
+<PageTitle>Live Runs · CurveGuard</PageTitle>
 
 <div class="section-intro">
-    <div class="kicker"><span></span>Curve validation</div>
-    <h1>Live runs</h1>
+    <div class="kicker"><span></span>Curve Validation</div>
+    <h1>Live Runs</h1>
     <p>Build and validate the USD SOFR curve for a market date.</p>
 </div>
 <div class="workspace-grid">
     <CurvePanel Report="report" Source="@source" />
     <section class="control-card">
-        <div class="control-title"><span class="control-symbol" aria-hidden="true">▦</span><h2>Run configuration</h2></div>
+        <div class="control-title"><span class="control-symbol" aria-hidden="true">▦</span><h2>Run Configuration</h2></div>
         <div class="control-body">
-            <label for="market-date">Valuation date</label>
+            <label for="market-date">Valuation Date</label>
             <input type="date" id="market-date" required @bind="date" disabled="@busy" />
-            <button class="primary" disabled="@(busy || date is null)" @onclick="Run"><i class="play" aria-hidden="true"></i>@(busy ? "Running curve…" : "Run live curve")</button>
+            <button class="primary" disabled="@(busy || date is null)" @onclick="Run"><i class="play" aria-hidden="true"></i>@(busy ? "Running Curve…" : "Run Live Curve")</button>
             <p class="form-note">Fetches market inputs and runs bootstrap and pricing checks.</p>
-            <div class="control-foot"><span>Market inputs</span><strong>SOFR · EFFR · OIS · ZQ</strong></div>
+            <div class="control-foot"><span>Market Inputs</span><strong>SOFR · EFFR · OIS · ZQ</strong></div>
         </div>
     </section>
 </div>
 @if (error is not null) { <p class="error" role="alert">@error</p> }
-@if (busy) { <p class="progress" role="status">Running live validation for @date?.ToString("yyyy-MM-dd")…</p> }
+@if (busy) { <p class="progress" role="status">Running Live Validation For @date?.ToString("yyyy-MM-dd")…</p> }
 @if (report is not null) { <ReportDetails Report="report" /> }
 @if (history.Count > 0)
 {
     <section class="history">
-        <h2>Saved live runs</h2>
+        <h2>Saved Live Runs</h2>
         <div class="history-links">
             @foreach (var item in history)
             {
