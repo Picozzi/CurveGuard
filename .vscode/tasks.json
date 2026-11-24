@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build CurveGuard.Web",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/CurveGuard.Web/CurveGuard.Web.csproj", "--configuration", "Debug"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build CurveGuard",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/CurveGuard.csproj", "--configuration", "Debug"],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+@page "/replays"
+@page "/replays/{Fixture}"
+@inject RunWorkspace Workspace
+<PageTitle>Replays · CurveGuard</PageTitle>
+
+<div class="section-intro">
+    <div class="kicker"><span></span>Curve Validation</div>
+    <h1>Replays</h1>
+    <p>Inspect a saved market scenario or rerun it through validation.</p>
+</div>
+<div class="replay-grid">
+    <nav class="catalog" aria-label="Replay fixtures">
+        <div class="catalog-heading"><h2>Fixture Catalog</h2><span>@Workspace.Fixtures.Count</span></div>
+        @foreach (var name in Workspace.Fixtures)
+        {
+            <a class="@(name == selected ? "selected" : "")" href="@($"/replays/{name}")" aria-current="@(name == selected ? "page" : null)">@name</a>
+        }
+    </nav>
+    <section class="replay-detail">
+        <div class="replay-head">
+            <div><div class="kicker">Selected Fixture</div><h2>@selected</h2></div>
+            <button class="primary" disabled="@(busy || !Workspace.Fixtures.Contains(selected))" @onclick="Run"><i class="play" aria-hidden="true"></i>@(busy ? "Running…" : "Run Replay")</button>
+        </div>
+        @if (error is not null) { <p class="error" role="alert">@error</p> }
+        @if (report is not null)
+        {
+            <CurvePanel Report="report" Source="@source" />
+            <ReportDetails Report="report" />
+        }
+        else if (error is null) { <p class="empty">Run this fixture to generate its report.</p> }
+    </section>
+</div>
+
+@code {
+    [Parameter] public string? Fixture { get; set; }
+    private string selected => Fixture ?? "clean";
+    private RunReport? report;
+    private string source = "";
+    private string? error;
+    private bool busy;
+    private int selection;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var version = ++selection;
+        busy = false;
+        report = null;
+        error = null;
+        if (!Workspace.Fixtures.Contains(selected)) { error = "Unknown replay. Select a fixture from the catalog."; return; }
+        if (Workspace.FindReplay(selected) is not { } file) return;
+        busy = true;
+        try
+        {
+            var loaded = await RunWorkspace.ReadAsync(file);
+            if (version == selection) { report = loaded; source = file.Label; }
+        }
+        catch (Exception ex) { if (version == selection) error = ex.Message; }
+        finally { if (version == selection) busy = false; }
+    }
+
+    private async Task Run()
+    {
+        if (busy) return;
+        var version = selection;
+        busy = true;
+        error = null;
+        try
+        {
+            var result = await Workspace.ExecuteAsync(default, selected);
+            if (version == selection) { report = result; source = "Replay result"; }
+        }
+        catch (Exception ex) { if (version == selection) error = ex.Message; }
+        finally { if (version == selection) busy = false; }
+    }
+}

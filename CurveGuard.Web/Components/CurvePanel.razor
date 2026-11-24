@@ -1,0 +1,78 @@
+<section class="curve-panel" aria-label="SOFR Forward Curve">
+    <div class="chart-head">
+        <div>
+            <div class="chart-legend"><i></i> Instantaneous Forward</div>
+            <h2>SOFR Forward Curve</h2>
+        </div>
+        @if (points.Count > 1)
+        {
+            <div class="ranges" aria-label="Chart horizon">
+                @foreach (var years in Horizons)
+                {
+                    <button aria-pressed="@((horizon == years).ToString().ToLowerInvariant())" @onclick="() => SetHorizon(years)">@(years == 0 ? "Full" : $"{years}Y")</button>
+                }
+            </div>
+        }
+    </div>
+    @if (points.Count > 1)
+    {
+        <div class="plot-unit">Rate (%)</div>
+        <svg class="plot" viewBox="0 0 760 211" role="img" aria-label="@($"Instantaneous forward rate by maturity for {Report!.Inputs.ValuationDate:yyyy-MM-dd}, {RangeLabel} horizon")">
+            <defs><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#ff6545" stop-opacity=".25"/><stop offset="100%" stop-color="#ff6545" stop-opacity=".015"/></linearGradient></defs>
+            @for (int i = 0; i <= 4; i++)
+            {
+                var y = 10 + i * 42;
+                <g><line x1="49" y1="@y" x2="744" y2="@y" class="gridline" /><text x="34" y="@(y + 4)" text-anchor="end">@((high - (high-low)*i/4).ToString("0.00", Inv))</text></g>
+            }
+            @for (int i = 0; i <= 5; i++)
+            {
+                var x = 49 + i * 139;
+                var years = duration * i / 5 / 365.0;
+                var label = horizon == 1 ? $"{Math.Round(years*12)}M" : $"{years:0.#}Y";
+                <g><line x1="@x" y1="10" x2="@x" y2="178" class="gridline vertical" /><text x="@x" y="201" text-anchor="@(i == 5 ? "end" : "middle")">@(i == 0 ? "0" : label)</text></g>
+            }
+            <polygon points="@($"49,178 {coordinates} 744,178")" fill="url(#area)" />
+            <polyline points="@coordinates" fill="none" stroke="#ff694b" stroke-width="3" vector-effect="non-scaling-stroke" stroke-linejoin="round" />
+            <circle cx="744" cy="@F(Y(points[^1]))" r="4" fill="#ff694b" />
+        </svg>
+    }
+    else
+    {
+        <div class="no-curve">
+            <strong>@(Report is null ? "Awaiting a run" : "Curve unavailable")</strong>
+            <span>@(Report is null ? "Choose a valuation date to build the curve." : $"Bootstrap status: {Report.BootstrapStatus}. See the validation findings below.")</span>
+        </div>
+    }
+    <div class="plot-foot"><span>@(Report is null ? "No report selected" : $"{Source} · {Report.Inputs.ValuationDate:dd MMM yyyy}")</span><span>@(horizon == 1 ? "Maturity in months" : "Maturity in years")</span></div>
+</section>
+
+@code {
+    [Parameter] public RunReport? Report { get; set; }
+    [Parameter] public string Source { get; set; } = "";
+    private static readonly int[] Horizons = [1, 5, 0];
+    private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
+    private int horizon;
+    private string RangeLabel => horizon == 0 ? "full" : $"{horizon} year";
+    private List<ForwardPoint> points = [];
+    private double high, low, duration;
+    private string coordinates = "";
+    protected override void OnParametersSet() => Prepare();
+    private void SetHorizon(int years) { horizon = years; Prepare(); }
+    private static string F(double v) => v.ToString("0.##", Inv);
+    private double Y(ForwardPoint pt) => 10 + 168 * (high - pt.InstantaneousForwardPercent) / (high - low);
+    private void Prepare()
+    {
+        if (Report?.Curve?.MonthlyAndPillarForwards is not { Count: > 1 } all) { points = []; return; }
+        var start = Report.Inputs.ValuationDate;
+        points = horizon == 0 ? all : all.Where(p => p.Date <= start.AddYears(horizon)).ToList();
+        if (points.Count < 2) return;
+        duration = Math.Max(1, points[^1].Date.DayNumber - start.DayNumber);
+        var min = points.Min(p => p.InstantaneousForwardPercent);
+        var max = points.Max(p => p.InstantaneousForwardPercent);
+        var step = Math.Max(.05, Math.Ceiling((max-min)/4*10)/10);
+        low = Math.Floor(min/step)*step;
+        high = low + 4*step;
+        if (high < max) high += step;
+        coordinates = string.Join(' ', points.Select(p => $"{F(49 + 695*(p.Date.DayNumber-start.DayNumber)/duration)},{F(Y(p))}"));
+    }
+}

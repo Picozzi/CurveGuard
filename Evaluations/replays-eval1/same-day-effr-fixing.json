@@ -1,0 +1,542 @@
+{
+  "inputs": {
+    "valuation_date": "2026-11-02",
+    "sofr_fixing": {
+      "effective_date": "2026-10-30",
+      "rate_percent": 3.95,
+      "rate_decimal": 0.0395
+    },
+    "effr_fixing": {
+      "date": "2026-11-02T00:00:00",
+      "rate": 3.88,
+      "target_lower": 3.75,
+      "target_upper": 4
+    },
+    "ois_snapshot": {
+      "observation_date": "2026-11-02T00:00:00",
+      "source": "CheckMySwap",
+      "url": "https://checkmyswap.com/api/curves/USD?date=2026-11-02",
+      "provider_collection_time": "2026-11-03T01:00:04.338501819\u002B00:00",
+      "quotes": [
+        {
+          "tenor": "1Y",
+          "rate": 4.3737,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 74,
+          "close_trades": 9
+        },
+        {
+          "tenor": "2Y",
+          "rate": 4.4447,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 124,
+          "close_trades": 19
+        },
+        {
+          "tenor": "3Y",
+          "rate": 4.4348,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close",
+          "trades": 101,
+          "close_trades": 28
+        },
+        {
+          "tenor": "4Y",
+          "rate": 4.4145,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 37,
+          "close_trades": 10
+        },
+        {
+          "tenor": "5Y",
+          "rate": 4.418,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close",
+          "trades": 208,
+          "close_trades": 43
+        },
+        {
+          "tenor": "7Y",
+          "rate": 4.4446,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 50,
+          "close_trades": 9
+        },
+        {
+          "tenor": "10Y",
+          "rate": 4.5098,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close",
+          "trades": 301,
+          "close_trades": 51
+        },
+        {
+          "tenor": "15Y",
+          "rate": 4.642,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 23,
+          "close_trades": 6
+        },
+        {
+          "tenor": "20Y",
+          "rate": 4.7,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close-thin",
+          "trades": 54,
+          "close_trades": 10
+        },
+        {
+          "tenor": "30Y",
+          "rate": 4.6313,
+          "date": "2026-11-02T00:00:00",
+          "source": "DTCC:CFTC",
+          "method": "close",
+          "trades": 233,
+          "close_trades": 33
+        }
+      ]
+    },
+    "fomc_decisions": [
+      {
+        "meeting_date": "2026-12-09T00:00:00",
+        "pre_meeting_rate": 3.8728562029301732510288065844,
+        "post_meeting_rate": 4.0661072907624518518518518519,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.226995648671
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.773004351329
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-01-27T00:00:00",
+        "pre_meeting_rate": 4.0661072907624518518518518519,
+        "post_meeting_rate": 4.1350021362305,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.164440328122612141707888
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.622535610553775716584224
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.213024061323612141707888
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-03-17T00:00:00",
+        "pre_meeting_rate": 4.1326451021081941176470588235,
+        "post_meeting_rate": 4.27071598597935,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0736226423307424355120677892
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.3695371283836930913091696323
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.4391905475543865108454573677
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.1176496817311779623333052108
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-04-28T00:00:00",
+        "pre_meeting_rate": 4.27071598597935,
+        "post_meeting_rate": 4.3349990844726,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0546918760576207046143892284
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.2934479281736079695436205249
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.4212803971346212595576540547
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.2003282543204507537962734022
+          },
+          {
+            "lower": 4.75,
+            "upper": 5.00,
+            "probability": 0.0302515443136993124880627898
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-06-09T00:00:00",
+        "pre_meeting_rate": 4.3354123433428333333333333333,
+        "post_meeting_rate": 4.4133938380650714285714285714,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0376320590810715041592719491
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.2189737129016555421639122734
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.3814061291201594802926881974
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.2692489677553830160264442764
+          },
+          {
+            "lower": 4.75,
+            "upper": 5.00,
+            "probability": 0.0833028885687758376170380159
+          },
+          {
+            "lower": 5.00,
+            "upper": 5.25,
+            "probability": 0.0094362425729546197406452878
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-07-28T00:00:00",
+        "pre_meeting_rate": 4.4133938380650714285714285714,
+        "post_meeting_rate": 4.4300003051758,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0351323168753130449525120233
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.2069279360617333785299903230
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.3706164148095505181562687163
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.2766991046011399797758964856
+          },
+          {
+            "lower": 4.75,
+            "upper": 5.00,
+            "probability": 0.0956545183623170664975806661
+          },
+          {
+            "lower": 5.00,
+            "upper": 5.25,
+            "probability": 0.0143428986821986926870505910
+          },
+          {
+            "lower": 5.25,
+            "upper": 5.50,
+            "probability": 0.0006268106077473194007011947
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-09-15T00:00:00",
+        "pre_meeting_rate": 4.4292676007304962962962962963,
+        "post_meeting_rate": 4.4507372820819037037037037037,
+        "target_ranges": [
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0321151982815014560247455089
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.1921743472556690415785951425
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.3565590568910408633004031927
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.2847646034953981890331810964
+          },
+          {
+            "lower": 4.75,
+            "upper": 5.00,
+            "probability": 0.1112023966701638258036701016
+          },
+          {
+            "lower": 5.00,
+            "upper": 5.25,
+            "probability": 0.0213258369410246840691003652
+          },
+          {
+            "lower": 5.25,
+            "upper": 5.50,
+            "probability": 0.0018047307691376401712591983
+          },
+          {
+            "lower": 5.50,
+            "upper": 5.75,
+            "probability": 0.0000538296960643000190453944
+          }
+        ]
+      },
+      {
+        "meeting_date": "2027-10-27T00:00:00",
+        "pre_meeting_rate": 4.4507372820819037037037037037,
+        "post_meeting_rate": 4.4449996948242,
+        "target_ranges": [
+          {
+            "lower": 3.50,
+            "upper": 3.75,
+            "probability": 0.0007370550097602298065026072
+          },
+          {
+            "lower": 3.75,
+            "upper": 4.00,
+            "probability": 0.0357886116160634277158929114
+          },
+          {
+            "lower": 4.00,
+            "upper": 4.25,
+            "probability": 0.1959470337171604136305729447
+          },
+          {
+            "lower": 4.25,
+            "upper": 4.50,
+            "probability": 0.3549113491271210007914122034
+          },
+          {
+            "lower": 4.50,
+            "upper": 4.75,
+            "probability": 0.2807812902701684499786887867
+          },
+          {
+            "lower": 4.75,
+            "upper": 5.00,
+            "probability": 0.1091396982546745636796979474
+          },
+          {
+            "lower": 5.00,
+            "upper": 5.25,
+            "probability": 0.0208778207409086681317380917
+          },
+          {
+            "lower": 5.25,
+            "upper": 5.50,
+            "probability": 0.0017645469783918545789049048
+          },
+          {
+            "lower": 5.50,
+            "upper": 5.75,
+            "probability": 0.0000525942857513916865896027
+          }
+        ]
+      }
+    ],
+    "zq_implied_rates": [
+      {
+        "year": 2026,
+        "month": 11,
+        "rate_percent": 3.879997253418,
+        "ticker": "ZQX26.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2026,
+        "month": 12,
+        "rate_percent": 4.0100021362305,
+        "ticker": "ZQZ26.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 1,
+        "rate_percent": 4.0749969482422,
+        "ticker": "ZQF27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 2,
+        "rate_percent": 4.1350021362305,
+        "ticker": "ZQG27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 3,
+        "rate_percent": 4.1949996948242,
+        "ticker": "ZQH27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 4,
+        "rate_percent": 4.2750015258789,
+        "ticker": "ZQJ27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 5,
+        "rate_percent": 4.3349990844726,
+        "ticker": "ZQK27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 6,
+        "rate_percent": 4.3899993896484,
+        "ticker": "ZQM27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 7,
+        "rate_percent": 4.4150009155274,
+        "ticker": "ZQN27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 8,
+        "rate_percent": 4.4300003051758,
+        "ticker": "ZQQ27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 9,
+        "rate_percent": 4.4400024414062,
+        "ticker": "ZQU27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 10,
+        "rate_percent": 4.4499969482422,
+        "ticker": "ZQV27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 11,
+        "rate_percent": 4.4449996948242,
+        "ticker": "ZQX27.CBT",
+        "close_date": "2026-11-02"
+      },
+      {
+        "year": 2027,
+        "month": 12,
+        "rate_percent": 4.4250030517578,
+        "ticker": "ZQZ27.CBT",
+        "close_date": "2026-11-02"
+      }
+    ]
+  },
+  "curve": null,
+  "validation": {
+    "decision": "QUARANTINE",
+    "bootstrap_result": "SKIPPED",
+    "message": "INPUT_VALIDATION_FAILED One or more input checks failed. Bootstrap was skipped.",
+    "validation_risks": [
+      {
+        "code": "EFFR_FIXING_DATE_MISMATCH",
+        "message": "The EFFR fixing must be from the previous business day.",
+        "tenor": null,
+        "quote_date": "2026-11-02",
+        "expected_date": "2026-10-30",
+        "contract": null
+      }
+    ],
+    "pricing_risks": []
+  },
+  "evidence": {
+    "id": "guard",
+    "valuation_date": "2026-11-02",
+    "decision": "QUARANTINE",
+    "bootstrap": "SKIPPED",
+    "failure_code": "INPUT_VALIDATION_FAILED",
+    "input_checks": [
+      {
+        "id": "input-1",
+        "check": {
+          "code": "EFFR_FIXING_DATE_MISMATCH",
+          "message": "The EFFR fixing must be from the previous business day.",
+          "tenor": null,
+          "quote_date": "2026-11-02",
+          "expected_date": "2026-10-30",
+          "contract": null
+        }
+      }
+    ],
+    "pricing_checks": []
+  },
+  "model": "gpt-6-luna",
+  "diagnostic": {
+    "explanation": "CurveGuard quarantined the curve at input validation: the EFFR fixing date was 2026-11-02, but the expected previous business day was 2026-10-30. Bootstrapping was skipped, so no price was measured and pricing impact is unknown.",
+    "evidence_ids": [
+      "input-1"
+    ],
+    "unknowns": [
+      "Why the fixing date did not match; pricing impact."
+    ],
+    "recommended_next_action": "Have a reviewer verify the EFFR fixing date and correct the input if needed."
+  },
+  "diagnostic_error": null
+}
