@@ -3,3 +3,4 @@
 reports/
 bin/
 obj/
+/.env

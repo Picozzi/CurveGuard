@@ -5,30 +5,29 @@ namespace CurveGuard.Tests;
 public class CurveRiskTests
 {
     [Fact]
-    [Trait(SavedFixtures.TraitName, SavedFixtures.OneBp)]
+    [Trait("Fixture", SavedCurveFixtures.OneBp)]
     public Task OneBpFiveYearBumpProducesExpectedPvChange()
-        => AssertSavedBumpPvChangeAsync(SavedFixtures.OneBp, 1, 444, 446);
+        => AssertSavedBumpPvChangeAsync(SavedCurveFixtures.OneBp, 1, 444, 446);
 
     [Fact]
-    [Trait(SavedFixtures.TraitName, SavedFixtures.TenBp)]
+    [Trait("Fixture", SavedCurveFixtures.TenBp)]
     public Task TenBpFiveYearBumpProducesExpectedPvChange()
-        => AssertSavedBumpPvChangeAsync(SavedFixtures.TenBp, 10, 4447, 4450);
+        => AssertSavedBumpPvChangeAsync(SavedCurveFixtures.TenBp, 10, 4447, 4450);
 
     [Fact]
     public async Task LiveAndSavedScenariosProduceTheSamePricingChecks()
     {
-        var baseline = await SavedFixtures.ReadInputsAsync(SavedFixtures.Baseline);
-        var savedBumps = new Dictionary<int, CurveInputs>
-        {
-            [1] = await SavedFixtures.ReadInputsAsync(SavedFixtures.OneBp),
-            [10] = await SavedFixtures.ReadInputsAsync(SavedFixtures.TenBp),
-        };
+        var replay = await SavedCurveFixtures.LoadReplayAsync("clean");
+        var baseline = replay.Inputs;
         var curve = SOFRCurveCreation.Build(baseline);
-        var saved = await CurveRiskValidation.RunPricingValidation(baseline, curve, savedBumps);
+        var saved = await CurveRiskValidation.RunPricingValidation(baseline, curve, replay.SavedBumps, null);
         var live = await CurveRiskValidation.RunPricingValidation(baseline, curve);
 
+        Assert.NotNull(replay.SavedBumps);
         Assert.Equal("PASS", saved.Decision);
         Assert.Equal("PASS", live.Decision);
+        Assert.Equal("PASS", live.BootstrapResult);
+        Assert.Empty(live.message);
         Assert.Empty(live.validationRisks);
         Assert.Equal(saved.pricingRisks, live.pricingRisks);
         Assert.Equal(new int?[] { 1, 10 },
@@ -37,22 +36,22 @@ public class CurveRiskTests
     }
 
     [Fact]
-    [Trait(SavedFixtures.TraitName, SavedFixtures.DoubledPv)]
+    [Trait("Fixture", SavedCurveFixtures.DoubledPv)]
     public async Task DoubledPvFailsDollarChecksEvenWhenCurvesPass()
     {
-        var fixture = await SavedFixtures.ReadAsync<PricingFailureFixture>(SavedFixtures.DoubledPv);
-        var baseline = await SavedFixtures.ReadInputsAsync(fixture.BaselineFile);
-        var bumps = new Dictionary<int, CurveInputs>();
-        foreach (var bump in fixture.Bumps)
-            bumps.Add(bump.BumpBp, await SavedFixtures.ReadInputsAsync(bump.InputsFile));
+        var fixture = await SavedCurveFixtures.ReadAsync<PricingFailureFixture>(SavedCurveFixtures.DoubledPv);
+        var replay = await SavedCurveFixtures.LoadReplayAsync("doubled-pv");
+        var baseline = replay.Inputs;
 
         var curve = SOFRCurveCreation.Build(baseline);
-        var clean = await CurveRiskValidation.RunPricingValidation(baseline, curve, bumps);
-        var report = await CurveRiskValidation.RunPricingValidation(baseline, curve, bumps,
-            fixture.Bumps.ToDictionary(bump => bump.BumpBp, bump => bump.ReportedPvUsd));
+        var clean = await CurveRiskValidation.RunPricingValidation(baseline, curve, replay.SavedBumps, null);
+        var report = await CurveRiskValidation.RunPricingValidation(baseline, curve, replay.SavedBumps, replay.ReportedPvOverrides);
 
+        Assert.NotNull(replay.SavedBumps);
         Assert.Equal("PASS", clean.Decision);
         Assert.Equal("QUARANTINE", report.Decision);
+        Assert.Equal("PASS", report.BootstrapResult);
+        Assert.StartsWith("PRICING_VALIDATION_FAILED ", report.message);
         Assert.Empty(report.validationRisks);
         Assert.True(Assert.Single(report.pricingRisks, check => check.Code == "ten_bp_to_one_bp_ratio").Passed);
         var failures = report.pricingRisks.Where(check => !check.Passed)
@@ -64,7 +63,7 @@ public class CurveRiskTests
     [Fact]
     public async Task MissingFiveYearQuoteIsReportedAsAnInputRisk()
     {
-        var baseline = await SavedFixtures.ReadInputsAsync(SavedFixtures.Baseline);
+        var baseline = await SavedCurveFixtures.ReadInputsAsync(SavedCurveFixtures.Baseline);
         var snapshot = baseline.OisSnapshot;
         var inputs = baseline with
         {
@@ -75,7 +74,8 @@ public class CurveRiskTests
         var result = await CurveRiskValidation.RunPricingValidation(inputs, SOFRCurveCreation.Build(inputs));
 
         Assert.Equal("QUARANTINE", result.Decision);
-        Assert.Equal("PASS", result.Result);
+        Assert.Equal("PASS", result.BootstrapResult);
+        Assert.StartsWith("MISSING_5Y_OIS_QUOTE ", result.message);
         Assert.Empty(result.pricingRisks);
         ValidationCheck inputRisk = Assert.Single(result.validationRisks);
         Assert.Equal("MISSING_5Y_OIS_QUOTE", inputRisk.Code);
@@ -83,11 +83,11 @@ public class CurveRiskTests
 
     private static async Task AssertSavedBumpPvChangeAsync(string fixture, int bumpBp, double minUsd, double maxUsd)
     {
-        var baseline = await SavedFixtures.ReadInputsAsync(SavedFixtures.Baseline);
-        var bumped = await SavedFixtures.ReadInputsAsync(fixture);
+        var baseline = await SavedCurveFixtures.ReadInputsAsync(SavedCurveFixtures.Baseline);
+        var bumped = await SavedCurveFixtures.ReadInputsAsync(fixture);
 
         var report = await CurveRiskValidation.RunPricingValidation(baseline, SOFRCurveCreation.Build(baseline),
-            new Dictionary<int, CurveInputs> { [bumpBp] = bumped });
+            new Dictionary<int, CurveInputs> { [bumpBp] = bumped }, null);
 
         Assert.Equal("PASS", report.Decision);
         var dollarCheck = Assert.Single(report.pricingRisks, check => check.Code == "pv_change_usd");
@@ -95,10 +95,7 @@ public class CurveRiskTests
         Assert.InRange(Assert.IsType<double>(dollarCheck.Actual), minUsd, maxUsd);
     }
 
-    private sealed record PricingFailureFixture(string BaselineFile, IReadOnlyList<PricingFailureBump> Bumps,
-        IReadOnlyList<PricingCheck> ExpectedFailedChecks);
-
-    private sealed record PricingFailureBump(int BumpBp, string InputsFile, double ReportedPvUsd);
+    private sealed record PricingFailureFixture(IReadOnlyList<PricingCheck> ExpectedFailedChecks);
 
     private sealed record PricingCheck(string Name, int? BumpBp);
 }

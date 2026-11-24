@@ -10,7 +10,7 @@ internal static class CurveChart
     private static readonly Color OisColor = Color.FromHex("#234C87");
     private static readonly Color HandoffColor = Color.FromHex("#8C601F");
 
-    public static string Save(JsonElement report)
+    public static void Save(JsonElement report, string outputPath)
     {
         var valuation = ReadDate(report, "reference_date");
         var forwards = report.GetProperty("monthly_and_pillar_forwards").EnumerateArray()
@@ -81,11 +81,7 @@ internal static class CurveChart
         near.Axes.Bottom.TickGenerator = monthTicks;
         near.Axes.SetLimitsX(CalendarAxis(valuation.AddDays(-5)), CalendarAxis(through.AddDays(12)));
 
-        var reportDirectory = ProjectPaths.ReportDirectory;
-        Directory.CreateDirectory(reportDirectory);
-        var output = Path.Combine(reportDirectory, $"sofr-forward-{valuation:yyyy-MM-dd}.png");
-        chart.SavePng(output, 1440, 1060);
-        return output;
+        chart.SavePng(outputPath, 1440, 1060);
     }
 
     private static void Draw(Plot plot, IReadOnlyList<Point> steps, IReadOnlyList<Point> forwards,
