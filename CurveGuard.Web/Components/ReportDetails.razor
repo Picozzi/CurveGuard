@@ -9,17 +9,36 @@
         <div><span>OIS Quotes</span><strong>@Report.Inputs.OisSnapshot.Quotes.Count</strong></div>
         <div><span>Bootstrap</span><strong class="status-text">@Report.BootstrapStatus</strong></div>
     </div>
-    @if (Report.Validation.ValidationRisks is { Count: > 0 } findings)
-    {
-        <h3>Input findings</h3>
-        @for (int i = 0; i < findings.Count; i++)
-        {
-            var check = findings[i];
-            <div class="finding" id="@($"input-{i+1}")"><strong>@check.Code</strong><p>@check.Message</p>
-            <span>@check.Tenor @check.Contract @if (check.QuoteDate is { } observed) { <text>Observed @observed.ToString("yyyy-MM-dd") </text> } @if (check.ExpectedDate is { } expected) { <text>Expected @expected.ToString("yyyy-MM-dd")</text> }</span></div>
-        }
-    }
-    else if (Report.Validation.PricingRisks is not { Count: > 0 } && !string.IsNullOrWhiteSpace(Report.Validation.Message))
+    <h3>Input Validation</h3>
+    <div class="table-scroll">
+        <table aria-label="Input Validation">
+            <thead><tr><th>Check</th><th>Result</th></tr></thead>
+            <tbody>
+                @if (Report.Validation.ValidationRisks is { Count: > 0 } findings)
+                {
+                    @for (int i = 0; i < findings.Count; i++)
+                    {
+                        var check = findings[i];
+                        <tr id="@($"input-{i+1}")">
+                            <th scope="row">
+                                <strong>@check.Code</strong> @check.Tenor @check.Contract
+                                <p>@check.Message</p>
+                                @if (check.QuoteDate is { } observed) { <span>Observed @observed.ToString("yyyy-MM-dd")</span> }
+                                @if (check.ExpectedDate is { } expected) { <span>Expected @expected.ToString("yyyy-MM-dd")</span> }
+                            </th>
+                            <td class="fail">Fail</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    var status = InputStatus;
+                    <tr><th scope="row">Input Validation</th><td class="@(status == "Pass" ? "ok" : status == "Fail" ? "fail" : null)">@status</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (Report.Validation.ValidationRisks is not { Count: > 0 } && Report.Validation.PricingRisks is not { Count: > 0 } && !string.IsNullOrWhiteSpace(Report.Validation.Message))
     {
         <p class="finding">@Report.Validation.Message</p>
     }
@@ -61,6 +80,13 @@
 @code {
     [Parameter, EditorRequired] public RunReport Report { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
+    private string InputStatus => Report.Validation.Message?.Split(' ', 2)[0] switch
+    {
+        "INPUT_VALIDATION_FAILED" or "CURVE_VALIDATION_FAILED" => "Fail",
+        "FOMC_BUILD_FAILED" => "Pass",
+        _ when Report.Validation.Decision == "PASS" || Report.BootstrapStatus is "PASS" or "FAIL" => "Pass",
+        _ => "Unavailable"
+    };
     private string EffrRate => Report.Inputs.EffrFixing.Rate.ToString(
         Math.Abs(Report.Inputs.EffrFixing.Rate) >= 1000 ? "0.##E+0" : "0.00", CultureInfo.InvariantCulture);
     private static string Format(double? value) => value switch
